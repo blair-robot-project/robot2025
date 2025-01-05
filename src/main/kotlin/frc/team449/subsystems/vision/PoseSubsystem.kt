@@ -1,9 +1,7 @@
 package frc.team449.subsystems.vision
 
-import com.revrobotics.sim.MovingAverageFilterSim
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
-import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d

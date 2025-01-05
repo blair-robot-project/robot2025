@@ -7,8 +7,6 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.units.Units.MetersPerSecond
-import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
 import frc.team449.system.encoder.AbsoluteEncoder.Companion.createAbsoluteEncoder
@@ -103,11 +101,10 @@ open class SwerveModuleNEO(
       drivingMotor.encoder.velocity
     )
     val driveFF = driveFeedforward.calculate(
-      MetersPerSecond.of(desiredState.speedMetersPerSecond)
+      desiredState.speedMetersPerSecond
     )
-    // .calculate(
 
-    drivingMotor.setVoltage(drivePid + driveFF.`in`(Volts))
+    drivingMotor.setVoltage(drivePid + driveFF)
 
     /** CONTROL direction of module */
     val turnPid = turnController.calculate(
