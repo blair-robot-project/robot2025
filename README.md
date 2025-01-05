@@ -1,6 +1,6 @@
-# vetbot2024
+# robot2025
 
-Repository for FRC Team 449's code for [2025 Blair Bunnybots](https://robot.mbhs.edu/bunnybots).
+Repository for FRC Team 449's code for the [2025 FIRST Robotics Competition REEFSCAPE](https://www.youtube.com/watch?v=YWbxcjlY9JY).
 
 Credit to 6328 for characterization commands and analysis.
 
