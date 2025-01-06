@@ -18,10 +18,7 @@ object RobotConstants {
   const val ROTATION_DEADBAND = .125
   val SNAP_TO_ANGLE_TOLERANCE_RAD = Units.degreesToRadians(3.5)
 
-  /** In kilograms, include bumpers and battery and all */
-  const val ROBOT_WEIGHT = 55.0 // TODO: find
-
-  /** Drive configuration */
+  /** Drive Configuration */
   val MAX_LINEAR_SPEED = SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED // m/s
   const val MAX_ROT_SPEED = 5.804 * PI / 4 // r ad/s
 
@@ -48,10 +45,8 @@ object RobotConstants {
 
   const val ALIGN_ROT_SPEED = 7 * PI / 2
 
-  val IR_CHANNEL = 3
-  val IR_CHANNEL2 = 4
-
-  // Robot dimensions (INCLUDING BUMPERS)
+  // Robot Dimensions (INCLUDING BUMPERS)
   val ROBOT_WIDTH = Units.inchesToMeters(27.25 + 3.25 * 2)
   val ROBOT_LENGTH = Units.inchesToMeters(27.5 + 3.25 * 2)
+  val ROBOT_WEIGHT = 55.0 // TODO: find (incl. bumpers + battery) (kg)
 }

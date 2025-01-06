@@ -25,7 +25,7 @@ class SwerveSim(
     Pose2d()
   )
 
-  var odometryPose = odometryTracker.poseMeters
+  var odometryPose: Pose2d = odometryTracker.poseMeters
 
   override fun periodic() {
     val currTime = getFPGATimestamp()
