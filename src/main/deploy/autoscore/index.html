@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics Stuff</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="choiceContainer" style="display: none">
+        <div class="Level" id="processorChoice">Processor</div>
+        <div class="Level" id="reefChoice">Reef</div>
+    </div>
+    <div class="reefContainer" style="display: none">
+        <div class="levelContainer">
+            <div class="Level" id="L1">
+                Level 1 Score
+            </div>
+            <div class="Level" id="L2">
+                Level 2 Score
+            </div>
+            <div class="Level" id="L3">
+                Level 3 Score
+            </div>
+            <div class="Level" id="L4">
+                Level 4 Score
+            </div>
+        </div>
+        <div class="imageContainer">
+            <img src="coralNone.png" alt="" width="256px" height="512px" id="coral">
+        </div>
+    </div>
+    <div class="processorContainer" style="display: none">
+        <div class="buttonContainer">
+            <div class="Level" id="button">
+                Processor Score
+            </div>
+        </div>
+        <div class="imageContainer">
+            <img src="processor1.png" alt="" width="512px" height="512px" id="processor">
+        </div>
+    </div>
+    <div class="locationContainer" style="display: none">
+        <div class="imageContainer">
+            <img src="locationSelectorNone.png" alt="" width="473px" height="411px" id="locationSelect">
+            <h1>Click on the area you want to go to.</h1>
+        </div>
+    </div>
+    <div class="screenChangeContainer" style="display: none">
+        <h1 id="msgDisplayer"></h1>
+    </div>
+    <script src="robotCommunication.js"></script>
+    <script src="menuControl.js"></script>
+    <script src="choice.js"></script>
+    <script src="processor.js"></script>
+    <script src="reefPlacement.js"></script>
+    <script src="reefLevel.js"></script>
+
+</body>
+</html>
