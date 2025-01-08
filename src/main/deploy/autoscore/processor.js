@@ -1,11 +1,11 @@
 const processorButton = document.getElementById("button");
 const animationIntervals = [];
-const animationFPS = 6;
+const animationFPS = 11.25;
 const processorImage = document.getElementById("processor");
 
 processorButton.onmouseenter = () => {
-        processorImage.style.filter = "brightness(1.25)";
-    }
+    processorImage.style.filter = "brightness(1.25)";
+}
 
 processorButton.onmouseleave = () => {
     processorImage.style.filter = "brightness(1)";
@@ -19,15 +19,21 @@ processorButton.onclick = () => {
     })
     let frame = 1;
     const animationInterval = setInterval(() => {
-        if(frame == 8) {
+        if(frame == 15) {
             console.log("clearing");
             changeMenu("choice");
             clearInterval(animationInterval);
         } else {
-            if(frame == 7) {
-                processorImage.src = `processor1.png`;
-            } else {
-                processorImage.src = `processor${frame}.png`;
+            if(frame == 14) {
+                processorImage.src = `processorEmpty.png`;
+            }
+            else {
+                if(frame == 13) {
+                    processorImage.src = `processorr12`;
+                }
+                else {
+                    processorImage.src = `processorr${frame}.png`;
+                }
             }
             frame++; 
         }
