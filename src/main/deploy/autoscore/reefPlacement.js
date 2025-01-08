@@ -25,87 +25,89 @@ class Polygon {
     }
 }
 
-let imageCenterX = 682; //440 with console, 682 without console
-let imageCenterY = 372;
-
 const polygon1 = new Polygon([0, 0, 160], [0, 284, 284]);
-const polygon2 = new Polygon([0,160, 171], [0, 284, 104]);
-const polygon3 = new Polygon([0, 171, 232], [0, 104, 0]);
+const polygon2 = new Polygon([0, 160, 236, 236], [0, 284, 130, 203]);
+const polygon3 = new Polygon([0, 236, 236], [0, 0, 130]);
 
-const polygon4 = new Polygon([0, 232, -176], [0, 0, -100]); //-176, 100
-const polygon5 = new Polygon([0, -176, 120], [0, 100, -200]); //120, -200
-const polygon6 = new Polygon([0, 120, 0], [0, -200, -200]); //0, -200
+const polygon4 = new Polygon([0, 236, 236], [0, 0, -130]); 
+const polygon5 = new Polygon([0, 236, 120, 236], [0, -130, -203, -203]);
+const polygon6 = new Polygon([0, 120, 0], [0, -203, -203]);
 
-const polygon7 = new Polygon([0, 0, -116], [0, -200, -200]); //-116, -200
-const polygon8 = new Polygon([0, -116, -175], [0, -200, -102]);
-const polygon9 = new Polygon([0, -176, -232], [0, -102, 0]);  //-232, 0
+const polygon7 = new Polygon([0, 0, -120], [0, -203, -203]);
+const polygon8 = new Polygon([0, -120, -175, -232], [0, -203, -102, -203]);
+const polygon9 = new Polygon([0, -232, -236], [0, -130, 0]);
 
-const polygon10 = new Polygon([0, -232, -172], [0, 0, 100]); //-172, 100
-const polygon11 = new Polygon([0, -172, -116], [0, 100, 200]); //-116, 200
-const polygon12 = new Polygon([0, -116, 0], [0, 200, 200]); //0, 200
+const polygon10 = new Polygon([0, -236, -232], [0, 0, 130]);
+const polygon11 = new Polygon([0, -232, -116, -232], [0, 130, 203, 203]);
+const polygon12 = new Polygon([0, -116, 0], [0, 200, 203]);
 
 let inPicker = false;
 locationImg.onmouseenter = () => inPicker = true;
 locationImg.onmouseleave = () => {
-    inPicker = false;
-    locationImg.src = "locationSelectorNone.png";
+    if(!areaSelected) {
+        inPicker = false;
+        locationImg.src = "locationSelectorImages/locationSelectorNone.png";
+    }
 }
 
-let locationArea = 1;
-
-
 document.addEventListener("mousemove", (event) => {
-    if(menu == "location pick" && inPicker) {
-        let x = event.screenX-imageCenterX;
-        let y = imageCenterY-event.screenY;
+    if(menu == "reef" && inPicker && !areaSelected) {
+        let imgPosition = locationImg.getBoundingClientRect();
+        let imageCenterX = imgPosition.left + (imgPosition.right-imgPosition.left) / 2;
+        let imageCenterY = imgPosition.top + (imgPosition.bottom-imgPosition.top) / 2;
+        
+        let x = event.clientX-imageCenterX;
+        let y = imageCenterY-event.clientY;
+
         if(x > 0 && y > 0) /*helps performance*/ {
             if(pointInPolygon(polygon1, [x, y])) {
-                locationArea = 1;
+                reefArea = 1;
             } else if (pointInPolygon(polygon2, [x, y])) {
-                locationArea = 2;
+                reefArea = 2;
             } else if (pointInPolygon(polygon3, [x, y])) {
-                locationArea = 3;
+                reefArea = 3;
             }
         } else if (x > 0 && y < 0) {
             if(pointInPolygon(polygon4, [x, y])) {
-                locationArea = 4;
+                reefArea = 4;
             } else if (pointInPolygon(polygon5, [x, y])) {
-                locationArea = 5;
+                reefArea = 5;
             } else if (pointInPolygon(polygon6, [x, y])) {
-                locationArea = 6;
+                reefArea = 6;
             }
         } else if (x < 0 && y < 0) {
             if(pointInPolygon(polygon7, [x, y])) {
-                locationArea = 7;
+                reefArea = 7;
             } else if (pointInPolygon(polygon8, [x, y])) {
-                locationArea = 8;
+                reefArea = 8;
             } else if (pointInPolygon(polygon9, [x, y])) {
-                locationArea = 9;
+                reefArea = 9;
             }
         } else if (x < 0 && y > 0) {
             if(pointInPolygon(polygon10, [x, y])) {
-                locationArea = 10;
+                reefArea = 10;
             } else if (pointInPolygon(polygon11, [x, y])) {
-                locationArea = 11;
+                reefArea = 11;
             } else if (pointInPolygon(polygon12, [x, y])) {
-                locationArea = 12;
+                reefArea = 12;
             }
         }
-        locationImg.src = `locationSelector${locationArea}.png`;
+        locationImg.src = `locationSelectorImages/locationSelector${reefArea}.png`;
     }
 });
 
-const timeoutList = [];
+let areaText = document.getElementById("areaText");
 
-locationImg.onclick = async () => {
-    changeMenu("screen change", `Moving to Reef Location ${locationArea}`);
-    moveToReefLocation(locationArea);
-    timeoutList.map((timeout) => clearTimeout(timeout));
-    //this is just a demo wait time to simulate
-    //the robot moving to the right location
-    await new Promise((resolve) => {
-        const waitTimeout = setTimeout(resolve, 3000);
-        timeoutList.push(waitTimeout);
-    });
-    changeMenu("reef");
+locationImg.onclick = () => {
+    areaSelected = !areaSelected;
+    if(areaSelected) {
+        areaText.innerText = `Reef Area: ${reefArea}`;
+    }
+    if(coralSelected && areaSelected) {
+        confirmReefButton.innerText = `Score at Level ${coralLevel} and Area ${reefArea}`;
+    }
+    if(!areaSelected) {
+        confirmReefButton.innerText = `Choose Robot Alignment`;
+        areaText.innerText = `Reef Area: None`;
+    }
 }
