@@ -105,6 +105,10 @@ open class DifferentialDrive(
       this.poseEstimator.resetPosition(ahrs.heading, leftEncoder.position, rightEncoder.position, pose)
     }
 
+  override fun driveFieldRelative(speeds: ChassisSpeeds) {
+    TODO("Not yet implemented")
+  }
+
   override fun stop() {
     this.set(ChassisSpeeds(0.0, 0.0, 0.0))
   }

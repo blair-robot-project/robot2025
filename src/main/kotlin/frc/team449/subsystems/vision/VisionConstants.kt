@@ -79,6 +79,7 @@ object VisionConstants {
 
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
+    /**
     ApriltagCamera(
       "back_left",
       TAG_LAYOUT,
@@ -89,7 +90,8 @@ object VisionConstants {
 //      "back_right",
 //      TAG_LAYOUT,
 //      backRight,
-//      VISION_SIM
+**/
+  //      VISION_SIM
 //    )
   )
 
