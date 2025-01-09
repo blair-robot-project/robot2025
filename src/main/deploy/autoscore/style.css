@@ -2,14 +2,14 @@ body {
     background-attachment: fixed;
 }
 
-.reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .choiceContainer {
+.reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .netContainer, .choiceContainer {
     display: flex;
     gap: 50px;
     justify-content: center;
     margin-top: 50px;
 }
 
-.levelContainer{
+.levelContainer {
     display: flex;
     flex-direction: column;
     gap: 50px;
@@ -41,10 +41,11 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
+    padding: 0 10px;
 }
 
 #confirmText {
-    width: 450px;
+    width: 300px;
 }
 
 .Button:hover {
@@ -63,11 +64,15 @@ h1 {
     color: white;
 }
 
-#processorChoice, #reefChoice {
+#processorChoice, #reefChoice, #netChoice {
     margin-top: 100px;
 }
 
 .reefText {
     align-self: center;
+    justify-self: center;
+}
+
+#areaSelectionText {
     justify-self: center;
 }

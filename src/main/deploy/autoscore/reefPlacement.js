@@ -29,12 +29,12 @@ const polygon1 = new Polygon([0, 0, 160], [0, 284, 284]);
 const polygon2 = new Polygon([0, 160, 236, 236], [0, 284, 130, 203]);
 const polygon3 = new Polygon([0, 236, 236], [0, 0, 130]);
 
-const polygon4 = new Polygon([0, 236, 236], [0, 0, -130]); 
-const polygon5 = new Polygon([0, 236, 120, 236], [0, -130, -203, -203]);
-const polygon6 = new Polygon([0, 120, 0], [0, -203, -203]);
+const polygon4 = new Polygon([0, 236, 236], [0, 0, -125]); 
+const polygon5 = new Polygon([0, 236, 236, 155], [0, -125, -200, -200]);
+const polygon6 = new Polygon([0, 115, 0], [0, -200, -200]);
 
-const polygon7 = new Polygon([0, 0, -120], [0, -203, -203]);
-const polygon8 = new Polygon([0, -120, -175, -232], [0, -203, -102, -203]);
+const polygon7 = new Polygon([0, 0, -120], [0, -200, -200]);
+const polygon8 = new Polygon([0, -120, -175, -232], [0, -200, -102, -200]);
 const polygon9 = new Polygon([0, -232, -236], [0, -130, 0]);
 
 const polygon10 = new Polygon([0, -236, -232], [0, 0, 130]);
@@ -92,16 +92,22 @@ document.addEventListener("mousemove", (event) => {
                 reefArea = 12;
             }
         }
-        locationImg.src = `locationSelectorImages/locationSelector${reefArea}.png`;
+        if(reefArea == -1) {
+            locationImg.src = `locationSelectorImages/locationSelectorNone.png`;
+        } else {
+            locationImg.src = `locationSelectorImages/locationSelector${reefArea}.png`;
+        }
     }
 });
 
 let areaText = document.getElementById("areaText");
+let areaSelectionText = document.getElementById("areaSelectionText");
 
 locationImg.onclick = () => {
     areaSelected = !areaSelected;
     if(areaSelected) {
         areaText.innerText = `Reef Area: ${reefArea}`;
+        areaSelectionText.innerText = "Click again to reselect";
     }
     if(coralSelected && areaSelected) {
         confirmReefButton.innerText = `Score at Level ${coralLevel} and Area ${reefArea}`;
@@ -109,5 +115,6 @@ locationImg.onclick = () => {
     if(!areaSelected) {
         confirmReefButton.innerText = `Choose Robot Alignment`;
         areaText.innerText = `Reef Area: None`;
+        areaSelectionText.innerText = "Hover to the area you want to go to.";
     }
 }

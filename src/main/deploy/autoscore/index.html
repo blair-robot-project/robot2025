@@ -13,6 +13,7 @@
     <div class="choiceContainer" style="display: none">
         <div class="Button" id="processorChoice">Processor</div>
         <div class="Button" id="reefChoice">Reef</div>
+        <div class="Button" id="netChoice">Net</div>
     </div>
     <div class="reefContainer" style="display: none">
         <div class="levelContainer">
@@ -35,7 +36,7 @@
         <div class="locationContainer" style="display: none">
             <div class="imageContainer">
                 <img src="locationSelectorImages/locationSelectorNone.png" alt="" width="473px" height="411px" id="locationSelect">
-                <h1>Click on the area you want to go to.</h1>
+                <h1 id="areaSelectionText">Hover to the area you want to go to.</h1>
             </div>
         </div>
         <div class="confirmChoice">
@@ -46,14 +47,24 @@
             </div>
         </div>
     </div>
-    <div class="processorContainer" style="display: none">
+    <div class="netContainer" style="display: none">
         <div class="buttonContainer">
-            <div class="Button" id="button">
-                Processor Score
+            <div class="Button" id="netScore">
+                Score Net
             </div>
         </div>
         <div class="imageContainer">
-            <img src="processorImages/processorEmpty.png" alt="" width="1164px" height="837px" id="processor">
+            <img src="" alt="">
+        </div>
+    </div>
+    <div class="processorContainer" style="display: none">
+        <div class="buttonContainer">
+            <div class="Button" id="processorScore">
+                Score Processor
+            </div>
+        </div>
+        <div class="imageContainer">
+            <img src="processorImages/processorEmpty.png" alt="" width="582px" height="419px" id="processor">
         </div>
     </div>
     <div class="screenChangeContainer" style="display: none">
@@ -61,8 +72,10 @@
     </div>
     <script src="reefCommunication.js"></script>
     <script src="processorCommunication.js"></script>
+    <script src="netCommunication.js"></script>
     <script src="menuControl.js"></script>
     <script src="processor.js"></script>
+    <script src="net.js"></script>
     <script src="reefPlacement.js"></script>
     <script src="coralLevel.js"></script>
 

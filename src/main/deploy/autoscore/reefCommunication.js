@@ -4,13 +4,13 @@ const moveToReefLocation = async (location) => {
     // Replace the following line with your actual implementation
     console.log(`Moving robot to ${location}`);
     //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 1500)); // Simulate asynchronous movement
+    await new Promise((resolve) => setTimeout(() => resolve(), 500)); // Simulate asynchronous movement
 }
 
 const scoreReefLevel = async (level) => {
     console.log(`Scoring on level: ${level}`);
     //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 1500)); // Simulate asynchronous movement
+    await new Promise((resolve) => setTimeout(() => resolve(), 500)); // Simulate asynchronous movement
 }
 
 const scoreReef = async (location, level) => {

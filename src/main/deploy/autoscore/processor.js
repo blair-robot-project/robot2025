@@ -1,4 +1,4 @@
-const processorButton = document.getElementById("button");
+const processorButton = document.getElementById("processorScore");
 const animationIntervals = [];
 const animationFPS = 11.25;
 const processorImage = document.getElementById("processor");
@@ -20,12 +20,14 @@ processorButton.onclick = async () => {
         });
         let frame = 1;
         const animationInterval = setInterval(() => {
+            //increase the width because the animation shrinks the img for some reason
             if(frame == 15) {
                 console.log("clearing");
                 clearInterval(animationInterval);
             } else {
                 if(frame == 14) {
                     processorImage.src = `processorImages/processorEmpty.png`;
+                    //put it back
                 }
                 else {
                     if(frame == 13) {
