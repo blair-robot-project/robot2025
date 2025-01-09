@@ -2,14 +2,19 @@ body {
     background-attachment: fixed;
 }
 
-.reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .netContainer, .choiceContainer {
+.reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .netContainer, .coralIntakeContainer, .choiceContainer {
     display: flex;
     gap: 50px;
     justify-content: center;
     margin-top: 50px;
+    height: 600px;
 }
 
-.levelContainer {
+.reefContainer {
+    height: 600px;
+}
+
+.levelContainer, .locationContainer {
     display: flex;
     flex-direction: column;
     gap: 50px;
@@ -64,8 +69,9 @@ h1 {
     color: white;
 }
 
-#processorChoice, #reefChoice, #netChoice {
-    margin-top: 100px;
+#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice {
+    align-self: center;
+    justify-self: center;
 }
 
 .reefText {

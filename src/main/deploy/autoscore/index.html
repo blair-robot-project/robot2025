@@ -14,6 +14,7 @@
         <div class="Button" id="processorChoice">Processor</div>
         <div class="Button" id="reefChoice">Reef</div>
         <div class="Button" id="netChoice">Net</div>
+        <div class="Button" id="coralIntakeChoice">Coral Intake</div>
     </div>
     <div class="reefContainer" style="display: none">
         <div class="levelContainer">
@@ -67,17 +68,23 @@
             <img src="processorImages/processorEmpty.png" alt="" width="582px" height="419px" id="processor">
         </div>
     </div>
+    <div class="coralIntakeContainer" style="display: none">
+        <div class="buttonContainer">
+            <div class="Button" id="coralIntake">
+                Intake Coral
+            </div>
+        </div>
+    </div>
     <div class="screenChangeContainer" style="display: none">
         <h1 id="msgDisplayer"></h1>
     </div>
-    <script src="reefCommunication.js"></script>
-    <script src="processorCommunication.js"></script>
-    <script src="netCommunication.js"></script>
+    <script src="robotCommunication.js"></script>
     <script src="menuControl.js"></script>
     <script src="processor.js"></script>
     <script src="net.js"></script>
     <script src="reefPlacement.js"></script>
     <script src="coralLevel.js"></script>
+    <script src="coralIntake.js"></script>
 
 </body>
 </html>

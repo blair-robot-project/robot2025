@@ -6,6 +6,7 @@ const locationContainer = document.querySelector(".locationContainer");
 const screenChangeContainer = document.querySelector(".screenChangeContainer");
 const choiceContainer = document.querySelector(".choiceContainer");
 const netContainer = document.querySelector(".netContainer");
+const coralIntakeContainer = document.querySelector(".coralIntakeContainer");
 
 let menu;
 
@@ -23,6 +24,7 @@ const changeMenu = (menuVal, screenmsg) => {
     choiceContainer.style.display = "none";
     confirmReefContainer.style.display = "none";
     netContainer.style.display = "none";
+    coralIntakeContainer.style.display = "none";
     if (menu == "processor") {
         processorContainer.style.display = "";
     } else if (menu == "reef") {
@@ -37,6 +39,8 @@ const changeMenu = (menuVal, screenmsg) => {
         choiceContainer.style.display = "";
     } else if (menu == "net") {
         netContainer.style.display = "";
+    } else if (menu == "coral intake") {
+        coralIntakeContainer.style.display = "";
     }
 }
 
@@ -45,6 +49,7 @@ changeMenu("choice");
 const reefChoice = document.getElementById("reefChoice");
 const processorChoice = document.getElementById("processorChoice");
 const netChoice = document.getElementById("netChoice");
+const coralIntakeChoice = document.getElementById("coralIntakeChoice");
 
 reefChoice.onclick = () => {
     changeMenu("reef");
@@ -56,6 +61,10 @@ processorChoice.onclick = () => {
 
 netChoice.onclick = () => {
     changeMenu("net");
+}
+
+coralIntakeChoice.onclick = () => {
+    changeMenu("coral intake");
 }
 
 let reefScoreButtonClickable = true;
