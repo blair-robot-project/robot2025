@@ -90,7 +90,7 @@ class ChoreoFollower(
 
     val desiredMatrix = trajectory.sample(currTime)
 
-    drivetrain.set(calculate(poseSubsystem.pose, desiredMatrix))
+    drivetrain.driveFieldRelative(calculate(poseSubsystem.pose, desiredMatrix))
   }
 
   override fun isFinished(): Boolean {

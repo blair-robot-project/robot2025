@@ -188,7 +188,7 @@ class SwerveOrthogonalCommand(
         rotScaled,
         poseEstimator.heading
       )
-      drive.set(
+      drive.driveFieldRelative(
         desVel
       )
 
@@ -196,7 +196,7 @@ class SwerveOrthogonalCommand(
       desiredVel[1] = desVel.vyMetersPerSecond
       desiredVel[2] = desVel.omegaRadiansPerSecond
     } else {
-      drive.set(
+      drive.driveFieldRelative(
         ChassisSpeeds(
           vel.x,
           vel.y,

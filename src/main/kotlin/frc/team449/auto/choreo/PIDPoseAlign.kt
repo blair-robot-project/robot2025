@@ -68,7 +68,7 @@ class PIDPoseAlign(
   }
 
   override fun execute() {
-    drivetrain.set(calculate(poseSubsystem.pose, pose))
+    drivetrain.driveFieldRelative(calculate(poseSubsystem.pose, pose))
   }
 
   override fun isFinished(): Boolean {
