@@ -1,3 +1,50 @@
+//CODE FOR RUNNING ASYNCRONOUS INTERVALS v
+const asyncIntervals = [];
+
+const runAsyncInterval = async (cb, interval, intervalIndex) => {
+  await cb();
+  if (asyncIntervals[intervalIndex]) {
+    setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
+  }
+};
+
+const setAsyncInterval = (cb, interval) => {
+  if (cb && typeof cb === "function") {
+    const intervalIndex = asyncIntervals.length;
+    asyncIntervals.push(true);
+    runAsyncInterval(cb, interval, intervalIndex);
+    return intervalIndex;
+  } else {
+    throw new Error('Callback must be a function');
+  }
+};
+
+const clearAsyncInterval = (intervalIndex) => {
+  if (asyncIntervals[intervalIndex]) {
+    asyncIntervals[intervalIndex] = false;
+  }
+};
+//CODE FOR RUNNING ASYNCRONOUS INTERVALS ^
+
+const updateTime = 20; //ms
+const networkTablePath = "../../../../networktables.json";
+
+const getAutoscoreInfo = async () => {
+}
+
+const awaitCommandFinished = () => {
+    return new Promise(resolve => {
+        // let awaitingIntervalNumber;
+        // awaitingIntervalNumber = setAsyncInterval(async () => {
+        //     let info = await getAutoscoreInfo();
+        //     if(info.finishedCommand === "done") {
+        //         setTimeout(() => resolve, 50);
+        //         clearInterval(awaitingIntervalNumber);
+        //     }
+        // }, updateTime);
+    });
+}
+
 const scoreNet = async () => {
     console.log("scoring net");
     //communicate with network tables somehow
@@ -40,16 +87,10 @@ const scoreReef = async (location, level) => {
 }
 
 const getAlliance = async () => {
-    //wait half a second if network tables is bad
-    await new Promise((resolve) => setTimeout(() => resolve(), 500));
-    let alliance = "Red"; //temporary
-    //get alliance from networktables
-    let response = await fetch("../../../../networktables.json");
-    let json = response.json();
-    console.log("json", json);
-    if(alliance == "Red") {
+    let temporaryAlliance = "Red";
+    if(temporaryAlliance == "Red") {
         document.body.style.background = "radial-gradient(circle at 50% 50%, pink, rgb(114, 114, 138))";
-    } else if(alliance == "Blue") {
+    } else if(temporaryAlliance == "Blue") {
         document.body.style.background = "radial-gradient(circle at 50% 50%, cornflowerblue, rgb(114, 114, 138))";
     }
 }
