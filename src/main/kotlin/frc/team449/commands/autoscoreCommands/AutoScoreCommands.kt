@@ -15,4 +15,48 @@ class AutoScoreCommands (
   fun netCommand() {
     drive.desiredSpeeds = ChassisSpeeds();
   }
+
+
+  /*
+   * Takes in reefLocation enum, goes to specified reef location using swerve drive
+   * Calls putCoralInReef function with passed in reefLevel enum
+   * */
+  fun reefCommand(reefLocation: AutoScoreCommandConstants.reefLocation,
+                  reefLevel: AutoScoreCommandConstants.reefLevel) {
+    when (reefLocation) {
+      AutoScoreCommandConstants.reefLocation.PointA -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointB -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointC -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointD -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointE -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointF -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointG -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointH -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointI -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointJ -> TODO()
+    }
+  }
+  /*
+  * Puts coral in specified level
+  * Should only be called by reefCommand
+  * */
+  fun putCoralInReef(reefLevel: AutoScoreCommandConstants.reefLevel) {
+    when (reefLevel) {
+      AutoScoreCommandConstants.reefLevel.L1 -> TODO()
+      AutoScoreCommandConstants.reefLevel.L2 -> TODO()
+      AutoScoreCommandConstants.reefLevel.L3 -> TODO()
+      AutoScoreCommandConstants.reefLevel.L4 -> TODO()
+    }
+  }
+
+  fun coralIntake() {
+
+  }
+
+  fun goToProcessor() {
+
+  }
+
+
+
 }
