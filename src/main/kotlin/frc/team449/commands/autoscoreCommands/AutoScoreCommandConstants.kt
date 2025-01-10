@@ -5,16 +5,18 @@ class AutoScoreCommandConstants() {
 
 
   enum class reefLocation {
-    PointA,
-    PointB,
-    PointC,
-    PointD,
-    PointE,
-    PointF,
-    PointG,
-    PointH,
+    PointJ,
     PointI,
-    PointJ
+    PointH,
+    PointG,
+    PointF,
+    PointE,
+    PointD,
+    PointC,
+    PointB,
+    PointA,
+    PointL,
+    PointK
   }
 
   enum class reefLevel {

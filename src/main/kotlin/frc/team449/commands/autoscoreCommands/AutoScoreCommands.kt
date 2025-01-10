@@ -34,6 +34,8 @@ class AutoScoreCommands (
       AutoScoreCommandConstants.reefLocation.PointH -> TODO()
       AutoScoreCommandConstants.reefLocation.PointI -> TODO()
       AutoScoreCommandConstants.reefLocation.PointJ -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointL -> TODO()
+      AutoScoreCommandConstants.reefLocation.PointK -> TODO()
     }
   }
   /*
