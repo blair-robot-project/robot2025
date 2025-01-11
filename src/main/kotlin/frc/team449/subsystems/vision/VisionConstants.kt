@@ -79,12 +79,12 @@ object VisionConstants {
 
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
-    ApriltagCamera(
-      "back_left",
-      TAG_LAYOUT,
-      backLeft,
-      VISION_SIM
-    ),
+//    ApriltagCamera(
+//      "back_left",
+//      TAG_LAYOUT,
+//      backLeft,
+//      VISION_SIM
+//    ),
 //    ApriltagCamera(
 //      "back_right",
 //      TAG_LAYOUT,
@@ -93,10 +93,7 @@ object VisionConstants {
 //    )
   )
 
-  val interpolatedVisionSets = listOf(
-    InterpolatedVisionDataset.HOMELEFT,
-//    InterpolatedVisionDataset.HOMERIGHT
-  )
+  val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf()
 
   val ENCODER_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .125, .125, .0125)
   val SINGLE_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), 0.05, 0.05, 1e+9)

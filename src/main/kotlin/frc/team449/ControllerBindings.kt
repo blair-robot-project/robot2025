@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
+import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import kotlin.jvm.optionals.getOrNull
@@ -21,10 +23,22 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
+    val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem)
+    driveController.x().onTrue(ConditionalCommand(
+      autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1B),
+      autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1R),
+      {DriverStation.getAlliance().get() == DriverStation.Alliance.Blue}
+    ))
+    driveController.a().onTrue(ConditionalCommand(
+      autoscore.moveToProcessorCommandRed(),
+      autoscore.moveToProcessorCommandBlue(),
+      {DriverStation.getAlliance().get() == DriverStation.Alliance.Blue}
+    ))
   }
 
   private fun nonRobotBindings() {
     // slowDrive()
+
 
     if (RobotBase.isSimulation()) resetOdometrySim()
 

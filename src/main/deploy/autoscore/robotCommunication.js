@@ -62,6 +62,7 @@ const scoreProcessor = async () => {
 const intakeCoral = async () => {
     console.log("intaking coral");
     //communicate with network tables somehow
+    NetworkTables.putValue("commands", "intakeCoral");
     await new Promise((resolve) => setTimeout(() => resolve(), 3000)); // Simulate asynchronous movement
     console.log("await done");
 }
