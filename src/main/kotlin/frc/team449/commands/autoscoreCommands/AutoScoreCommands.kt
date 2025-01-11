@@ -22,9 +22,9 @@ class AutoScoreCommands (
    * This command moves the robot to one of the twelve reef locations 
    * (location 1 is the most vertical location on the right, going
    * clockwise)
+   * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
   fun moveToReefCommand(reefLocation: AutoScoreCommandConstants.reefLocation,
-                  reefLevel: AutoScoreCommandConstants.reefLevel
   ) : Command {
     var reefNumericalLocation = reefLocation.ordinal + 1;
     //RANDOM POSE so that compiler does not complain about undefined when command returned.
@@ -68,7 +68,7 @@ class AutoScoreCommands (
   /**
    * this command scores the coral on the reef
    * level that is passed in.
-   * @param reefLevel an enum that determines which level to score the coral on
+   * @param reefLevel a reefLevel enum that determines which level to score the coral on
    */
   fun putCoralInReef(reefLevel: AutoScoreCommandConstants.reefLevel) : Command {
     //we don't have score yet, but we're setting up stuff for future
@@ -93,27 +93,37 @@ class AutoScoreCommands (
   }
 
   /**
-   * moves robot to coral intake location
-   * using swerve drive.
+   * moves robot to coral intake, either top
+   * or bottom depending on the parameter passed
+   * in, using swerve drive
+   * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
-  fun moveToCoralIntakeCommand() : Command {
-    var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlue)
+  fun moveToCoralIntakeCommand(isAtTopSource : Boolean) : Command {
+    var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueTop)
+    if(!isAtTopSource) {
+      returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueBottom)
+    }
     if(DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRed)
+      returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedTop)
+      if(!isAtTopSource) {
+        returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedBottom)
+      }
     }
     return returnCommand
   }
 
   /**
-   * moves robot to net location (only
-   * distance away from the net, parallel
-   * distance from net will be determined 
-   * by the driver) using swerve drive
+   * moves robot to net location on either
+   * side (only distance away from the net,
+   * parallel distance from net will be
+   * determined by the driver) using swerve
+   * drive.
+   * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
-  fun moveToNetCommand() : Command {
-    var netPose = Pose2d(Translation2d(poseSubsystem.pose.x, AutoScoreCommandConstants.netTranslationDistance), AutoScoreCommandConstants.netRotation2dBlue)
-    if(DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      netPose = Pose2d(Translation2d(poseSubsystem.pose.x, AutoScoreCommandConstants.netTranslationDistance), AutoScoreCommandConstants.netRotation2dRed)
+  fun moveToNetCommand(onRedAllianceSide: Boolean) : Command {
+    var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
+    if(onRedAllianceSide) {
+      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     }
     return PIDPoseAlign(drive, poseSubsystem, netPose)
   }

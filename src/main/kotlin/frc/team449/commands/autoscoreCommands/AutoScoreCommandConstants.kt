@@ -40,30 +40,42 @@ class AutoScoreCommandConstants() {
 
     //processor pose values
     //BLUE
-    val processorTranslation2dBlue = Translation2d(1.0, 1.0)
-    val processorRotation2dBlue = Rotation2d(Math.PI / 2) // in radians
+    val processorTranslation2dBlue = Translation2d(6.358, 0.622)
+    val processorRotation2dBlue = Rotation2d(3*Math.PI / 2) // in radians
     val processorPoseBlue = Pose2d(processorTranslation2dBlue, processorRotation2dBlue)
     //RED
-    val processorTranslation2dRed = Translation2d(1.0, 1.0)
+    val processorTranslation2dRed = Translation2d(11.520, 7.500)
     val processorRotation2dRed = Rotation2d(Math.PI / 2) // in radians
     val processorPoseRed = Pose2d(processorTranslation2dRed, processorRotation2dRed)
 
     //coral intake pose values
     //BLUE
-    val coralIntakeTranslation2dBlue = Translation2d(1.0, 1.0)
-    val coralIntakeRotation2dBlue = Rotation2d(Math.PI / 2) // in radians
-    val coralIntakePoseBlue = Pose2d(coralIntakeTranslation2dBlue, coralIntakeRotation2dBlue)
+    //TOP
+    val coralIntakeTranslation2dBlueTop = Translation2d(16.454, 6.990)
+    val coralIntakeRotation2dBlueTop = Rotation2d(radians(55)) // in radians
+    val coralIntakePoseBlueTop = Pose2d(coralIntakeTranslation2dBlueTop, coralIntakeRotation2dBlueTop)
+    //BOTTOM
+    val coralIntakeTranslation2dBlueBottom = Translation2d(16.454, 1.111)
+    val coralIntakeRotation2dBlueBottom = Rotation2d(radians(-55)) // in radians
+    val coralIntakePoseBlueBottom = Pose2d(coralIntakeTranslation2dBlueBottom, coralIntakeRotation2dBlueBottom)
     //RED
-    val coralIntakeTranslation2dRed = Translation2d(1.0, 1.0)
-    val coralIntakeRotation2dRed = Rotation2d(Math.PI / 2) // in radians
-    val coralIntakePoseRed = Pose2d(coralIntakeTranslation2dRed, coralIntakeRotation2dRed)
+    //TOP
+    val coralIntakeTranslation2dRedTop = Translation2d(1.214, 6.990)
+    val coralIntakeRotation2dRedTop = Rotation2d(radians(125)) // in radians
+    val coralIntakePoseRedTop = Pose2d(coralIntakeTranslation2dRedTop, coralIntakeRotation2dRedTop)
+    //BOTTOM
+    val coralIntakeTranslation2dRedBottom = Translation2d(1.214, 1.111)
+    val coralIntakeRotation2dRedBottom = Rotation2d(radians(-125)) // in radians
+    val coralIntakePoseRedBottom = Pose2d(coralIntakeTranslation2dRedBottom, coralIntakeRotation2dRedBottom)
+
 
     //net pose values
-    val netTranslationDistance: Double = 1.0;
+    val centerOfField = 8.808
+    val netTranslationDistance: Double = 2.152;
     //BLUE
-    val netRotation2dBlue = Rotation2d(Math.PI / 2) // in radians
+    val netRotation2dBlue = Rotation2d(0.9) // in radians
     //RED
-    val netRotation2dRed = Rotation2d(Math.PI / 2) // in radians
+    val netRotation2dRed = Rotation2d(Math.PI) // in radians
 
 
     //Reef pose translations are in meters (round to 3 decimal places)
