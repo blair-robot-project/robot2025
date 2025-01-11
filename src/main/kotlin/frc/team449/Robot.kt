@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
 import frc.team449.auto.Routines
@@ -18,6 +19,8 @@ import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
+import java.util.function.DoubleSupplier
+import java.util.function.Supplier
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -54,8 +57,12 @@ class Robot : TimedRobot(), Logged {
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
     val routines = Routines(robot)
+
     routines.addOptions(robot.autoChooser)
-    SmartDashboard.putData(robot.autoChooser)
+
+    println("Putting the thing on the other thing")
+    SmartDashboard.putData("Auto Chooser", robot.autoChooser)
+
     RobotModeTriggers.autonomous().whileTrue(robot.autoChooser.selectedCommandScheduler())
     println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
 

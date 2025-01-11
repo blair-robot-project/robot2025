@@ -88,9 +88,9 @@ open class SwerveDrive(
 
     // Generate the next speeds for the robot
     val speeds = ChassisSpeeds(
-      sample.vx + xController.calculate(pose.x, sample.x),
-      sample.vy + yController.calculate(pose.y, sample.y),
-      sample.omega + headingController.calculate(pose.rotation.radians, sample.heading)
+      sample.vx,
+      sample.vy,
+      sample.omega
     )
 
     // Apply the generated speeds
@@ -102,8 +102,8 @@ open class SwerveDrive(
       it.setVoltage(volts)
     }
   }
- fun resetOdometry(pose : Pose2d){
-   this.pose = pose
+ fun resetOdometry(newPose : Pose2d){
+   this.pose = newPose
  }
   /** Stops the robot's drive. */
   fun stop() {
