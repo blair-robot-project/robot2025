@@ -49,7 +49,7 @@ open class SwerveDrive(
 
   var pose: Pose2d = Pose2d()
 
-  private var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
+  var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
@@ -87,7 +87,7 @@ open class SwerveDrive(
     // Get the current pose of the robot
 
     // Generate the next speeds for the robot
-    val speeds: ChassisSpeeds = ChassisSpeeds(
+    val speeds = ChassisSpeeds(
       sample.vx + xController.calculate(pose.x, sample.x),
       sample.vy + yController.calculate(pose.y, sample.y),
       sample.omega + headingController.calculate(pose.rotation.radians, sample.heading)
@@ -102,7 +102,9 @@ open class SwerveDrive(
       it.setVoltage(volts)
     }
   }
-
+ fun resetOdometry(pose : Pose2d){
+   this.pose = pose
+ }
   /** Stops the robot's drive. */
   fun stop() {
     this.driveFieldRelative(ChassisSpeeds(0.0, 0.0, 0.0))

@@ -98,7 +98,7 @@ open class DifferentialDrive(
   }
 
   /** The (x, y, theta) position of the robot on the field. */
-  var pose: Pose2d
+  open var pose: Pose2d
     get() = this.poseEstimator.estimatedPosition
     set(pose) {
       this.poseEstimator.resetPosition(ahrs.heading, leftEncoder.position, rightEncoder.position, pose)

@@ -16,7 +16,7 @@ import kotlin.random.Random
 class ControllerBindings(
   private val driveController: CommandXboxController,
   private val mechanismController: CommandXboxController,
-  private val robot: Robot
+  private val robot: RobotContainer
 ) {
 
   private fun robotBindings() {
