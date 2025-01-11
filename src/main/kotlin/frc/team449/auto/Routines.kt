@@ -13,8 +13,8 @@ class Routines(
 
 ) {
   val autoFactory = AutoFactory(
-    robot.drive::pose,
-    robot.drive::resetOdometry,
+    robot.poseSubsystem::pose,
+    robot.poseSubsystem::resetOdometry,
     robot.drive::followTrajectory,
     true,
     robot.drive

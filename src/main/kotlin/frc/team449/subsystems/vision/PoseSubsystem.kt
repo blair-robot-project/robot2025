@@ -101,6 +101,10 @@ class PoseSubsystem(
     }
   }
 
+  fun resetOdometry(newPose : Pose2d){
+    this.poseEstimator.resetPose(newPose)
+  }
+
   override fun periodic() {
     if (isReal) {
       this.poseEstimator.update(

@@ -102,9 +102,7 @@ open class SwerveDrive(
       it.setVoltage(volts)
     }
   }
- fun resetOdometry(newPose : Pose2d){
-   this.pose = newPose
- }
+
   /** Stops the robot's drive. */
   fun stop() {
     this.driveFieldRelative(ChassisSpeeds(0.0, 0.0, 0.0))
