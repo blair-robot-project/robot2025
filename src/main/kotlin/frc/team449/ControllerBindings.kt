@@ -24,21 +24,24 @@ class ControllerBindings(
   private fun robotBindings() {
     /** Call robot functions you create below */
     val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem)
-    driveController.x().onTrue(ConditionalCommand(
-      autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1B),
-      autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1R),
-      {DriverStation.getAlliance().get() == DriverStation.Alliance.Blue}
-    ))
-    driveController.a().onTrue(ConditionalCommand(
-      autoscore.moveToProcessorCommandRed(),
-      autoscore.moveToProcessorCommandBlue(),
-      {DriverStation.getAlliance().get() == DriverStation.Alliance.Blue}
-    ))
+    driveController.x().onTrue(
+      ConditionalCommand(
+        autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1B),
+        autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1R),
+        { DriverStation.getAlliance().get() == DriverStation.Alliance.Blue }
+      )
+    )
+    driveController.a().onTrue(
+      ConditionalCommand(
+        autoscore.moveToProcessorCommandRed(),
+        autoscore.moveToProcessorCommandBlue(),
+        { DriverStation.getAlliance().get() == DriverStation.Alliance.Blue }
+      )
+    )
   }
 
   private fun nonRobotBindings() {
     // slowDrive()
-
 
     if (RobotBase.isSimulation()) resetOdometrySim()
 

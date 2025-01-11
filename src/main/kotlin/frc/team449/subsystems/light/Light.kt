@@ -1,8 +1,5 @@
 package frc.team449.subsystems.light
 
-import edu.wpi.first.networktables.BooleanSubscriber
-import edu.wpi.first.networktables.NetworkTable
-import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.AddressableLED
 import edu.wpi.first.wpilibj.AddressableLEDBuffer
 import edu.wpi.first.wpilibj.RobotBase
