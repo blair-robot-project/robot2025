@@ -1,22 +1,24 @@
 package frc.team449.commands.autoscoreCommands
 
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+
 class AutoScoreCommandConstants() {
 
-
-
   enum class reefLocation {
-    PointJ,
-    PointI,
-    PointH,
-    PointG,
-    PointF,
-    PointE,
-    PointD,
-    PointC,
-    PointB,
-    PointA,
-    PointL,
-    PointK
+    Location1,
+    Location2,
+    Location3,
+    Location4,
+    Location5,
+    Location6,
+    Location7,
+    Location8,
+    Location9,
+    Location10,
+    Location11,
+    Location12
   }
 
   enum class reefLevel {
@@ -24,6 +26,185 @@ class AutoScoreCommandConstants() {
     L2,
     L3,
     L4
+  }
+
+  companion object {
+    //FILLER VALUES CURRENTLY
+
+    //processor pose values
+    //BLUE
+    val processorTranslation2dBlue = Translation2d(1.0, 1.0)
+    val processorRotation2dBlue = Rotation2d(Math.PI / 2) // in radians
+    val processorPoseBlue = Pose2d(processorTranslation2dBlue, processorRotation2dBlue)
+    //RED
+    val processorTranslation2dRed = Translation2d(1.0, 1.0)
+    val processorRotation2dRed = Rotation2d(Math.PI / 2) // in radians
+    val processorPoseRed = Pose2d(processorTranslation2dRed, processorRotation2dRed)
+
+    //coral intake pose values
+    //BLUE
+    val coralIntakeTranslation2dBlue = Translation2d(1.0, 1.0)
+    val coralIntakeRotation2dBlue = Rotation2d(Math.PI / 2) // in radians
+    val coralIntakePoseBlue = Pose2d(coralIntakeTranslation2dBlue, coralIntakeRotation2dBlue)
+    //RED
+    val coralIntakeTranslation2dRed = Translation2d(1.0, 1.0)
+    val coralIntakeRotation2dRed = Rotation2d(Math.PI / 2) // in radians
+    val coralIntakePoseRed = Pose2d(coralIntakeTranslation2dRed, coralIntakeRotation2dRed)
+
+    //net pose values
+    val netTranslationDistance: Double = 1.0;
+    //BLUE
+    val netRotation2dBlue = Rotation2d(Math.PI / 2) // in radians
+    //RED
+    val netRotation2dRed = Rotation2d(Math.PI / 2) // in radians
+
+
+    //BLUE
+    //reef 1st pose values
+    val reef1Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef1Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef1PoseBlue = Pose2d(reef1Translation2dBlue, reef1Rotation2dBlue)
+
+    //reef 2nd pose values
+    val reef2Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef2Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef2PoseBlue = Pose2d(reef2Translation2dBlue, reef2Rotation2dBlue)
+
+    //reef 3rd pose values
+    val reef3Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef3Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef3PoseBlue = Pose2d(reef3Translation2dBlue, reef3Rotation2dBlue)
+
+    //reef 4th pose values
+    val reef4Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef4Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef4PoseBlue = Pose2d(reef4Translation2dBlue, reef4Rotation2dBlue)
+
+    //reef 5th pose values
+    val reef5Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef5Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef5PoseBlue = Pose2d(reef5Translation2dBlue, reef5Rotation2dBlue)
+
+    //reef 6th pose values
+    val reef6Translation2dBlue= Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef6Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef6PoseBlue = Pose2d(reef6Translation2dBlue, reef6Rotation2dBlue)
+
+    //reef 7th pose values
+    val reef7Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef7Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef7PoseBlue = Pose2d(reef7Translation2dBlue, reef7Rotation2dBlue)
+
+    //reef 8th pose values
+    val reef8Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef8Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef8PoseBlue = Pose2d(reef8Translation2dBlue, reef8Rotation2dBlue)
+
+    //reef 9th pose values
+    val reef9Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef9Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef9PoseBlue = Pose2d(reef9Translation2dBlue, reef9Rotation2dBlue)
+
+    //reef 10th pose values
+    val reef10Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef10Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef10PoseBlue = Pose2d(reef10Translation2dBlue, reef10Rotation2dBlue)
+
+    //reef 11th pose values
+    val reef11Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef11Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef11PoseBlue = Pose2d(reef11Translation2dBlue, reef11Rotation2dBlue)
+
+    //reef 12th pose values
+    val reef12Translation2dBlue = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef12Rotation2dBlue = Rotation2d(Math.PI / 2)
+    val reef12PoseBlue = Pose2d(reef12Translation2dBlue, reef12Rotation2dBlue)
+
+    //RED
+    //reef 1st pose values
+    val reef1Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef1Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef1PoseRed = Pose2d(reef1Translation2dRed, reef1Rotation2dRed)
+
+    //reef 2nd pose values
+    val reef2Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef2Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef2PoseRed = Pose2d(reef2Translation2dRed, reef2Rotation2dRed)
+
+    //reef 3rd pose values
+    val reef3Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef3Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef3PoseRed = Pose2d(reef3Translation2dRed, reef3Rotation2dRed)
+
+    //reef 4th pose values
+    val reef4Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef4Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef4PoseRed = Pose2d(reef4Translation2dRed, reef4Rotation2dRed)
+
+    //reef 5th pose values
+    val reef5Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef5Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef5PoseRed = Pose2d(reef5Translation2dRed, reef5Rotation2dRed)
+
+    //reef 6th pose values
+    val reef6Translation2dRed= Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef6Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef6PoseRed = Pose2d(reef6Translation2dRed, reef6Rotation2dRed)
+
+    //reef 7th pose values
+    val reef7Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef7Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef7PoseRed = Pose2d(reef7Translation2dRed, reef7Rotation2dRed)
+
+    //reef 8th pose values
+    val reef8Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef8Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef8PoseRed = Pose2d(reef8Translation2dRed, reef8Rotation2dRed)
+
+    //reef 9th pose values
+    val reef9Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef9Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef9PoseRed = Pose2d(reef9Translation2dRed, reef9Rotation2dRed)
+
+    //reef 10th pose values
+    val reef10Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef10Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef10PoseRed = Pose2d(reef10Translation2dRed, reef10Rotation2dRed)
+
+    //reef 11th pose values
+    val reef11Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef11Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef11PoseRed = Pose2d(reef11Translation2dRed, reef11Rotation2dRed)
+
+    //reef 12th pose values
+    val reef12Translation2dRed = Translation2d(1.0, 1.0)
+    //RADIANS
+    val reef12Rotation2dRed = Rotation2d(Math.PI / 2)
+    val reef12PoseRed = Pose2d(reef12Translation2dRed, reef12Rotation2dRed)
+
   }
 
 }
