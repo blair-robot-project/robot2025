@@ -77,13 +77,11 @@ class AutoScoreCommands(
    * moves robot to processor location using * swerve drive.
    */
   fun moveToProcessorCommandBlue(): Command {
-    var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
-    returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
+    val returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
     return returnCommand
   }
   fun moveToProcessorCommandRed(): Command {
-    var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed)
-    returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed)
+    val returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed)
     return returnCommand
   }
 
