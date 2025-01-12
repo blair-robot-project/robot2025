@@ -8,30 +8,18 @@ import edu.wpi.first.math.util.Units
 class AutoScoreCommandConstants() {
 
   enum class reefLocation {
-    Location1B,
-    Location2B,
-    Location3B,
-    Location4B,
-    Location5B,
-    Location6B,
-    Location7B,
-    Location8B,
-    Location9B,
-    Location10B,
-    Location11B,
-    Location12B,
-    Location1R,
-    Location2R,
-    Location3R,
-    Location4R,
-    Location5R,
-    Location6R,
-    Location7R,
-    Location8R,
-    Location9R,
-    Location10R,
-    Location11R,
-    Location12R
+    Location1,
+    Location2,
+    Location3,
+    Location4,
+    Location5,
+    Location6,
+    Location7,
+    Location8,
+    Location9,
+    Location10,
+    Location11,
+    Location12
   }
 
   enum class reefLevel {
