@@ -23,7 +23,7 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
-    val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem)
+    val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, driveController.hid)
     driveController.x().onTrue(
       ConditionalCommand(
         autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1B),
