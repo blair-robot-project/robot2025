@@ -41,8 +41,8 @@ processorButton.onclick = async () => {
             }
         }, 1000/animationFPS);
         animationIntervals.push(animationInterval);
-        console.log("calling score processor");
         processorButton.innerText = "Scoring...";
+        console.log("wait start")
         await scoreProcessor();
         changeMenu("choice");
         processorButton.innerText = "Score Processor";

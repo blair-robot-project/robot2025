@@ -37,40 +37,39 @@ const awaitCommandFinished = () => {
 }
 
 const scoreNet = async (isOnRedAllianceSide) => {
-    console.log("scoring net");
-    //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 3000)); // Simulate asynchronous movement
-    console.log("await done");
+  console.log("scoring net");
+  //communicate with network tables somehow
+  await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
+  console.log("await done");
 }
 
 const scoreProcessor = async () => {
-    console.log("scoring processor");
-    //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 3000)); // Simulate asynchronous movement
-    console.log("await done");
+  console.log("scoring processor");
+  //communicate with network tables somehow
+  await new Promise((resolve) => setTimeout(() => resolve(), 2000)); // Simulate asynchronous movement
+  console.log("await done");
 }
 
 const intakeCoral = async (isAtTopSide) => {
-    console.log("intaking coral");
-    //communicate with network tables somehow
-    NetworkTables.putValue("commands", "intakeCoral");
-    await new Promise((resolve) => setTimeout(() => resolve(), 3000)); // Simulate asynchronous movement
-    console.log("await done");
+  console.log("intaking coral");
+  //communicate with network tables somehow
+  await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
+  console.log("await done");
 }
 
 const scoreReef = async (location, level) => {
-    console.log(`Scoring on level: ${level} and location: ${location}`);
-    //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 500)); // Simulate asynchronous movement
+  console.log(`Scoring on level: ${level} and location: ${location}`);
+  //communicate with network tables somehow
+  await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
 }
 
 const getAlliance = async () => {
-    let temporaryAlliance = "Red";
-    if(temporaryAlliance == "Red") {
-        document.body.style.background = "radial-gradient(circle at 50% 50%, pink, rgb(114, 114, 138))";
-    } else if(temporaryAlliance == "Blue") {
-        document.body.style.background = "radial-gradient(circle at 50% 50%, cornflowerblue, rgb(114, 114, 138))";
-    }
+  let temporaryAlliance = "Red";
+  if(temporaryAlliance == "Red") {
+      document.body.style.background = "radial-gradient(circle at 50% 50%, pink, rgb(114, 114, 138))";
+  } else if(temporaryAlliance == "Blue") {
+      document.body.style.background = "radial-gradient(circle at 50% 50%, cornflowerblue, rgb(114, 114, 138))";
+  }
 }
 
 getAlliance();
