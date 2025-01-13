@@ -6,10 +6,9 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import frc.team449.Robot
-import frc.team449.RobotContainer
 
 class Routines(
-  robot: RobotContainer
+  robot: Robot
 
 ) {
   val autoFactory = AutoFactory(

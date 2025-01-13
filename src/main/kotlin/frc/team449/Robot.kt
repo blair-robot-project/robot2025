@@ -1,132 +1,47 @@
 package frc.team449
 
-import com.ctre.phoenix6.SignalLogger
-import edu.wpi.first.hal.FRCNetComm
-import edu.wpi.first.hal.HAL
-import edu.wpi.first.wpilibj.*
-import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.CommandScheduler
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
-import frc.team449.auto.Routines
-import frc.team449.commands.light.BlairChasing
-import frc.team449.commands.light.Rainbow
-import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.vision.VisionConstants
+import choreo.auto.AutoChooser
+import edu.wpi.first.wpilibj.PowerDistribution
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.drive.swerve.SwerveDrive
+import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
+import frc.team449.subsystems.light.Light.Companion.createLight
+import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
+import frc.team449.system.AHRS
 import monologue.Annotations.Log
 import monologue.Logged
-import monologue.Monologue
-import org.littletonrobotics.urcl.URCL
-import java.util.function.DoubleSupplier
-import java.util.function.Supplier
 
-/** The main class of the robot, constructs all the subsystems
- * and initializes default commands . */
-class Robot : TimedRobot(), Logged {
+class Robot : RobotBase(), Logged {
+
+  val driveController = CommandXboxController(0)
+
+  val mechController = CommandXboxController(1)
+
+  val ahrs = AHRS()
+
+  // Instantiate/declare PDP and other stuff here
+  @Log.NT
+  override val powerDistribution: PowerDistribution = PowerDistribution(
+    RobotConstants.PDH_CAN,
+    PowerDistribution.ModuleType.kRev
+  )
 
   @Log.NT
-  private val robot = RobotContainer()
+  override val drive = SwerveDrive.createSwerveKraken(field)
+
+  val autoChooser = AutoChooser()
 
   @Log.NT
-  private val field = robot.field
+  override val poseSubsystem = createPoseSubsystem(ahrs, drive, field)
 
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
+  @Log.NT
+  override val driveCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
 
-  override fun robotInit() {
-    // Yes this should be a print statement, it's useful to know that robotInit started.
-    println("Started robotInit.")
+  val light = createLight()
 
-    SignalLogger.setPath("/media/sda1/ctre-logs/")
-    SignalLogger.start()
-
-    HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
-
-    if (RobotBase.isSimulation()) {
-      // Don't complain about joysticks if there aren't going to be any
-      DriverStation.silenceJoystickConnectionWarning(true)
-//      val instance = NetworkTableInstance.getDefault()
-//      instance.stopServer()
-//      instance.startClient4("localhost")
-    }
-
-    /** Example Quad Calibration
-     QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
-     */
-
-    println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
-    val routines = Routines(robot)
-
-    routines.addOptions(robot.autoChooser)
-
-    println("Putting the thing on the other thing")
-    SmartDashboard.putData("Auto Chooser", robot.autoChooser)
-
-    RobotModeTriggers.autonomous().whileTrue(robot.autoChooser.selectedCommandScheduler())
-    println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
-
-    SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance())
-
-    robot.light.defaultCommand = BlairChasing(robot.light)
-
-    controllerBinder.bindButtons()
-
-    DriverStation.startDataLog(DataLogManager.getLog())
-    Monologue.setupMonologue(this, "/Monologuing", false, false)
-
-    URCL.start()
-  }
-
-  override fun driverStationConnected() {
-    Monologue.setFileOnly(DriverStation.isFMSAttached())
-  }
-
-  override fun robotPeriodic() {
-    CommandScheduler.getInstance().run()
-
-    robot.field.robotPose = robot.poseSubsystem.pose
-
-    robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
-
-    Monologue.updateAll()
-  }
-
-  override fun autonomousInit() {}
-
-  override fun autonomousPeriodic() {}
-
-  override fun teleopInit() {
-    (robot.light.currentCommand ?: InstantCommand()).cancel()
-
-    robot.drive.defaultCommand = robot.driveCommand
-  }
-
-  override fun teleopPeriodic() {
-  }
-
-  override fun disabledInit() {
-    robot.drive.stop()
-
-    (robot.light.currentCommand ?: InstantCommand()).cancel()
-    Rainbow(robot.light).schedule()
-  }
-
-  override fun disabledPeriodic() {}
-
-  override fun testInit() {}
-
-  override fun testPeriodic() {}
-
-  override fun simulationInit() {}
-
-  override fun simulationPeriodic() {
-    robot.drive as SwerveSim
-
-    VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
-    }
-
-    VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
-  }
+  /** Example for using infrared sensors
+   * @Log.NT
+   * val infrared = DigitalInput(RobotConstants.IR_CHANNEL)
+   */
 }
