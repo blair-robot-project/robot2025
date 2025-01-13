@@ -9,7 +9,7 @@ const coralIntakeBottom = document.getElementById("coralIntakeBottom");
             coralIntakeClickable = false;
             button.innerText = "Intaking...";
             await intakeCoral(button.id == "coralIntakeTop");
-            button.innerText = `Intaking Coral ${button.id == "coralIntakeTop" ? " on Top Side" : " on Bottom Side"}`;
+            button.innerText = `Intaking Coral ${button.id == "coralIntakeTop" ? " Top" : " Bottom"}`;
             coralIntakeClickable = true;
             changeMenu("choice");
         }
