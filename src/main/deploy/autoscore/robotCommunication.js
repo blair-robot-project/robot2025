@@ -1,27 +1,6 @@
 //CODE FOR RUNNING ASYNCHRONOUS INTERVALS v
-import { NT4_Client } from "./NT4.js";
 
 const asyncIntervals = [];
-
-let client = new NT4_Client(
-  window.location.hostname, // serverAddr
-  "autoscore", // appName
-  (topic) => { // onTopicAnnounce
-    // Topic announce
-  },
-  (topic) => { // onTopicUnannounce
-    // Topic unannounce
-  },
-  (topic, timestamp, value) => { // onNewTopicData
-    // New data
-  },
-  () => { // onConnect
-    // Connected
-  },
-  () => { // onDisconnect
-    // Disconnected
-  }
-);
 
 const runAsyncInterval = async (cb, interval, intervalIndex) => {
   await cb();
@@ -51,23 +30,13 @@ const clearAsyncInterval = (intervalIndex) => {
 const updateTime = 20; //ms
 const networkTablePath = "../../../../networktables.json";
 
-const getAutoscoreInfo = async () => {
-}
-
 const awaitCommandFinished = () => {
-    return new Promise(resolve => {
-        // let awaitingIntervalNumber;
-        // awaitingIntervalNumber = setAsyncInterval(async () => {
-        //     let info = await getAutoscoreInfo();
-        //     if(info.finishedCommand === "done") {
-        //         setTimeout(() => resolve, 50);
-        //         clearInterval(awaitingIntervalNumber);
-        //     }
-        // }, updateTime);
-    });
+  return new Promise(resolve => {
+
+  });
 }
 
-const scoreNet = async () => {
+const scoreNet = async (isOnRedAllianceSide) => {
     console.log("scoring net");
     //communicate with network tables somehow
     await new Promise((resolve) => setTimeout(() => resolve(), 3000)); // Simulate asynchronous movement
@@ -81,7 +50,7 @@ const scoreProcessor = async () => {
     console.log("await done");
 }
 
-const intakeCoral = async () => {
+const intakeCoral = async (isAtTopSide) => {
     console.log("intaking coral");
     //communicate with network tables somehow
     NetworkTables.putValue("commands", "intakeCoral");
@@ -89,24 +58,10 @@ const intakeCoral = async () => {
     console.log("await done");
 }
 
-//robot coms part
-const moveToReefLocation = async (location) => {
-    // Call a function to move the robot to the specified reef location
-    // Replace the following line with your actual implementation
-    console.log(`Moving robot to ${location}`);
-    //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 500)); // Simulate asynchronous movement
-}
-
-const scoreReefLevel = async (level) => {
-    console.log(`Scoring on level: ${level}`);
-    //communicate with network tables somehow
-    await new Promise((resolve) => setTimeout(() => resolve(), 500)); // Simulate asynchronous movement
-}
-
 const scoreReef = async (location, level) => {
-    await moveToReefLocation(location);
-    await scoreReefLevel(level);
+    console.log(`Scoring on level: ${level} and location: ${location}`);
+    //communicate with network tables somehow
+    await new Promise((resolve) => setTimeout(() => resolve(), 500)); // Simulate asynchronous movement
 }
 
 const getAlliance = async () => {
