@@ -6,18 +6,15 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.choreo.PIDPoseAlign
-import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants.Companion
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
-import frc.team449.auto.routines.DoNothing
 
-class AutoScoreCommands (
+class AutoScoreCommands(
   private val drive: SwerveDrive,
-  private val poseSubsystem: PoseSubsystem,
+  private val poseSubsystem: PoseSubsystem
 ) {
 
   init {
-
   }
 
   /**
@@ -26,14 +23,15 @@ class AutoScoreCommands (
    * clockwise)
    * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
-  fun moveToReefCommand(reefLocation: AutoScoreCommandConstants.reefLocation,
-  ) : Command {
-    var reefNumericalLocation = reefLocation.ordinal + 1;
-    //RANDOM POSE so that compiler does not complain about undefined when command returned.
+  fun moveToReefCommand(
+    reefLocation: AutoScoreCommandConstants.reefLocation
+  ): Command {
+    var reefNumericalLocation = reefLocation.ordinal + 1
+    // RANDOM POSE so that compiler does not complain about undefined when command returned.
     var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
 
-    //choose desired pose from the number and the alliance
-    if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+    // choose desired pose from the number and the alliance
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
       when (reefNumericalLocation) {
         1 -> reefPose = AutoScoreCommandConstants.reef1PoseBlue
         2 -> reefPose = AutoScoreCommandConstants.reef2PoseBlue
@@ -72,9 +70,9 @@ class AutoScoreCommands (
    * moves robot to processor location using
    * swerve drive.
    */
-  fun moveToProcessorCommand() : Command {
+  fun moveToProcessorCommand(): Command {
     var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
-    if(DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed)
     }
     return returnCommand
@@ -86,14 +84,14 @@ class AutoScoreCommands (
    * in, using swerve drive
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
-  fun moveToCoralIntakeCommand(isAtTopSource : Boolean) : Command {
+  fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
     var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueTop)
-    if(!isAtTopSource) {
+    if (!isAtTopSource) {
       returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueBottom)
     }
-    if(DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedTop)
-      if(!isAtTopSource) {
+      if (!isAtTopSource) {
         returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedBottom)
       }
     }
@@ -109,9 +107,9 @@ class AutoScoreCommands (
    * drive.
    * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
-  fun moveToNetCommand(onRedAllianceSide: Boolean) : Command {
+  fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
     var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
-    if(onRedAllianceSide) {
+    if (onRedAllianceSide) {
       netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     }
     return PIDPoseAlign(drive, poseSubsystem, netPose)
@@ -123,16 +121,16 @@ class AutoScoreCommands (
    * @param reefLevel a reefLevel enum that determines which level to score the coral on
    * does nothing right now
    */
-  fun putCoralInReef(reefLevel: AutoScoreCommandConstants.reefLevel) : Command {
-    //we don't have score yet, but we're setting up stuff for future
-    //we won't have to account for alliance here
+  fun putCoralInReef(reefLevel: AutoScoreCommandConstants.reefLevel): Command {
+    // we don't have score yet, but we're setting up stuff for future
+    // we won't have to account for alliance here
     when (reefLevel) {
       AutoScoreCommandConstants.reefLevel.L1 -> println("scoring coral l1")
       AutoScoreCommandConstants.reefLevel.L2 -> println("scoring coral l2")
       AutoScoreCommandConstants.reefLevel.L3 -> println("scoring coral l3")
       AutoScoreCommandConstants.reefLevel.L4 -> println("scoring coral l4")
     }
-    //returns a command that does nothing (for now)
+    // returns a command that does nothing (for now)
     return InstantCommand()
   }
 
@@ -140,9 +138,9 @@ class AutoScoreCommands (
    * returns a command that scores into processor
    * does nothing right now
    * */
-  fun scoreProcessorCommand() : Command {
-    //we don't have processor scoring yet, just setting up.
-    //returns a command that does nothing (for now)
+  fun scoreProcessorCommand(): Command {
+    // we don't have processor scoring yet, just setting up.
+    // returns a command that does nothing (for now)
     return InstantCommand()
   }
 
@@ -150,9 +148,9 @@ class AutoScoreCommands (
    * returns a command that scores net into net
    * does nothing right now
    * */
-  fun scoreNetCommand() : Command {
-    //we don't have net scoring yet, just setting up.
-    //returns a command that does nothing (for now)
+  fun scoreNetCommand(): Command {
+    // we don't have net scoring yet, just setting up.
+    // returns a command that does nothing (for now)
     return InstantCommand()
   }
 
@@ -160,10 +158,9 @@ class AutoScoreCommands (
    * intakes coral from coral intake
    * does nothing right now
    * */
-  fun intakeCoralCommand() : Command {
-    //we don't have coral intake yet, just setting up.
-    //returns a command that does nothing (for now)
+  fun intakeCoralCommand(): Command {
+    // we don't have coral intake yet, just setting up.
+    // returns a command that does nothing (for now)
     return InstantCommand()
   }
-
 }

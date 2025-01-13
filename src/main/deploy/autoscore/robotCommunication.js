@@ -1,5 +1,27 @@
-//CODE FOR RUNNING ASYNCRONOUS INTERVALS v
+//CODE FOR RUNNING ASYNCHRONOUS INTERVALS v
+import { NT4_Client } from "./NT4.js";
+
 const asyncIntervals = [];
+
+let client = new NT4_Client(
+  window.location.hostname, // serverAddr
+  "autoscore", // appName
+  (topic) => { // onTopicAnnounce
+    // Topic announce
+  },
+  (topic) => { // onTopicUnannounce
+    // Topic unannounce
+  },
+  (topic, timestamp, value) => { // onNewTopicData
+    // New data
+  },
+  () => { // onConnect
+    // Connected
+  },
+  () => { // onDisconnect
+    // Disconnected
+  }
+);
 
 const runAsyncInterval = async (cb, interval, intervalIndex) => {
   await cb();

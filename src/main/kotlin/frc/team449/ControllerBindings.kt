@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
-import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
-import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import kotlin.jvm.optionals.getOrNull

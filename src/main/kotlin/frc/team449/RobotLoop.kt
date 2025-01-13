@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.RoutineChooser
-import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
+import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
@@ -37,7 +37,7 @@ class RobotLoop : TimedRobot(), Logged {
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
-  lateinit var autoscoreCommands : Command
+  lateinit var autoscoreCommands: Command
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -82,7 +82,7 @@ class RobotLoop : TimedRobot(), Logged {
   override fun driverStationConnected() {
     Monologue.setFileOnly(DriverStation.isFMSAttached())
     val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem)
-    //temporary bindings for sim testing
+    // temporary bindings for sim testing
     robot.mechController.x().onTrue(
       autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1)
         .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.reefLevel.L1))
@@ -98,7 +98,6 @@ class RobotLoop : TimedRobot(), Logged {
       autoscore.moveToCoralIntakeCommand(true)
         .andThen(autoscore.intakeCoralCommand())
     )
-
   }
 
   override fun robotPeriodic() {
