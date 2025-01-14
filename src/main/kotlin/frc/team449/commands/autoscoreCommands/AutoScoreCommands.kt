@@ -10,19 +10,16 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.choreo.MagnetizePIDPoseAlign
-import frc.team449.auto.choreo.PIDPoseAlign
+import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
-import frc.team449.subsystems.RobotConstants
-import frc.team449.subsystems.drive.swerve.SwerveConstants
 import kotlin.math.*
-
 
 class AutoScoreCommands(
   private val drive: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
-  private val controller: XboxController,
-  ) {
+  private val controller: XboxController
+) {
 
   init {
   }
@@ -62,7 +59,7 @@ class AutoScoreCommands(
   ): Command {
     var reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
-    //var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
+    // var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
     var reefPose = AutoScoreCommandConstants.reef1PoseRed
     // choose desired pose from the number and the alliance
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
@@ -80,8 +77,7 @@ class AutoScoreCommands(
         11 -> reefPose = AutoScoreCommandConstants.reef11PoseBlue
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseBlue
       }
-    }
-    else /* red alliance */ {
+    } else /* red alliance */ {
       when (reefNumericalLocation) {
         1 -> reefPose = AutoScoreCommandConstants.reef1PoseRed
         2 -> reefPose = AutoScoreCommandConstants.reef2PoseRed
@@ -106,9 +102,10 @@ class AutoScoreCommands(
    * swerve drive.
    */
   fun moveToProcessorCommand(): Command {
-    //val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
-    //var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
-    var returnCommand = MagnetizePIDPoseAlign(drive,
+    // val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
+    // var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
+    var returnCommand = MagnetizePIDPoseAlign(
+      drive,
       poseSubsystem,
       AutoScoreCommandConstants.processorPoseBlue,
       controller
