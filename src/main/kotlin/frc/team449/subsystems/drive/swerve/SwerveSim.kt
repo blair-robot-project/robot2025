@@ -8,56 +8,45 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import kotlin.math.hypot
 
 class SwerveSim(
-  modules: List<SwerveModule>,
-  maxLinearSpeed: Double,
-  maxRotSpeed: Double,
-  field: Field2d,
-  maxModuleSpeed: Double
+    modules: List<SwerveModule>,
+    maxLinearSpeed: Double,
+    maxRotSpeed: Double,
+    field: Field2d,
+    maxModuleSpeed: Double,
 ) : SwerveDrive(modules, maxLinearSpeed, maxRotSpeed, field, maxModuleSpeed) {
 
-  private var lastTime = getFPGATimestamp()
-  var currHeading = Rotation2d()
+    private var lastTime = getFPGATimestamp()
+    var currHeading = Rotation2d()
 
-  private val odometryTracker = SwerveDriveOdometry(
-    kinematics,
-    currHeading,
-    getPositions(),
-    Pose2d()
-  )
+    private val odometryTracker =
+        SwerveDriveOdometry(kinematics, currHeading, getPositions(), Pose2d())
 
-  var odometryPose: Pose2d = odometryTracker.poseMeters
+    var odometryPose: Pose2d = odometryTracker.poseMeters
 
-  override fun periodic() {
-    val currTime = getFPGATimestamp()
+    override fun periodic() {
+        val currTime = getFPGATimestamp()
 
-    currHeading = currHeading.plus(Rotation2d(super.desiredSpeeds.omegaRadiansPerSecond * (currTime - lastTime)))
-    this.lastTime = currTime
+        currHeading =
+            currHeading.plus(
+                Rotation2d(super.desiredSpeeds.omegaRadiansPerSecond * (currTime - lastTime))
+            )
+        this.lastTime = currTime
 
-    set(super.desiredSpeeds)
+        set(super.desiredSpeeds)
 
-    // Updates the robot's currentSpeeds.
-    currentSpeeds = kinematics.toChassisSpeeds(
-      arrayOf(
-        modules[0].state,
-        modules[1].state,
-        modules[2].state,
-        modules[3].state
-      )
-    )
+        // Updates the robot's currentSpeeds.
+        // Erroring in intelliJ, but when you fix the error by using arrayOf() it doesn't build
+        currentSpeeds =
+            kinematics.toChassisSpeeds(
+                modules[0].state, modules[1].state, modules[2].state, modules[3].state
+            )
 
-    odometryPose = odometryTracker.update(
-      currHeading,
-      getPositions()
-    )
+        odometryPose = odometryTracker.update(currHeading, getPositions())
 
-    speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
-  }
+        speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+    }
 
-  fun resetOdometryOnly(pose: Pose2d) {
-    odometryTracker.resetPosition(
-      currHeading,
-      getPositions(),
-      pose
-    )
-  }
+    fun resetOdometryOnly(pose: Pose2d) {
+        odometryTracker.resetPosition(currHeading, getPositions(), pose)
+    }
 }

@@ -1,14 +1,22 @@
 plugins {
     id "java"
     id "idea"
-    id "org.jetbrains.kotlin.jvm" version "1.9.22"
     id "edu.wpi.first.GradleRIO" version "2025.1.1"
-    id "org.jlleitschuh.gradle.ktlint" version "11.6.1"
-    id "org.jetbrains.dokka" version "1.8.10"
+    id "com.diffplug.spotless" version "7.0.0.BETA4"
+    id 'org.jetbrains.kotlin.jvm' version "2.0.10"
+    /*
+    IMPORTANT: The 'id "org.jetbrains.kotlin.kapt" version "2.0.21"'
+    and 'kapt wpi.java.deps.wpilibAnnotations()'
+    lines are to enable epilogue support;
+    however, they can slightly increase initial compile times.
+
+    If you do not wish to use epilogue in your project,
+    you can remove them.
+     */
+    id "org.jetbrains.kotlin.kapt" version "2.0.21"
 }
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
 }
 
 def ROBOT_MAIN_CLASS = "frc.team449.Main"
@@ -36,7 +44,6 @@ deploy {
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
-                    deleteOldFiles = true
                 }
             }
         }
@@ -49,30 +56,14 @@ def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 wpi.java.debugJni = false
 
 // Set this to true to enable desktop support.
-def includeDesktopSupport = false
-
-ktlint {
-    version = "0.47.0"
-    disabledRules = ["no-wildcard-imports", "trailing-comma-on-call-site"]
-}
+def includeDesktopSupport = true
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
-    compileOnly 'org.jetbrains:annotations:24.0.1'
-
-    implementation 'com.github.shueja:Monologue:v1.0.0-beta6'
-
-    implementation("io.javalin:javalin:5.6.2")
-    implementation("org.slf4j:slf4j-nop:2.0.6")
-
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
-
-    implementation "gov.nist.math:jama:1.0.3"
-
-    annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+    kapt wpi.java.deps.wpilibAnnotations()
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -90,6 +81,7 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 test {
@@ -111,26 +103,6 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
-
-sourceSets {
-    main.kotlin.srcDirs = ['src/main/kotlin']
-    main.resources.srcDirs = ['src/main/resources']
-}
-
-wrapper {
-    gradleVersion = '8.11.1'
-}
-
-// pre-commit hook to format
-tasks.register('updateGitHooks', Copy) {
-    from './scripts/pre-commit'
-    into './.git/hooks'
-}
-
 // Configure jar and deploy tasks
 deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
@@ -139,4 +111,16 @@ wpi.java.configureTestTasks(test)
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+}
+
+spotless {
+    kotlin {
+        ktfmt().kotlinlangStyle()
+    }
+}
+repositories {
+    mavenCentral()
+}
+kotlin {
+    jvmToolchain(17)
 }

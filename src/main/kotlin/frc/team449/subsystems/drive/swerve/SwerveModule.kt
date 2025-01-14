@@ -6,20 +6,20 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 
 interface SwerveModule {
 
-  val location: Translation2d
+    val location: Translation2d
 
-  val desiredState: SwerveModuleState
+    val desiredState: SwerveModuleState
 
-  /** The module's [SwerveModuleState], containing speed and angle. */
-  var state: SwerveModuleState
+    /** The module's [SwerveModuleState], containing speed and angle. */
+    var state: SwerveModuleState
 
-  /** The module's [SwerveModulePosition], containing distance and angle. */
-  val position: SwerveModulePosition
+    /** The module's [SwerveModulePosition], containing distance and angle. */
+    val position: SwerveModulePosition
 
-  fun setVoltage(volts: Double) {}
+    fun setVoltage(volts: Double) {}
 
-  /** Set module speed to zero but keep module angle the same. */
-  fun stop() {}
+    /** Set module speed to zero but keep module angle the same. */
+    fun stop() {}
 
-  fun update() {}
+    fun update() {}
 }

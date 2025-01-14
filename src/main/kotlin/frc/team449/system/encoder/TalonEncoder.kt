@@ -22,7 +22,8 @@ package frc.team449.system.encoder
 //      encoderCPR: Int,
 //      unitPerRotation: Double,
 //      gearing: Double
-//    ): EncoderCreator<T> where T : MotorController, T : BaseTalon = EncoderCreator { name, motor, _ ->
+//    ): EncoderCreator<T> where T : MotorController, T : BaseTalon = EncoderCreator { name, motor,
+// _ ->
 //      TalonEncoder(name, motor, encoderCPR, unitPerRotation, gearing)
 //    }
 //  }

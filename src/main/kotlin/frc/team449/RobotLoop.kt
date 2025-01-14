@@ -1,6 +1,8 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import edu.wpi.first.epilogue.Epilogue
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.*
@@ -16,148 +18,145 @@ import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorConstants
 import frc.team449.subsystems.vision.VisionConstants
-import monologue.Annotations.Log
-import monologue.Logged
-import monologue.Monologue
-import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrNull
 
-/** The main class of the robot, constructs all the subsystems
- * and initializes default commands . */
-class RobotLoop : TimedRobot(), Logged {
+/** The main class of the robot, constructs all the subsystems and initializes default commands . */
+@Logged
+class RobotLoop : TimedRobot() {
 
-  @Log.NT
-  private val robot = Robot()
+    private val robot = Robot()
 
-  private val routineChooser: RoutineChooser = RoutineChooser(robot)
+    private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
-  @Log.NT
-  private val field = robot.field
-  private var autoCommand: Command? = null
-  private var routineMap = hashMapOf<String, Command>()
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
+    private val field = robot.field
+    private var autoCommand: Command? = null
+    private var routineMap = hashMapOf<String, Command>()
+    private val controllerBinder =
+        ControllerBindings(robot.driveController, robot.mechController, robot)
 
-  override fun robotInit() {
-    // Yes this should be a print statement, it's useful to know that robotInit started.
-    println("Started robotInit.")
+    override fun robotInit() {
+        // Yes this should be a print statement, it's useful to know that robotInit started.
+        println("Started robotInit.")
 
-    SignalLogger.setPath("/media/sda1/ctre-logs/")
-    SignalLogger.start()
+        SignalLogger.setPath("/media/sda1/ctre-logs/")
+        SignalLogger.start()
 
-    HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
+        HAL.report(
+            FRCNetComm.tResourceType.kResourceType_Language,
+            FRCNetComm.tInstances.kLanguage_Kotlin,
+        )
 
-    if (RobotBase.isSimulation()) {
-      // Don't complain about joysticks if there aren't going to be any
-      DriverStation.silenceJoystickConnectionWarning(true)
-//      val instance = NetworkTableInstance.getDefault()
-//      instance.stopServer()
-//      instance.startClient4("localhost")
+        if (RobotBase.isSimulation()) {
+            // Don't complain about joysticks if there aren't going to be any
+            DriverStation.silenceJoystickConnectionWarning(true)
+            //      val instance = NetworkTableInstance.getDefault()
+            //      instance.stopServer()
+            //      instance.startClient4("localhost")
+        }
+
+        println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
+        routineMap = routineChooser.routineMap()
+        println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
+
+        routineChooser.createOptions()
+
+        SmartDashboard.putData("Routine Chooser", routineChooser)
+        SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance())
+
+        robot.light.defaultCommand = BlairChasing(robot.light)
+
+        controllerBinder.bindButtons()
+
+        Epilogue.bind(this)
+        DriverStation.startDataLog(DataLogManager.getLog())
     }
 
-    println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
-    routineMap = routineChooser.routineMap()
-    println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
+    override fun driverStationConnected() {}
 
-    routineChooser.createOptions()
+    override fun robotPeriodic() {
+        CommandScheduler.getInstance().run()
 
-    SmartDashboard.putData("Routine Chooser", routineChooser)
-    SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance())
+        // Robot Drive Logging
+        robot.field.robotPose = robot.poseSubsystem.pose
+        robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
-    robot.light.defaultCommand = BlairChasing(robot.light)
+        // Superstructure Simulation
+        if (RobotBase.isReal()) {
+            robot.elevator.elevatorLigament.length =
+                ElevatorConstants.MIN_HEIGHT + robot.elevator.positionSupplier.get()
+            robot.elevator.desiredElevatorLigament.length =
+                ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
 
-    controllerBinder.bindButtons()
+            robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get()
+            robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get()
+        } else if (RobotBase.isSimulation()) {
+            robot.elevator.elevatorLigament.length =
+                ElevatorConstants.MIN_HEIGHT + robot.elevator.simPositionSupplier.get()
+            robot.elevator.desiredElevatorLigament.length =
+                ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
 
-    DriverStation.startDataLog(DataLogManager.getLog())
-    Monologue.setupMonologue(this, "/Monologuing", false, false)
+            robot.elevator.elevatorSim.changeAngle(robot.pivot.simPositionSupplier.get())
+            robot.pivot.pivotSim.changeArmLength(robot.elevator.simPositionSupplier.get())
+        }
 
-    URCL.start()
-  }
-
-  override fun driverStationConnected() {
-    Monologue.setFileOnly(DriverStation.isFMSAttached())
-  }
-
-  override fun robotPeriodic() {
-    CommandScheduler.getInstance().run()
-
-    // Robot Drive Logging
-    robot.field.robotPose = robot.poseSubsystem.pose
-    robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
-
-    // Superstructure Simulation
-    if (RobotBase.isReal()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
-
-      robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get()
-    } else if (RobotBase.isSimulation()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.simPositionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
-
-      robot.elevator.elevatorSim.changeAngle(robot.pivot.simPositionSupplier.get())
-      robot.pivot.pivotSim.changeArmLength(robot.elevator.simPositionSupplier.get())
+        SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
     }
 
-    SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+    override fun autonomousInit() {
+        /** Every time auto starts, we update the chosen auto command. */
+        this.autoCommand =
+            routineMap[
+                if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red)
+                    "Red" + routineChooser.selected
+                else "Blue" + routineChooser.selected]
+        CommandScheduler.getInstance().schedule(this.autoCommand)
 
-    // Monologue Logging
-    Monologue.updateAll()
-  }
-
-  override fun autonomousInit() {
-    /** Every time auto starts, we update the chosen auto command. */
-    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
-    CommandScheduler.getInstance().schedule(this.autoCommand)
-
-    if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
-      BreatheHue(robot.light, 0).schedule()
-    } else {
-      BreatheHue(robot.light, 95).schedule()
-    }
-  }
-
-  override fun autonomousPeriodic() {}
-
-  override fun teleopInit() {
-    if (autoCommand != null) {
-      CommandScheduler.getInstance().cancel(autoCommand)
+        if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
+            BreatheHue(robot.light, 0).schedule()
+        } else {
+            BreatheHue(robot.light, 95).schedule()
+        }
     }
 
-    (robot.light.currentCommand ?: InstantCommand()).cancel()
+    override fun autonomousPeriodic() {}
 
-    robot.drive.defaultCommand = robot.driveCommand
-  }
+    override fun teleopInit() {
+        if (autoCommand != null) {
+            CommandScheduler.getInstance().cancel(autoCommand)
+        }
 
-  override fun teleopPeriodic() {
-  }
+        (robot.light.currentCommand ?: InstantCommand()).cancel()
 
-  override fun disabledInit() {
-    robot.drive.stop()
-
-    (robot.light.currentCommand ?: InstantCommand()).cancel()
-    Rainbow(robot.light).schedule()
-  }
-
-  override fun disabledPeriodic() {}
-
-  override fun testInit() {
-    if (autoCommand != null) {
-      CommandScheduler.getInstance().cancel(autoCommand)
-    }
-  }
-
-  override fun testPeriodic() {}
-
-  override fun simulationInit() {}
-
-  override fun simulationPeriodic() {
-    robot.drive as SwerveSim
-
-    VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
+        robot.drive.defaultCommand = robot.driveCommand
     }
 
-    VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
-  }
+    override fun teleopPeriodic() {}
+
+    override fun disabledInit() {
+        robot.drive.stop()
+
+        (robot.light.currentCommand ?: InstantCommand()).cancel()
+        Rainbow(robot.light).schedule()
+    }
+
+    override fun disabledPeriodic() {}
+
+    override fun testInit() {
+        if (autoCommand != null) {
+            CommandScheduler.getInstance().cancel(autoCommand)
+        }
+    }
+
+    override fun testPeriodic() {}
+
+    override fun simulationInit() {}
+
+    override fun simulationPeriodic() {
+        robot.drive as SwerveSim
+
+        VisionConstants.ESTIMATORS.forEach { it.simulationPeriodic(robot.drive.odometryPose) }
+
+        VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose =
+            robot.poseSubsystem.pose
+    }
 }

@@ -7,19 +7,13 @@ import frc.team449.auto.choreo.ChoreoRoutine
 import frc.team449.auto.choreo.ChoreoRoutineStructure
 import frc.team449.auto.choreo.ChoreoTrajectory
 
-class DoNothing(
-  private val robot: Robot
-) : ChoreoRoutineStructure {
+class DoNothing(private val robot: Robot) : ChoreoRoutineStructure {
 
-  override val routine =
-    ChoreoRoutine(
-      drive = robot.drive,
-      poseSubsystem = robot.poseSubsystem
-    )
+    override val routine = ChoreoRoutine(drive = robot.drive, poseSubsystem = robot.poseSubsystem)
 
-  override val trajectory: MutableList<ChoreoTrajectory> = mutableListOf()
+    override val trajectory: MutableList<ChoreoTrajectory> = mutableListOf()
 
-  override fun createCommand(): Command {
-    return InstantCommand()
-  }
+    override fun createCommand(): Command {
+        return InstantCommand()
+    }
 }

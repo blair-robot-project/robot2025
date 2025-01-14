@@ -23,99 +23,97 @@ import kotlin.math.hypot
  * @param tolerance The allowed tolerance from the targetPose
  */
 class ProfiledPoseAlign(
-  private val drive: SwerveDrive,
-  private val poseSubsystem: PoseSubsystem,
-  private val targetPose: Pose2d,
-  private val xSpeed: Double,
-  private val ySpeed: Double,
-  private val xPID: PIDController = PIDController(
-    AutoConstants.DEFAULT_X_KP,
-    0.0,
-    0.0
-  ),
-  private val yPID: PIDController = PIDController(
-    AutoConstants.DEFAULT_Y_KP,
-    0.0,
-    0.0
-  ),
-  private val headingPID: PIDController = PIDController(
-    AutoConstants.DEFAULT_ROTATION_KP,
-    0.0,
-    0.0
-  ),
-  private val xProfile: TrapezoidProfile = TrapezoidProfile(TrapezoidProfile.Constraints(RobotConstants.MAX_LINEAR_SPEED - 1.25, 2.25)),
-  private val yProfile: TrapezoidProfile = TrapezoidProfile(TrapezoidProfile.Constraints(RobotConstants.MAX_LINEAR_SPEED - 1.25, 2.25)),
-  private val tolerance: Pose2d = Pose2d(0.05, 0.05, Rotation2d(0.05)),
-  private val speedTol: Double = 0.05,
-  private val speedTolRot: Double = 0.05
+    private val drive: SwerveDrive,
+    private val poseSubsystem: PoseSubsystem,
+    private val targetPose: Pose2d,
+    private val xSpeed: Double,
+    private val ySpeed: Double,
+    private val xPID: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
+    private val yPID: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
+    private val headingPID: PIDController =
+        PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
+    private val xProfile: TrapezoidProfile =
+        TrapezoidProfile(
+            TrapezoidProfile.Constraints(RobotConstants.MAX_LINEAR_SPEED - 1.25, 2.25)
+        ),
+    private val yProfile: TrapezoidProfile =
+        TrapezoidProfile(
+            TrapezoidProfile.Constraints(RobotConstants.MAX_LINEAR_SPEED - 1.25, 2.25)
+        ),
+    private val tolerance: Pose2d = Pose2d(0.05, 0.05, Rotation2d(0.05)),
+    private val speedTol: Double = 0.05,
+    private val speedTolRot: Double = 0.05,
 ) : Command() {
-  init {
-    addRequirements(drive)
-  }
+    init {
+        addRequirements(drive)
+    }
 
-  val timer = Timer()
+    val timer = Timer()
 
-  override fun initialize() {
-    headingPID.enableContinuousInput(-PI, PI)
+    override fun initialize() {
+        headingPID.enableContinuousInput(-PI, PI)
 
-    // Set tolerances from the given pose tolerance
-    xPID.setTolerance(tolerance.x)
-    yPID.setTolerance(tolerance.y)
-    headingPID.setTolerance(tolerance.rotation.radians)
+        // Set tolerances from the given pose tolerance
+        xPID.setTolerance(tolerance.x)
+        yPID.setTolerance(tolerance.y)
+        headingPID.setTolerance(tolerance.rotation.radians)
 
-    headingPID.setpoint = targetPose.rotation.radians
+        headingPID.setpoint = targetPose.rotation.radians
 
-    timer.restart()
-  }
+        timer.restart()
+    }
 
-  fun getTime(): Double {
-    return maxOf(xProfile.totalTime(), yProfile.totalTime(), 0.5)
-  }
+    fun getTime(): Double {
+        return maxOf(xProfile.totalTime(), yProfile.totalTime(), 0.5)
+    }
 
-  override fun execute() {
-    val currTime = timer.get()
+    override fun execute() {
+        val currTime = timer.get()
 
-    // Calculate the feedback for X, Y, and theta using their respective controllers
+        // Calculate the feedback for X, Y, and theta using their respective controllers
 
-    val xProfCalc = xProfile.calculate(
-      currTime,
-      TrapezoidProfile.State(targetPose.x, 0.0),
-      TrapezoidProfile.State(poseSubsystem.pose.x, xSpeed)
-    )
+        val xProfCalc =
+            xProfile.calculate(
+                currTime,
+                TrapezoidProfile.State(targetPose.x, 0.0),
+                TrapezoidProfile.State(poseSubsystem.pose.x, xSpeed),
+            )
 
-    val yProfCalc = yProfile.calculate(
-      currTime,
-      TrapezoidProfile.State(targetPose.y, 0.0),
-      TrapezoidProfile.State(poseSubsystem.pose.y, ySpeed)
-    )
+        val yProfCalc =
+            yProfile.calculate(
+                currTime,
+                TrapezoidProfile.State(targetPose.y, 0.0),
+                TrapezoidProfile.State(poseSubsystem.pose.y, ySpeed),
+            )
 
-    val xFeedback = xPID.calculate(poseSubsystem.pose.x, xProfCalc.position)
-    val yFeedback = yPID.calculate(poseSubsystem.pose.y, yProfCalc.position)
-    val headingFeedback = headingPID.calculate(poseSubsystem.heading.radians)
+        val xFeedback = xPID.calculate(poseSubsystem.pose.x, xProfCalc.position)
+        val yFeedback = yPID.calculate(poseSubsystem.pose.y, yProfCalc.position)
+        val headingFeedback = headingPID.calculate(poseSubsystem.heading.radians)
 
-    drive.set(
-      ChassisSpeeds.fromFieldRelativeSpeeds(
-        xFeedback + xProfCalc.velocity,
-        yFeedback + yProfCalc.velocity,
-        headingFeedback,
-        poseSubsystem.heading
-      )
-    )
-  }
+        drive.set(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                xFeedback + xProfCalc.velocity,
+                yFeedback + yProfCalc.velocity,
+                headingFeedback,
+                poseSubsystem.heading,
+            )
+        )
+    }
 
-  override fun isFinished(): Boolean {
-    val currTime = timer.get()
+    override fun isFinished(): Boolean {
+        val currTime = timer.get()
 
-    return xPID.atSetpoint() && yPID.atSetpoint() && headingPID.atSetpoint() &&
-      xProfile.isFinished(currTime) && yProfile.isFinished(currTime) &&
-      hypot(
-        drive.currentSpeeds.vxMetersPerSecond,
-        drive.currentSpeeds.vyMetersPerSecond
-      ) < speedTol &&
-      drive.currentSpeeds.omegaRadiansPerSecond < speedTolRot
-  }
+        return xPID.atSetpoint() &&
+            yPID.atSetpoint() &&
+            headingPID.atSetpoint() &&
+            xProfile.isFinished(currTime) &&
+            yProfile.isFinished(currTime) &&
+            hypot(drive.currentSpeeds.vxMetersPerSecond, drive.currentSpeeds.vyMetersPerSecond) <
+                speedTol &&
+            drive.currentSpeeds.omegaRadiansPerSecond < speedTolRot
+    }
 
-  override fun end(interrupted: Boolean) {
-    drive.stop()
-  }
+    override fun end(interrupted: Boolean) {
+        drive.stop()
+    }
 }

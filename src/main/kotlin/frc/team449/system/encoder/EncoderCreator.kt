@@ -8,5 +8,5 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController
  * @param <M> The type of the motor controller
  */
 fun interface EncoderCreator<M : MotorController> {
-  fun create(encName: String, motor: M, inverted: Boolean): Encoder
+    fun create(encName: String, motor: M, inverted: Boolean): Encoder
 }

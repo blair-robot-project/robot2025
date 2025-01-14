@@ -11,68 +11,72 @@ import frc.team449.system.AHRS
 import frc.team449.system.encoder.Encoder
 
 class DifferentialSim(
-  private val driveSim: DifferentialDrivetrainSim,
-  leftLeader: SparkMax,
-  rightLeader: SparkMax,
-  leftEncoder: Encoder,
-  rightEncoder: Encoder,
-  ahrs: AHRS,
-  private val feedForward: DifferentialDriveFeedforward,
-  makeVelPID: () -> PIDController,
-  trackwidth: Double
-) : DifferentialDrive(leftLeader, rightLeader, leftEncoder, rightEncoder, ahrs, feedForward, makeVelPID, trackwidth) {
+    private val driveSim: DifferentialDrivetrainSim,
+    leftLeader: SparkMax,
+    rightLeader: SparkMax,
+    leftEncoder: Encoder,
+    rightEncoder: Encoder,
+    ahrs: AHRS,
+    private val feedForward: DifferentialDriveFeedforward,
+    makeVelPID: () -> PIDController,
+    trackwidth: Double,
+) :
+    DifferentialDrive(
+        leftLeader,
+        rightLeader,
+        leftEncoder,
+        rightEncoder,
+        ahrs,
+        feedForward,
+        makeVelPID,
+        trackwidth,
+    ) {
 
-  private val leftEncSim = Encoder.SimController(leftEncoder)
-  private val rightEncSim = Encoder.SimController(rightEncoder)
+    private val leftEncSim = Encoder.SimController(leftEncoder)
+    private val rightEncSim = Encoder.SimController(rightEncoder)
 
-  private var offset: Rotation2d = Rotation2d()
-  private var lastTime = Timer.getFPGATimestamp()
+    private var offset: Rotation2d = Rotation2d()
+    private var lastTime = Timer.getFPGATimestamp()
 
-  override fun periodic() {
-    val currTime = Timer.getFPGATimestamp()
+    override fun periodic() {
+        val currTime = Timer.getFPGATimestamp()
 
-    val dt = currTime - lastTime
+        val dt = currTime - lastTime
 
-    val leftVel = desiredWheelSpeeds.leftMetersPerSecond
-    val rightVel = desiredWheelSpeeds.rightMetersPerSecond
+        val leftVel = desiredWheelSpeeds.leftMetersPerSecond
+        val rightVel = desiredWheelSpeeds.rightMetersPerSecond
 
-    leftPID.setpoint = leftVel
-    rightPID.setpoint = rightVel
+        leftPID.setpoint = leftVel
+        rightPID.setpoint = rightVel
 
-    /** Calculates the individual side voltages using a [DifferentialDriveFeedforward]. */
-    val sideVoltages = feedForward.calculate(
-      prevLeftVel,
-      leftVel,
-      prevRightVel,
-      rightVel,
-      0.02
-    )
+        /** Calculates the individual side voltages using a [DifferentialDriveFeedforward]. */
+        val sideVoltages = feedForward.calculate(prevLeftVel, leftVel, prevRightVel, rightVel, 0.02)
 
-    val leftVoltage = sideVoltages.left + leftPID.calculate(prevLeftVel)
+        val leftVoltage = sideVoltages.left + leftPID.calculate(prevLeftVel)
 
-    val rightVoltage = sideVoltages.right + rightPID.calculate(prevRightVel)
+        val rightVoltage = sideVoltages.right + rightPID.calculate(prevRightVel)
 
-    leftEncSim.velocity = driveSim.leftVelocityMetersPerSecond
-    rightEncSim.velocity = driveSim.rightVelocityMetersPerSecond
-    leftEncSim.position = driveSim.leftPositionMeters
-    rightEncSim.position = driveSim.rightPositionMeters
+        leftEncSim.velocity = driveSim.leftVelocityMetersPerSecond
+        rightEncSim.velocity = driveSim.rightVelocityMetersPerSecond
+        leftEncSim.position = driveSim.leftPositionMeters
+        rightEncSim.position = driveSim.rightPositionMeters
 
-    driveSim.setInputs(leftVoltage, rightVoltage)
+        driveSim.setInputs(leftVoltage, rightVoltage)
 
-    driveSim.update(dt)
-    this.poseEstimator.update(heading, this.leftEncSim.position, this.rightEncSim.position)
-    this.lastTime = currTime
-  }
-
-  override var pose: Pose2d
-    get() = driveSim.pose
-    set(value) {
-      driveSim.pose = value
+        driveSim.update(dt)
+        this.poseEstimator.update(heading, this.leftEncSim.position, this.rightEncSim.position)
+        this.lastTime = currTime
     }
 
-  override var heading: Rotation2d
-    get() = driveSim.heading.rotateBy(offset)
-    set(value) {
-      offset = value - driveSim.heading
-    }
+    override var pose: Pose2d
+        get() = driveSim.pose
+        set(value) {
+            driveSim.pose = value
+        }
+
+    override var heading: Rotation2d
+        get() = driveSim.heading.rotateBy(offset)
+        set(value) {
+            offset = value - driveSim.heading
+        }
 }

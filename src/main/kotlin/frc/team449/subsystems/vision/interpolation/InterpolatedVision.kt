@@ -9,17 +9,20 @@ import frc.team449.subsystems.vision.VisionConstants
 import kotlin.jvm.optionals.getOrNull
 
 object InterpolatedVision {
-  private val usedSet: List<InterpolatedVisionDataset> = VisionConstants.interpolatedVisionSets
+    private val usedSet: List<InterpolatedVisionDataset> = VisionConstants.interpolatedVisionSets
 
-  /**
-   * @param visionInput - pose from the limelight
-   * @return a transformed pose that can be added to the pose estimator
-   */
-  fun interpolatePose(visionInput: Pose2d, camIndex: Int): Pose2d {
-    val usedDataPoints = if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) usedSet[camIndex].redSet else usedSet[camIndex].blueSet
-    return Pose2d(
-      InterpolationUtil.interpolateTranslation(usedDataPoints, visionInput.translation),
-      visionInput.rotation
-    )
-  }
+    /**
+     * @param visionInput - pose from the limelight
+     * @return a transformed pose that can be added to the pose estimator
+     */
+    fun interpolatePose(visionInput: Pose2d, camIndex: Int): Pose2d {
+        val usedDataPoints =
+            if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red)
+                usedSet[camIndex].redSet
+            else usedSet[camIndex].blueSet
+        return Pose2d(
+            InterpolationUtil.interpolateTranslation(usedDataPoints, visionInput.translation),
+            visionInput.rotation,
+        )
+    }
 }

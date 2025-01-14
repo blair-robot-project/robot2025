@@ -8,13 +8,13 @@ import frc.team449.subsystems.vision.PoseSubsystem
 
 abstract class RobotBase {
 
-  val field = Field2d()
+    val field = Field2d()
 
-  abstract val powerDistribution: PowerDistribution
+    abstract val powerDistribution: PowerDistribution
 
-  abstract val drive: SwerveDrive
+    abstract val drive: SwerveDrive
 
-  abstract val poseSubsystem: PoseSubsystem
+    abstract val poseSubsystem: PoseSubsystem
 
-  abstract val driveCommand: Command
+    abstract val driveCommand: Command
 }
