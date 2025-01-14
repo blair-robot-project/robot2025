@@ -8,11 +8,7 @@ body {
     gap: 50px;
     justify-content: center;
     margin-top: 50px;
-    height: 600px;
-}
-
-.reefContainer {
-    height: 600px;
+    height: 500px;
 }
 
 .levelContainer, .locationContainer {
@@ -34,12 +30,12 @@ body {
     margin-top: 60px;
 }
 
-.Button {
+.Button, .Level {
     background-color: red;
-    width: 300px;
+    width: 250px;
     height: 100px;
     color: white;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
     border-radius: 50px;
     font-family: 'Orbitron';
@@ -48,6 +44,9 @@ body {
     justify-content: center;
     text-align: center;
     padding: 0 10px;
+}
+.Level {
+    width: 150px;
 }
 
 #confirmText {
@@ -85,6 +84,11 @@ h1 {
     justify-self: center;
 }
 
-#areaSelectionText {
+#areaSelectionText, #locationSelect {
     justify-self: center;
+}
+
+#areaSelectionText {
+    width: 315px;
+    text-align: center;
 }

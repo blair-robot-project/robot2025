@@ -115,6 +115,6 @@ locationImg.onclick = () => {
     if(!areaSelected) {
         confirmReefButton.innerText = `Choose Robot Alignment`;
         areaText.innerText = `Reef Area: None`;
-        areaSelectionText.innerText = "Hover to the area you want to go to.";
+        areaSelectionText.innerText = "Click the area you want to go to.";
     }
 }

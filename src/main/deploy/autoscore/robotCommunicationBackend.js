@@ -2,14 +2,14 @@
 // using `window.location.hostname` causes the client to open a 
 // NT connection on the same machine as is serving the website.
 // It could be hardcoded to point at a roboRIO if needed.
-var nt4Client = new NT4_Client(
-    window.location.hostname, 
-    topicAnnounceHandler,
-    topicUnannounceHandler,
-    valueUpdateHandler,
-    onConnect,
-    onDisconnect
-);
+// var nt4Client = new NT4_Client(
+//     window.location.hostname, 
+//     topicAnnounceHandler,
+//     topicUnannounceHandler,
+//     valueUpdateHandler,
+//     onConnect,
+//     onDisconnect
+// );
 //nt4client IMPORTANT methods
 /*
 subscribeTopicNames : list of topics name to subscribe to 
@@ -80,14 +80,13 @@ function onConnect() {
  * The NT4_Client will call this after every time it disconnects to an NT4 server.
  */
 function onDisconnect() {
-    changeMenu(menuChoices.SCREEN, "NO ROBOT CONNECTION");
-    //For this example, we simply mark the status as disconnected.
-    console.log("robot disconnected")
+    // //For this example, we simply mark the status as disconnected.
+    // console.log("robot disconnected")
 
-    //throwing an error to stop the reconnect cycle because we have nothing planned currently
-    throw new Error("Robot disconnected");
-    //Since we've disconnected from the server, the connection is no longer valid.
-    subscription = null;
+    // //throwing an error to stop the reconnect cycle because we have nothing planned currently
+    // throw new Error("Robot disconnected");
+    // //Since we've disconnected from the server, the connection is no longer valid.
+    // subscription = null;
 }
 
 const getAlliance = () => {
@@ -98,4 +97,5 @@ const getAlliance = () => {
         document.body.style.background = "radial-gradient(circle at 50% 50%, cornflowerblue, rgb(114, 114, 138))";
     }
 }
+changeMenu(menuChoices.CHOICE);
   
