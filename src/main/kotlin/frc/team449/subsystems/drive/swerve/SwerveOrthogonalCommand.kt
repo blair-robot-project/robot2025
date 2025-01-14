@@ -131,7 +131,7 @@ class SwerveOrthogonalCommand(
       dx = xScaled - prevX
       dy = yScaled - prevY
       magAcc = hypot(dx / dt, dy / dt)
-      magAccClamped = MathUtil.clamp(magAcc, -RobotConstants.MAX_ACCEL, RobotConstants.MAX_ACCEL)
+      magAccClamped = MathUtil.clamp(magAcc, -drive.accel, drive.accel)
 
       val factor = if (magAcc == 0.0) 0.0 else magAccClamped / magAcc
       val dxClamped = dx * factor
@@ -150,10 +150,6 @@ class SwerveOrthogonalCommand(
 //    } else if (controller.aButtonPressed) {
 //      snapToAngle(0.0)
 //    }
-//
-//    if (controller.aButtonPressed) {
-//      orthogonalAngle(0.0)
-//    }
 
     rotScaled = if (!headingLock) {
       rotRamp.calculate(
@@ -167,6 +163,8 @@ class SwerveOrthogonalCommand(
         ) * -sign(controller.rightX) * drive.maxRotSpeed
       )
     } else {
+      if (checkSnapToAngleTolerance()) headingLock = false
+
       MathUtil.clamp(
         rotCtrl.calculate(poseEstimator.heading.radians),
         -RobotConstants.ALIGN_ROT_SPEED,

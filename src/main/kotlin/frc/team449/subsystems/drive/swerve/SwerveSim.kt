@@ -10,10 +10,11 @@ import kotlin.math.hypot
 class SwerveSim(
   modules: List<SwerveModule>,
   maxLinearSpeed: Double,
+  accel: Double,
   maxRotSpeed: Double,
   field: Field2d,
   maxModuleSpeed: Double
-) : SwerveDrive(modules, maxLinearSpeed, maxRotSpeed, field, maxModuleSpeed) {
+) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed) {
 
   private var lastTime = getFPGATimestamp()
   var currHeading = Rotation2d()
