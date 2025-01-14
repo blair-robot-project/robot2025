@@ -16,17 +16,22 @@ import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorConstants
 import frc.team449.subsystems.vision.VisionConstants
+import monologue.Annotations.Log
+import monologue.Logged
+import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrNull
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
-class RobotLoop : TimedRobot() {
+class RobotLoop : TimedRobot(), Logged {
 
+  @Log.NT
   private val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
+  @Log.NT
   private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
@@ -63,11 +68,13 @@ class RobotLoop : TimedRobot() {
     controllerBinder.bindButtons()
 
     DriverStation.startDataLog(DataLogManager.getLog())
+    Monologue.setupMonologue(this, "/Monologuing", false, false)
 
     URCL.start()
   }
 
   override fun driverStationConnected() {
+    Monologue.setFileOnly(DriverStation.isFMSAttached())
   }
 
   override fun robotPeriodic() {
@@ -93,6 +100,9 @@ class RobotLoop : TimedRobot() {
     }
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+
+    // Monologue Logging
+    Monologue.updateAll()
   }
 
   override fun autonomousInit() {

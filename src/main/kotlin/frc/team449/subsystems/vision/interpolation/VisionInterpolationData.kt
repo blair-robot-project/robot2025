@@ -5,4 +5,5 @@ package frc.team449.subsystems.vision.interpolation
 
 import edu.wpi.first.math.geometry.Translation2d
 
+@JvmRecord
 data class VisionInterpolationData(val measuredPose: Translation2d, val visionPose: Translation2d, val label: String)
