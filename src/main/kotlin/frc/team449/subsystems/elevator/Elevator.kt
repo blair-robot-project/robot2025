@@ -7,7 +7,6 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.util.sendable.SendableBuilder
-import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
@@ -15,7 +14,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
-import frc.team449.subsystems.SuperstructureConstants
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.wrist.WristConstants
 import frc.team449.system.motor.createKraken
