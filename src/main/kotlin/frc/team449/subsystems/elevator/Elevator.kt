@@ -2,9 +2,11 @@ package frc.team449.subsystems.elevator
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.sim.TalonFXSimState
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.util.sendable.SendableBuilder
+import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
@@ -26,6 +28,8 @@ open class Elevator(
   open val positionSupplier = Supplier { motor.position.valueAsDouble }
   open val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
   open val targetSupplier = Supplier { request.Position }
+
+  lateinit var elevatorFeedForward: ElevatorFeedForward
 
   val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
     DCMotor.getKrakenX60(1),
@@ -79,8 +83,11 @@ open class Elevator(
   private fun setPosition(position: Double): Command {
     return this.runOnce {
       motor.setControl(
-        request.withPosition(position)
-          .withFeedForward(0.0)
+        request
+          .withPosition(position)
+          .withFeedForward(
+            elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
+          )
       )
     }
   }
@@ -128,8 +135,19 @@ open class Elevator(
   override fun periodic() {}
 
   override fun simulationPeriodic() {
-    elevatorSim.setInputVoltage(MathUtil.clamp(motor.motorVoltage.valueAsDouble, -12.0, 12.0))
+    val motorSim: TalonFXSimState = motor.simState
+
+    motorSim.setSupplyVoltage(RobotController.getBatteryVoltage())
+    val motorSimVoltage = motorSim.motorVoltage
+
+    elevatorSim.setInputVoltage(MathUtil.clamp(motorSimVoltage, -12.0, 12.0))
+    println("${request.Position}  -  ${elevatorSim.positionMeters}")
     elevatorSim.update(RobotConstants.LOOP_TIME)
+
+    motorSim.setRawRotorPosition(elevatorSim.positionMeters / ElevatorConstants.UPR)
+    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond / ElevatorConstants.UPR)
+
+
   }
 
   override fun initSendable(builder: SendableBuilder) {
@@ -144,7 +162,18 @@ open class Elevator(
 
   companion object {
     fun createElevator(): Elevator {
-      val elevatorMotor: TalonFX = createKraken(ElevatorConstants.MOTOR_ID, false)
+      // TODO(Fill in parameters.)
+      val elevatorMotor: TalonFX = createKraken(
+        id = ElevatorConstants.MOTOR_ID,
+        inverted = false,
+        sensorToMech = 1 / (ElevatorConstants.GEARING * ElevatorConstants.UPR),
+        kP = ElevatorConstants.KP,
+        kI = ElevatorConstants.KI,
+        kD = ElevatorConstants.KD,
+        cruiseVel = 1.0,
+        maxAccel = 1.0,
+      )
+
       return Elevator(elevatorMotor)
     }
   }

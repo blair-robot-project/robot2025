@@ -15,6 +15,8 @@ import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorConstants
+import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import monologue.Annotations.Log
 import monologue.Logged
@@ -54,6 +56,9 @@ class RobotLoop : TimedRobot(), Logged {
 //      instance.startClient4("localhost")
     }
 
+    robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
+    robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
+
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
     routineMap = routineChooser.routineMap()
     println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
@@ -86,14 +91,14 @@ class RobotLoop : TimedRobot(), Logged {
 
     // Superstructure Simulation
     if (RobotBase.isReal()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
+      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
+      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
       robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get()
       robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get()
     } else if (RobotBase.isSimulation()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.simPositionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
+      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.simPositionSupplier.get()
+      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
       robot.elevator.elevatorSim.changeAngle(robot.pivot.simPositionSupplier.get())
       robot.pivot.pivotSim.changeArmLength(robot.elevator.simPositionSupplier.get())
