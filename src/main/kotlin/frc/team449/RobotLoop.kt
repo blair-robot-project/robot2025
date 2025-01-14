@@ -94,7 +94,7 @@ class RobotLoop : TimedRobot(), Logged {
       autoscore.moveToNetCommand(false)
         .andThen(autoscore.scoreNetCommand())
     )
-    robot.mechController.y().onTrue(
+    robot.driveController.y().onTrue(
       autoscore.moveToCoralIntakeCommand(true)
         .andThen(autoscore.intakeCoralCommand())
     )
