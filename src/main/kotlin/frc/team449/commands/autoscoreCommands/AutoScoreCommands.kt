@@ -1,21 +1,55 @@
 package frc.team449.commands.autoscoreCommands
 
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import frc.team449.auto.choreo.MagnetizePIDPoseAlign
 import frc.team449.auto.choreo.PIDPoseAlign
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
+import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.drive.swerve.SwerveConstants
+import kotlin.math.*
+
 
 class AutoScoreCommands(
   private val drive: SwerveDrive,
-  private val poseSubsystem: PoseSubsystem
-) {
+  private val poseSubsystem: PoseSubsystem,
+  private val controller: XboxController,
+  ) {
 
   init {
   }
+  private var prevX = 0.0
+  private var prevY = 0.0
+
+  private var prevTime = 0.0
+
+  private var dx = 0.0
+  private var dy = 0.0
+  private var magAcc = 0.0
+  private var dt = 0.0
+  private var magAccClamped = 0.0
+
+  private var rotScaled = 0.0
+
+  var headingLock = false
+
+  private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
+
+  private val timer = Timer()
+
+  private val rotCtrl = PIDController(
+    RobotConstants.SNAP_KP,
+    RobotConstants.SNAP_KI,
+    RobotConstants.SNAP_KD
+  )
 
   /**
    * This command moves the robot to one of the twelve reef locations
@@ -28,8 +62,8 @@ class AutoScoreCommands(
   ): Command {
     var reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
-    var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
-
+    //var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
+    var reefPose = AutoScoreCommandConstants.reef1PoseRed
     // choose desired pose from the number and the alliance
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
       when (reefNumericalLocation) {
@@ -46,7 +80,8 @@ class AutoScoreCommands(
         11 -> reefPose = AutoScoreCommandConstants.reef11PoseBlue
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseBlue
       }
-    } else /* red alliance */ {
+    }
+    else /* red alliance */ {
       when (reefNumericalLocation) {
         1 -> reefPose = AutoScoreCommandConstants.reef1PoseRed
         2 -> reefPose = AutoScoreCommandConstants.reef2PoseRed
@@ -63,7 +98,7 @@ class AutoScoreCommands(
       }
     }
 
-    return PIDPoseAlign(drive, poseSubsystem, reefPose)
+    return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
   }
 
   /**
@@ -71,9 +106,15 @@ class AutoScoreCommands(
    * swerve drive.
    */
   fun moveToProcessorCommand(): Command {
-    var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
+    //val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
+    //var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseBlue)
+    var returnCommand = MagnetizePIDPoseAlign(drive,
+      poseSubsystem,
+      AutoScoreCommandConstants.processorPoseBlue,
+      controller
+    )
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed)
+      returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed, controller)
     }
     return returnCommand
   }
@@ -85,14 +126,14 @@ class AutoScoreCommands(
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
   fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
-    var returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueTop)
+    var returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueTop, controller)
     if (!isAtTopSource) {
-      returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueBottom)
+      returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueBottom, controller)
     }
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedTop)
+      returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedTop, controller)
       if (!isAtTopSource) {
-        returnCommand = PIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedBottom)
+        returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedBottom, controller)
       }
     }
     return returnCommand
@@ -112,7 +153,7 @@ class AutoScoreCommands(
     if (onRedAllianceSide) {
       netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     }
-    return PIDPoseAlign(drive, poseSubsystem, netPose)
+    return MagnetizePIDPoseAlign(drive, poseSubsystem, netPose, controller)
   }
 
   /**
