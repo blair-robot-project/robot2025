@@ -15,6 +15,15 @@ let reefArea = -1;
 let coralSelected = false;
 let areaSelected = false;
 
+const menuChoices = {
+    PROCESSOR: "processor",
+    REEF: "reef",
+    SCREEN: "screen",
+    CHOICE: "choice",
+    NET: "net",
+    CORAL_INTAKE: "coral intake"
+}
+
 const changeMenu = (menuVal, screenmsg) => {
     menu = menuVal;
     reefContainer.style.display = "none";
@@ -32,7 +41,7 @@ const changeMenu = (menuVal, screenmsg) => {
         locationContainer.style.display = "";
         confirmReefContainer.style.display = "";
         confirmReefButton.innerText = "Choose Robot Alignment";
-    } else if (menu == "screen change") {
+    } else if (menu == "screen") {
         screenChangeContainer.style.display = "";
         document.getElementById("msgDisplayer").innerText = screenmsg;
     } else if (menu == "choice") {
@@ -43,8 +52,6 @@ const changeMenu = (menuVal, screenmsg) => {
         coralIntakeContainer.style.display = "";
     }
 }
-
-changeMenu("choice");
 
 const reefChoice = document.getElementById("reefChoice");
 const processorChoice = document.getElementById("processorChoice");
@@ -90,3 +97,5 @@ confirmReefButton.onclick = async () => {
         resetReefStuff();
     }
 }
+
+changeMenu("none");

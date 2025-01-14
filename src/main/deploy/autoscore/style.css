@@ -1,5 +1,6 @@
 body {
     background-attachment: fixed;
+    background: rgb(114, 114, 138);
 }
 
 .reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .netContainer, .coralIntakeContainer, .choiceContainer {
@@ -69,9 +70,14 @@ h1 {
     color: white;
 }
 
-#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice {
+#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice, #msgDisplayer {
     align-self: center;
     justify-self: center;
+}
+
+#msgDisplayer {
+    color: red;
+    font-size: 48px;
 }
 
 .reefText {

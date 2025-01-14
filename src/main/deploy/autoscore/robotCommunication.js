@@ -63,14 +63,3 @@ const scoreReef = async (location, level) => {
   //communicate with network tables somehow
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
 }
-
-const getAlliance = async () => {
-  let temporaryAlliance = "Red";
-  if(temporaryAlliance == "Red") {
-      document.body.style.background = "radial-gradient(circle at 50% 50%, pink, rgb(114, 114, 138))";
-  } else if(temporaryAlliance == "Blue") {
-      document.body.style.background = "radial-gradient(circle at 50% 50%, cornflowerblue, rgb(114, 114, 138))";
-  }
-}
-
-getAlliance();

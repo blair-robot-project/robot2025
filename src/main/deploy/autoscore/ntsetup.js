@@ -1164,9 +1164,9 @@ class NT4_Client {
 
     ws_connect() {
 
-        this.clientIdx = Math.floor(Math.random() * 99999999); //Not great, but using it for now
+        this.clientIdx = 449; //Not great, but using it for now
 
-        var port = 5810; //fallback - unsecured
+        var port = 8080;
         var prefix = "ws://";
 
         this.serverAddr = prefix + this.serverBaseAddr + ":" + port.toString() + "/nt/" + "JSClient_" + this.clientIdx.toString();
