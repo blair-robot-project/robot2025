@@ -71,6 +71,7 @@ class RobotLoop : TimedRobot(), Logged {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
+
     controllerBinder.bindButtons()
 
     DriverStation.startDataLog(DataLogManager.getLog())
