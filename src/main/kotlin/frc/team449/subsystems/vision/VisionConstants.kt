@@ -2,6 +2,7 @@ package frc.team449.subsystems.vision
 
 import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
@@ -12,7 +13,6 @@ import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.Filesystem
 import frc.team449.control.vision.ApriltagCamera
 import frc.team449.subsystems.vision.interpolation.InterpolatedVisionDataset
 import org.photonvision.estimation.TargetModel
@@ -32,7 +32,7 @@ object VisionConstants {
 //  val TAG_LAYOUT: AprilTagFieldLayout = TEST_TAG_LAYOUT
 
   /** WPILib's AprilTagFieldLayout for the 2024 Crescendo Game */
-  val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout(Filesystem.getDeployDirectory().absolutePath + "/modded_layout.json")
+  val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape)
 
   /** Robot to Camera distance */
   val backLeft = Transform3d(
@@ -93,12 +93,12 @@ object VisionConstants {
 //    )
   )
 
-  val interpolatedVisionSets = listOf(
-    InterpolatedVisionDataset.HOMELEFT,
+  val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(
+//    InterpolatedVisionDataset.HOMELEFT,
 //    InterpolatedVisionDataset.HOMERIGHT
   )
 
-  val ENCODER_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .125, .125, .0125)
-  val SINGLE_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), 0.05, 0.05, 1e+9)
-  val MULTI_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .0125, .0125, 1.75)
+  val ENCODER_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .125, .125, .0075)
+  val SINGLE_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), 0.05, 0.05, 0.35)
+  val MULTI_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .0125, .0125, 0.10)
 }
