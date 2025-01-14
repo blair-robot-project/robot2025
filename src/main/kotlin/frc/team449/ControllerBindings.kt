@@ -21,6 +21,13 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
+    driveController.a().onTrue(
+      robot.elevator.L4()
+    )
+
+    driveController.b().onTrue(
+      robot.elevator.L1()
+    )
   }
 
   private fun nonRobotBindings() {

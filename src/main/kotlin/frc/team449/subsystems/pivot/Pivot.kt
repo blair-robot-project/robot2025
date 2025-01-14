@@ -20,6 +20,8 @@ class Pivot(
   val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
   val targetSupplier = Supplier { request.Position }
 
+  lateinit var pivotFeedForward: PivotFeedForward
+
   val pivotSim = LengthPivotSim(
     DCMotor.getKrakenX60(1),
     1 / PivotConstants.GEARING,
@@ -40,8 +42,9 @@ class Pivot(
   private fun setPosition(position: Double): Command {
     return this.runOnce {
       motor.setControl(
-        request.withPosition(position)
-          .withFeedForward(0.0)
+        request
+          .withPosition(position)
+          .withFeedForward(pivotFeedForward.calculateWithAngle(positionSupplier.get(), motor.closedLoopReferenceSlope.valueAsDouble, 0.0))
       )
     }
   }

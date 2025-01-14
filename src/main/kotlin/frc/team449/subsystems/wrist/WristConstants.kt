@@ -8,4 +8,8 @@ object WristConstants {
   val COLOR = Color8Bit(123, 0, 123)
 
   const val MOTOR_ID = 40 // TODO(Change motor ID.)
+
+  const val KS = 0.0
+  const val KV = 0.0
+  const val KA = 0.0
 }

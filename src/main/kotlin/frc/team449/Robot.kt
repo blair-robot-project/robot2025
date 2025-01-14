@@ -7,9 +7,13 @@ import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
 import frc.team449.subsystems.elevator.Elevator
 import frc.team449.subsystems.elevator.Elevator.Companion.createElevator
+import frc.team449.subsystems.elevator.ElevatorFeedForward
+import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.light.Light.Companion.createLight
 import frc.team449.subsystems.pivot.Pivot
 import frc.team449.subsystems.pivot.Pivot.Companion.createPivot
+import frc.team449.subsystems.pivot.PivotFeedForward
+import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
 import frc.team449.system.AHRS

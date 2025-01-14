@@ -15,4 +15,11 @@ object PivotConstants {
   const val MAX_ANGLE = 5 * PI / 9
 
   const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
+
+  // TODO(Adjust gains.)
+  const val KS = 0.0
+  const val KV = 0.0
+  const val KA = 0.0
+  const val KG_MIN = 0.0 // (KG when elevator is fully retracted.)
+  const val KG_MAX = 0.0 // TODO(KG when elevator is fully extended.)
 }

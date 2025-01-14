@@ -10,5 +10,5 @@ object SuperstructureConstants {
   val L1_POSITIONS: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
   val L2_POSITIONS: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
   val L3_POSITIONS: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-  val L4_POSITIONS: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+  val L4_POSITIONS: Triple<Double, Double, Double> = Triple(0.0, 0.5, 0.0)
 }
