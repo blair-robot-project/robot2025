@@ -25,6 +25,7 @@ import kotlin.math.hypot
 open class SwerveDrive(
   val modules: List<SwerveModule>,
   var maxLinearSpeed: Double,
+  var accel: Double,
   var maxRotSpeed: Double,
   protected val field: Field2d,
   val maxModuleSpeed: Double
@@ -219,6 +220,7 @@ open class SwerveDrive(
         SwerveDrive(
           modules,
           RobotConstants.MAX_LINEAR_SPEED,
+          RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
@@ -227,6 +229,7 @@ open class SwerveDrive(
         SwerveSim(
           modules,
           RobotConstants.MAX_LINEAR_SPEED,
+          RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
@@ -297,6 +300,7 @@ open class SwerveDrive(
         SwerveDrive(
           modules,
           RobotConstants.MAX_LINEAR_SPEED,
+          RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
@@ -305,6 +309,7 @@ open class SwerveDrive(
         SwerveSim(
           modules,
           RobotConstants.MAX_LINEAR_SPEED,
+          RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED

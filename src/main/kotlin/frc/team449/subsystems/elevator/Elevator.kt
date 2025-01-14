@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.TalonFXSimState
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.SuperstructureConstants
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.wrist.WristConstants
 import frc.team449.system.motor.createKraken
 import java.util.function.Supplier
@@ -77,11 +79,11 @@ open class Elevator(
   )
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
-    SuperstructureConstants.STOW_POSITIONS.second
+    SuperstructureGoal.STOW.elevator.`in`(Meters)
   )
 
-  private fun setPosition(position: Double): Command {
-    return this.runOnce {
+  fun setPosition(position: Double): Command {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
@@ -89,7 +91,7 @@ open class Elevator(
             elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
           )
       )
-    }
+    }.until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -100,32 +102,8 @@ open class Elevator(
     return runOnce { motor.setVoltage(3.0) }
   }
 
-  fun stow(): Command {
-    return setPosition(SuperstructureConstants.STOW_POSITIONS.second)
-  }
-
-  fun L1(): Command {
-    return setPosition(SuperstructureConstants.L1_POSITIONS.second)
-  }
-
-  fun L2(): Command {
-    return setPosition(SuperstructureConstants.L2_POSITIONS.second)
-  }
-
-  fun L3(): Command {
-    return setPosition(SuperstructureConstants.L3_POSITIONS.second)
-  }
-
-  fun L4(): Command {
-    return setPosition(SuperstructureConstants.L4_POSITIONS.second)
-  }
-
-  fun hold(): Command {
-    return setPosition(targetSupplier.get())
-  }
-
   fun stop(): Command {
-    return this.run { motor.stopMotor() }
+    return this.runOnce { motor.stopMotor() }
   }
 
   private fun atSetpoint(): Boolean {
@@ -137,17 +115,15 @@ open class Elevator(
   override fun simulationPeriodic() {
     val motorSim: TalonFXSimState = motor.simState
 
-    motorSim.setSupplyVoltage(RobotController.getBatteryVoltage())
+    motorSim.setSupplyVoltage(12.0)
     val motorSimVoltage = motorSim.motorVoltage
 
     elevatorSim.setInputVoltage(MathUtil.clamp(motorSimVoltage, -12.0, 12.0))
     println("${request.Position}  -  ${elevatorSim.positionMeters}")
     elevatorSim.update(RobotConstants.LOOP_TIME)
 
-    motorSim.setRawRotorPosition(elevatorSim.positionMeters / ElevatorConstants.UPR)
-    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond / ElevatorConstants.UPR)
-
-
+    motorSim.setRawRotorPosition(elevatorSim.positionMeters / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
+    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
   }
 
   override fun initSendable(builder: SendableBuilder) {

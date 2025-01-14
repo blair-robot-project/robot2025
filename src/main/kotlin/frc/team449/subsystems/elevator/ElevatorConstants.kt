@@ -21,7 +21,7 @@ object ElevatorConstants {
   // Simulation Constants TODO(Adjust all of these.)
   const val GEARING = 2 / 6.4
   const val PULLEY_RADIUS = 0.018415
-  const val UPR = 0.11
+  const val UPR = 2 * PI * PULLEY_RADIUS
   const val CARRIAGE_MASS = 9.45
 
   const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
@@ -32,7 +32,7 @@ object ElevatorConstants {
   const val KA = 0.0
   const val KG = 0.0
 
-  const val KP = 1.0
+  const val KP = 10.0
   const val KI = 0.0
   const val KD = 0.0
 }

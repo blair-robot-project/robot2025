@@ -14,8 +14,11 @@ import frc.team449.subsystems.pivot.Pivot
 import frc.team449.subsystems.pivot.Pivot.Companion.createPivot
 import frc.team449.subsystems.pivot.PivotFeedForward
 import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
+import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
 import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
+import frc.team449.subsystems.wrist.Wrist
+import frc.team449.subsystems.wrist.Wrist.Companion.createWrist
 import frc.team449.system.AHRS
 import monologue.Annotations.Log
 import monologue.Logged
@@ -49,6 +52,11 @@ class Robot : RobotBase(), Logged {
 
   @Log.NT
   val pivot: Pivot = createPivot()
+
+  @Log.NT
+  val wrist: Wrist = createWrist()
+
+  val superstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
 }

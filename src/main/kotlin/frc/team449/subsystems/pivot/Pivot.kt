@@ -39,14 +39,14 @@ class Pivot(
     SuperstructureConstants.STOW_POSITIONS.first
   )
 
-  private fun setPosition(position: Double): Command {
-    return this.runOnce {
+  fun setPosition(position: Double): Command {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
           .withFeedForward(pivotFeedForward.calculateWithAngle(positionSupplier.get(), motor.closedLoopReferenceSlope.valueAsDouble, 0.0))
       )
-    }
+    }.until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -57,32 +57,8 @@ class Pivot(
     return runOnce { motor.setVoltage(3.0) }
   }
 
-  fun stow(): Command {
-    return setPosition(SuperstructureConstants.STOW_POSITIONS.first)
-  }
-
-  fun L1(): Command {
-    return setPosition(SuperstructureConstants.L1_POSITIONS.first)
-  }
-
-  fun L2(): Command {
-    return setPosition(SuperstructureConstants.L2_POSITIONS.first)
-  }
-
-  fun L3(): Command {
-    return setPosition(SuperstructureConstants.L3_POSITIONS.first)
-  }
-
-  fun L4(): Command {
-    return setPosition(SuperstructureConstants.L4_POSITIONS.first)
-  }
-
-  fun hold(): Command {
-    return setPosition(targetSupplier.get())
-  }
-
   fun stop(): Command {
-    return this.run { motor.stopMotor() }
+    return this.runOnce { motor.stopMotor() }
   }
 
   private fun atSetpoint(): Boolean {
