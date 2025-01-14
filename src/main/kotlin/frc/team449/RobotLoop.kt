@@ -81,16 +81,16 @@ class RobotLoop : TimedRobot(), Logged {
 
   override fun driverStationConnected() {
     Monologue.setFileOnly(DriverStation.isFMSAttached())
-    val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid)
+    val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.mechController.hid)
     // temporary bindings for sim testing
-    robot.driveController.x().onTrue(
+    robot.mechController.x().onTrue(
       autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1)
         .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.reefLevel.L1))
     )
-    robot.driveController.a().onTrue(
+    robot.mechController.a().onTrue(
       autoscore.moveToProcessorCommand().andThen(autoscore.scoreProcessorCommand())
     )
-    robot.driveController.b().onTrue(
+    robot.mechController.b().onTrue(
       autoscore.moveToNetCommand(false)
         .andThen(autoscore.scoreNetCommand())
     )
