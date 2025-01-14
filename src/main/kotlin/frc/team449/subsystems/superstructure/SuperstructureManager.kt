@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
-import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.elevator.Elevator
 import frc.team449.subsystems.pivot.Pivot
 import frc.team449.subsystems.wrist.Wrist
@@ -26,7 +25,8 @@ class SuperstructureManager(
           elevator.setPosition(goal.elevator.`in`(Meters))
             .alongWith(
               wrist.setPosition(goal.wrist.`in`(Radians))
-          )),
+            )
+        ),
       // If we retracting
       elevator.setPosition(goal.elevator.`in`(Meters))
         .alongWith(wrist.setPosition(goal.wrist.`in`(Radians)))

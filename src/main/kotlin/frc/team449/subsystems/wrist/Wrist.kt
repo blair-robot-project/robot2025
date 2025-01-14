@@ -1,9 +1,7 @@
 package frc.team449.subsystems.wrist
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.SuperstructureConstants
@@ -20,7 +18,6 @@ class Wrist(
   val targetSupplier = Supplier { request.Position }
 
   val request = MotionMagicVoltage(SuperstructureConstants.STOW_POSITIONS.third)
-
 
   fun setPosition(position: Double): Command {
     return this.runOnce {

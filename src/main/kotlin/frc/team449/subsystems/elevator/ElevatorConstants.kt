@@ -15,7 +15,6 @@ object ElevatorConstants {
   const val MAX_HEIGHT = 0.75
   const val MIN_HEIGHT = 0.0
 
-
   const val MOTOR_ID = 1 // TODO(Change motor ID.)
 
   // Simulation Constants TODO(Adjust all of these.)
