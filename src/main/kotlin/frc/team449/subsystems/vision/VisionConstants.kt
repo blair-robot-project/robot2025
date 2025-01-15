@@ -60,7 +60,7 @@ object VisionConstants {
 
   /** Std Dev Calculation Constants */
   const val ORDER = 2
-  const val PROPORTION = 3.75
+  const val PROPORTION = 3.25
 
   val VISION_SIM = VisionSystemSim(
     "main"
@@ -99,6 +99,6 @@ object VisionConstants {
   )
 
   val ENCODER_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .125, .125, .0075)
-  val SINGLE_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), 0.05, 0.05, 0.35)
-  val MULTI_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .0125, .0125, 0.10)
+  val SINGLE_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), 0.025, 0.025, 0.35)
+  val MULTI_TAG_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .010, .010, 0.10)
 }
