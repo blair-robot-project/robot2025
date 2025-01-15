@@ -91,25 +91,13 @@ class RobotLoop : TimedRobot(), Logged {
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
     // Superstructure Simulation
-    if (RobotBase.isReal()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
+    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
+    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
-      robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get()
+    robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get() * (180 / PI)
+    robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
 
-      robot.elevator.wristLigament.angle = robot.wrist.targetSupplier.get()
-    } else if (RobotBase.isSimulation()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
-
-      robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get() * (180 / PI)
-      robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
-
-      robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
-
-      robot.elevator.elevatorSim.changeAngle(robot.pivot.positionSupplier.get())
-    }
+    robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 
@@ -171,5 +159,8 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+
+    // change elevator angle according to pivot position
+    robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
   }
 }

@@ -14,8 +14,8 @@ class ElevatorFeedForward(
   private val ka: Double,
   private val kg: Double
 ) : ElevatorFeedforward(ks, kg, kv, ka) {
-  override fun calculate(velocity: Double): Double {
-    return this.ks * sign(velocity) + this.kg * sin(pivot.positionSupplier.get()) + this.kv * velocity + this.ka * 0.0
+  override fun calculate(velocitySetpoint: Double): Double {
+    return this.ks * sign(velocitySetpoint) + this.kg * sin(pivot.positionSupplier.get()) + this.kv * velocitySetpoint + this.ka * 0.0
   }
 
   companion object {

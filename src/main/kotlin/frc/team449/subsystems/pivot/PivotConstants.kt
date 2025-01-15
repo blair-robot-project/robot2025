@@ -1,5 +1,9 @@
 package frc.team449.subsystems.pivot
 
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.NeutralModeValue
+import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.measure.Frequency
 import kotlin.math.PI
 
 object PivotConstants {
@@ -14,6 +18,14 @@ object PivotConstants {
   const val ARM_LENGTH = 1.0
   const val MIN_ANGLE = PI / 12
   const val MAX_ANGLE = 5 * PI / 9
+
+  val INVERTED = InvertedValue.CounterClockwise_Positive
+  val BRAKE_MODE = NeutralModeValue.Brake
+
+  const val STATOR_LIM = 80.0
+  const val SUPPLY_LIM = 40.0
+
+  val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
 
   const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
 
