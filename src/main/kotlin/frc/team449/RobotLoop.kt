@@ -23,6 +23,7 @@ import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.PI
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -96,12 +97,18 @@ class RobotLoop : TimedRobot(), Logged {
 
       robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get()
       robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get()
+
+      robot.elevator.wristLigament.angle = robot.wrist.targetSupplier.get()
     } else if (RobotBase.isSimulation()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.simPositionSupplier.get()
+      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
       robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
-      robot.elevator.elevatorSim.changeAngle(robot.pivot.simPositionSupplier.get())
-      robot.pivot.pivotSim.changeArmLength(robot.elevator.simPositionSupplier.get())
+      robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get() * (180 / PI)
+      robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
+
+      robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
+
+      robot.elevator.elevatorSim.changeAngle(robot.pivot.positionSupplier.get())
     }
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)

@@ -27,8 +27,8 @@ class PivotFeedForward(
     return map.get(elevator.positionSupplier.get())
   }
 
-  fun calculateWithAngle(positionRadians: Double, velocityRadPerSec: Double, accelRadPerSecSquared: Double): Double {
-    return this.ks * sign(velocityRadPerSec) + calculateKg() * cos(positionRadians) + this.kv * velocityRadPerSec + this.ka * accelRadPerSecSquared
+  fun calculateWithLength(positionRadians: Double, velocityRadPerSec: Double): Double {
+    return this.ks * sign(velocityRadPerSec) + calculateKg() * cos(positionRadians) + this.kv * velocityRadPerSec
   }
 
   companion object {

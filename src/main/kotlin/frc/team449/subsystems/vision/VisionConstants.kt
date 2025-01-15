@@ -31,7 +31,7 @@ object VisionConstants {
 
 //  val TAG_LAYOUT: AprilTagFieldLayout = TEST_TAG_LAYOUT
 
-  /** WPILib's AprilTagFieldLayout for the 2024 Crescendo Game */
+  /** WPILib's AprilTagFieldLayout for the 2025 Reefscape Game */
   val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape)
 
   /** Robot to Camera distance */
