@@ -1,5 +1,7 @@
 package frc.team449.subsystems.pivot
 
+import com.ctre.phoenix6.BaseStatusSignal
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.units.Units.Radians
@@ -7,7 +9,6 @@ import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.system.motor.createKraken
 import java.util.function.Supplier
 import kotlin.math.abs
 
@@ -38,14 +39,15 @@ class Pivot(
     SuperstructureGoal.STOW.pivot.`in`(Radians)
   )
 
+  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.runOnce {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
           .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble))
       )
-    } // .until(::atSetpoint)
+    }.until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -84,18 +86,45 @@ class Pivot(
 
   companion object {
     fun createPivot(): Pivot {
-      val pivotMotor: TalonFX = createKraken(
-        id = PivotConstants.MOTOR_ID,
-        inverted = false,
-        sensorToMech = 1 / (PivotConstants.GEARING * PivotConstants.UPR),
-        kP = PivotConstants.KP,
-        kI = PivotConstants.KI,
-        kD = PivotConstants.KD,
-        cruiseVel = PivotConstants.CRUISE_VEL,
-        maxAccel = PivotConstants.MAX_ACCEL,
+      val leadMotor = TalonFX(PivotConstants.MOTOR_ID)
+      val config = TalonFXConfiguration()
+
+      config.MotorOutput.Inverted = PivotConstants.INVERTED
+      config.MotorOutput.NeutralMode = PivotConstants.BRAKE_MODE
+      config.MotorOutput.DutyCycleNeutralDeadband = 0.001
+      config.Feedback.SensorToMechanismRatio = 1 / (PivotConstants.GEARING * PivotConstants.UPR)
+
+      config.CurrentLimits.StatorCurrentLimitEnable = true
+      config.CurrentLimits.SupplyCurrentLimitEnable = true
+      config.CurrentLimits.StatorCurrentLimit = PivotConstants.STATOR_LIM
+      config.CurrentLimits.SupplyCurrentLimit = PivotConstants.SUPPLY_LIM
+
+      /** If we gonna have FOC in the future
+       config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)
+       config.TorqueCurrent.PeakReverseTorqueCurrent = -torqueCurrentLimit.`in`(Amps)
+       **/
+
+      config.Slot0.kP = PivotConstants.KP
+      config.Slot0.kI = PivotConstants.KI
+      config.Slot0.kD = PivotConstants.KD
+
+      config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL
+      config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL
+
+      val status1 = leadMotor.configurator.apply(config)
+      if (!status1.isOK) println("Error applying configs to Pivot Motor -> Error Code: $status1")
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        PivotConstants.VALUE_UPDATE_RATE,
+        leadMotor.position,
+        leadMotor.velocity,
+        leadMotor.motorVoltage,
+        leadMotor.supplyCurrent,
+        leadMotor.statorCurrent,
+        leadMotor.deviceTemp
       )
 
-      return Pivot(pivotMotor)
+      return Pivot(leadMotor)
     }
   }
 }
