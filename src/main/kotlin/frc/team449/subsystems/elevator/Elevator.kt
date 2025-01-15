@@ -42,10 +42,8 @@ open class Elevator(
     PI / 12
   )
 
-  val simPositionSupplier = Supplier { elevatorSim.positionMeters }
-
   val mech: Mechanism2d = Mechanism2d(3.0, 3.0, Color8Bit(0, 0, 0))
-  val rootElevator: MechanismRoot2d = mech.getRoot("elevatorRoot", 0.25, 0.25)
+  private val rootElevator: MechanismRoot2d = mech.getRoot("elevatorRoot", 0.25, 0.25)
   val elevatorLigament: MechanismLigament2d = rootElevator.append(
     MechanismLigament2d(
       "elevatorLigament",
@@ -81,7 +79,7 @@ open class Elevator(
   )
 
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
@@ -89,7 +87,7 @@ open class Elevator(
             elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
           )
       )
-    }.until(::atSetpoint)
+    } // .until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -117,7 +115,7 @@ open class Elevator(
     val motorSimVoltage = motorSim.motorVoltage
 
     elevatorSim.setInputVoltage(MathUtil.clamp(motorSimVoltage, -12.0, 12.0))
-    println("${request.Position}  -  ${elevatorSim.positionMeters}")
+//    println("${request.Position}  -  ${elevatorSim.positionMeters}")
     elevatorSim.update(RobotConstants.LOOP_TIME)
 
     motorSim.setRawRotorPosition(elevatorSim.positionMeters / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
@@ -144,8 +142,8 @@ open class Elevator(
         kP = ElevatorConstants.KP,
         kI = ElevatorConstants.KI,
         kD = ElevatorConstants.KD,
-        cruiseVel = 1.0,
-        maxAccel = 1.0,
+        cruiseVel = ElevatorConstants.CRUISE_VEL,
+        maxAccel = ElevatorConstants.MAX_ACCEL,
       )
 
       return Elevator(elevatorMotor)

@@ -2,12 +2,11 @@ package frc.team449.subsystems.pivot
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.units.Units.Radians
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.subsystems.SuperstructureConstants
-import frc.team449.subsystems.elevator.ElevatorConstants
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.system.motor.createKraken
 import java.util.function.Supplier
 import kotlin.math.abs
@@ -22,31 +21,31 @@ class Pivot(
 
   lateinit var pivotFeedForward: PivotFeedForward
 
-  val pivotSim = LengthPivotSim(
-    DCMotor.getKrakenX60(1),
-    1 / PivotConstants.GEARING,
-    PivotConstants.MOMENT_OF_INERTIA,
-    PivotConstants.ARM_LENGTH,
-    PivotConstants.MIN_ANGLE,
-    PivotConstants.MAX_ANGLE,
-    false,
-    PivotConstants.MIN_ANGLE
-  )
-
-  val simPositionSupplier = Supplier { pivotSim.angleRads }
+//  val pivotSim = LengthPivotSim(
+//    DCMotor.getKrakenX60(1),
+//    1 / PivotConstants.GEARING,
+//    PivotConstants.MOMENT_OF_INERTIA,
+//    PivotConstants.ARM_LENGTH,
+//    PivotConstants.MIN_ANGLE,
+//    PivotConstants.MAX_ANGLE,
+//    false,
+//    PivotConstants.MIN_ANGLE
+//  )
+//
+//  val simPositionSupplier = Supplier { pivotSim.angleRads }
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
-    SuperstructureConstants.STOW_POSITIONS.first
+    SuperstructureGoal.STOW.pivot.`in`(Radians)
   )
 
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
-          .withFeedForward(pivotFeedForward.calculateWithAngle(positionSupplier.get(), motor.closedLoopReferenceSlope.valueAsDouble, 0.0))
+          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble))
       )
-    }.until(::atSetpoint)
+    } // .until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -62,12 +61,15 @@ class Pivot(
   }
 
   private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < ElevatorConstants.TOLERANCE)
+    return (abs(positionSupplier.get() - request.Position) < PivotConstants.TOLERANCE)
   }
 
   override fun periodic() {}
 
   override fun simulationPeriodic() {
+    val motorSimState = motor.simState
+
+    motorSimState.setRawRotorPosition(request.Position / (PivotConstants.GEARING * PivotConstants.UPR))
   }
 
   override fun initSendable(builder: SendableBuilder) {
@@ -82,9 +84,18 @@ class Pivot(
 
   companion object {
     fun createPivot(): Pivot {
-      val motor: TalonFX = createKraken(PivotConstants.MOTOR_ID, false)
+      val pivotMotor: TalonFX = createKraken(
+        id = PivotConstants.MOTOR_ID,
+        inverted = false,
+        sensorToMech = 1 / (PivotConstants.GEARING * PivotConstants.UPR),
+        kP = PivotConstants.KP,
+        kI = PivotConstants.KI,
+        kD = PivotConstants.KD,
+        cruiseVel = PivotConstants.CRUISE_VEL,
+        maxAccel = PivotConstants.MAX_ACCEL,
+      )
 
-      return Pivot(motor)
+      return Pivot(pivotMotor)
     }
   }
 }
