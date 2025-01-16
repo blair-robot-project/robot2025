@@ -22,5 +22,9 @@ interface SwerveDrive: Subsystem{
   }
   fun zeroHeading(){
     setHeading(Rotation2d())
-  };
+  }
+  fun addVisionMeasurement(visionRobotPose: Pose2d, timeStampSeconds: float){}
+  fun addVisionMeasurement(visionRobotPoseMeters: Pose2d, timeStampSeconds: float, visionMeasurementStdDevs: Matrix<N3, N1>){
+
+  }
 }
