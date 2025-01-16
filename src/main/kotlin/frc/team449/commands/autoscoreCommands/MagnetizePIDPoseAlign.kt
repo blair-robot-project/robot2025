@@ -172,18 +172,6 @@ class MagnetizePIDPoseAlign(
     prevX = xClamped
     prevY = yClamped
 
-//    if (controller.bButtonPressed) {
-//      snapToAngle(-PI / 3)
-//    } else if (controller.xButtonPressed) {
-//      snapToAngle(PI / 3)
-//    } else if (controller.aButtonPressed) {
-//      snapToAngle(0.0)
-//    }
-//
-//    if (controller.aButtonPressed) {
-//      orthogonalAngle(0.0)
-//    }
-
     rotScaled = if (!headingLock) {
       rotRamp.calculate(
         min(
@@ -231,7 +219,7 @@ class MagnetizePIDPoseAlign(
         )
     }
 
-    // 1.7... is 100 degrees in radians 1.74533
+
     var angle = abs(atan2(controllerDesVel.vxMetersPerSecond,
       controllerDesVel.vyMetersPerSecond) -
       atan2(pose.translation.x, pose.translation.y))
@@ -239,6 +227,7 @@ class MagnetizePIDPoseAlign(
       angle = 2 * Math.PI - angle
     }
 
+    // 1.7... is 100 degrees in radians
     if (angle > 1.74533) {
       timeUntilMagnetizationStop -= 0.02
     } else {
