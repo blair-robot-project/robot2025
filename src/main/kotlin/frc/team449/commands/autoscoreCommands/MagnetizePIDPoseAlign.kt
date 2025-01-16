@@ -73,6 +73,10 @@ class MagnetizePIDPoseAlign(
   private var desiredVel = doubleArrayOf(0.0, 0.0, 0.0)
 
   private var magnetizationPower = 5.0
+  // Time in seconds until magnetization will stop if the driver is opposing magnetization
+  private var magnetizationStopTime = 1.2
+  private var timeUntilMagnetizationStop = magnetizationStopTime
+  private var stopMagnetization = false
 
   init {
 
@@ -103,6 +107,8 @@ class MagnetizePIDPoseAlign(
 
   override fun initialize() {
     timer.restart()
+
+    stopMagnetization = false
 
     prevX = drivetrain.currentSpeeds.vxMetersPerSecond
     prevY = drivetrain.currentSpeeds.vyMetersPerSecond
@@ -224,12 +230,39 @@ class MagnetizePIDPoseAlign(
           rotScaled
         )
     }
-    drivetrain.set(calculate(poseSubsystem.pose, pose) + controllerDesVel * magnetizationPower)
+
+    // 1.7... is 100 degrees in radians 1.74533
+    var angle = abs(atan2(controllerDesVel.vxMetersPerSecond,
+      controllerDesVel.vyMetersPerSecond) -
+      atan2(pose.translation.x, pose.translation.y))
+    println(angle)
+    if (angle > Math.PI) {
+      angle = 2 * Math.PI - angle
+    }
+
+    if (angle > 1.74533) {
+      timeUntilMagnetizationStop -= 0.02
+      println(timeUntilMagnetizationStop)
+    } else {
+      timeUntilMagnetizationStop = magnetizationStopTime
+    }
+    if (timeUntilMagnetizationStop <= 0) {
+      stopMagnetization = true
+    }
+
+    // magnetization power is lowered if the robot is closer to the goal, which
+    // makes it so the magnetization gets more powerful as the robot gets closer
+    // Values need to be adjusted I haven't tested yet
+
+    //
+    drivetrain.set(calculate(poseSubsystem.pose, pose) + controllerDesVel * (magnetizationPower))
+      //* (poseSubsystem.pose.translation.getDistance(pose.translation) / 10.0)))
   }
 
   override fun isFinished(): Boolean {
     return allControllersAtReference() ||
-      timer.hasElapsed(timeout)
+      timer.hasElapsed(timeout) ||
+      stopMagnetization
   }
 
   override fun end(interrupted: Boolean) {
