@@ -5,19 +5,29 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
+import frc.team449.subsystems.elevator.Elevator
+import frc.team449.subsystems.elevator.Elevator.Companion.createElevator
 import frc.team449.subsystems.light.Light.Companion.createLight
+import frc.team449.subsystems.pivot.Pivot
+import frc.team449.subsystems.pivot.Pivot.Companion.createPivot
+import frc.team449.subsystems.superstructure.SuperstructureManager
+import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
+import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
+import frc.team449.subsystems.wrist.Wrist
+import frc.team449.subsystems.wrist.Wrist.Companion.createWrist
 import frc.team449.system.AHRS
 import monologue.Annotations.Log
 import monologue.Logged
 
 class Robot : RobotBase(), Logged {
 
-  val driveController = CommandXboxController(0)
+  // Driver/Operator Controllers
+  val driveController: CommandXboxController = CommandXboxController(0)
+  val mechController: CommandXboxController = CommandXboxController(1)
 
-  val mechController = CommandXboxController(1)
-
-  val ahrs = AHRS()
+  // NavX
+  val ahrs: AHRS = AHRS()
 
   // Instantiate/declare PDP and other stuff here
   @Log.NT
@@ -27,18 +37,24 @@ class Robot : RobotBase(), Logged {
   )
 
   @Log.NT
-  override val drive = SwerveDrive.createSwerveKraken(field)
+  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
 
   @Log.NT
-  override val poseSubsystem = createPoseSubsystem(ahrs, drive, field)
+  override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
 
   @Log.NT
-  override val driveCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
+  override val driveCommand: SwerveOrthogonalCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
+
+  @Log.NT
+  val elevator: Elevator = createElevator()
+
+  @Log.NT
+  val pivot: Pivot = createPivot()
+
+  @Log.NT
+  val wrist: Wrist = createWrist()
+
+  val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
-
-  /** Example for using infrared sensors
-   * @Log.NT
-   * val infrared = DigitalInput(RobotConstants.IR_CHANNEL)
-   */
 }

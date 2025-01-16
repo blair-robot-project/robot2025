@@ -2,6 +2,7 @@ package frc.team449.subsystems.drive.swerve
 
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.*
+import kotlin.math.PI
 
 object SwerveConstants {
   const val EFFICIENCY = 0.95
@@ -55,9 +56,10 @@ object SwerveConstants {
   const val DRIVE_KD = 0.0
 
   /** Drive configuration */
+  val WHEEL_RADIUS = Units.inchesToMeters(1.895)
   const val DRIVE_GEARING = (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0)
-  const val DRIVE_UPR = 0.31818905832
-  const val TURN_UPR = 2 * Math.PI
+  val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
+  const val TURN_UPR = 2 * PI
   val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.85) // (12 - DRIVE_KS) / DRIVE_KV
 
   val DRIVE_SUPPLY_LIMIT = Amps.of(0.0)

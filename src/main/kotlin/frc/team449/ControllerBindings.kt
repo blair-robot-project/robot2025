@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -21,6 +22,13 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
+    driveController.a().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+    )
+
+    driveController.b().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+    )
   }
 
   private fun nonRobotBindings() {
