@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
-import kotlin.math.hypot
 import frc.team449.subsystems.vision.PoseSubsystem.*
+import kotlin.math.hypot
 
 /**
  * A Swerve Drive chassis.
@@ -85,17 +85,19 @@ open class SwerveDrive(
   }
 
   fun followTrajectory(sample: SwerveSample) {
-    val gyroAngle=heading
+    // Get the current pose of the robot
+
     // Generate the next speeds for the robot
-    val speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+    val speeds = ChassisSpeeds(
       sample.vx,
       sample.vy,
-      sample.omega,
-      gyroAngle,
-      )
+      sample.omega
+    )
+
+    val newspeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading)
 
     // Apply the generated speeds
-    driveFieldRelative(speeds)
+    driveFieldRelative(newspeeds)
   }
 
   fun setVoltage(volts: Double) {

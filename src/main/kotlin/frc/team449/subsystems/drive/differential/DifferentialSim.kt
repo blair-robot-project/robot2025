@@ -64,13 +64,13 @@ class DifferentialSim(
     this.lastTime = currTime
   }
 
-   override var pose: Pose2d
+  override var pose: Pose2d
     get() = driveSim.pose
     set(value) {
       driveSim.pose = value
     }
 
-   var heading: Rotation2d
+  var heading: Rotation2d
     get() = driveSim.heading.rotateBy(offset)
     set(value) {
       offset = value - driveSim.heading
