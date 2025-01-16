@@ -235,14 +235,12 @@ class MagnetizePIDPoseAlign(
     var angle = abs(atan2(controllerDesVel.vxMetersPerSecond,
       controllerDesVel.vyMetersPerSecond) -
       atan2(pose.translation.x, pose.translation.y))
-    println(angle)
     if (angle > Math.PI) {
       angle = 2 * Math.PI - angle
     }
 
     if (angle > 1.74533) {
       timeUntilMagnetizationStop -= 0.02
-      println(timeUntilMagnetizationStop)
     } else {
       timeUntilMagnetizationStop = magnetizationStopTime
     }
