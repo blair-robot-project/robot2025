@@ -27,19 +27,14 @@ class RobotLoop : TimedRobot() {
     private val robot = Robot()
 
     private val routineChooser: RoutineChooser = RoutineChooser(robot)
-
-    private val field = robot.field
     private var autoCommand: Command? = null
     private var routineMap = hashMapOf<String, Command>()
     private val controllerBinder =
         ControllerBindings(robot.driveController, robot.mechController, robot)
 
-    override fun robotInit() {
+    init {
         // Yes this should be a print statement, it's useful to know that robotInit started.
         println("Started robotInit.")
-
-        SignalLogger.setPath("/media/sda1/ctre-logs/")
-        SignalLogger.start()
 
         HAL.report(
             FRCNetComm.tResourceType.kResourceType_Language,
@@ -67,8 +62,10 @@ class RobotLoop : TimedRobot() {
 
         controllerBinder.bindButtons()
 
+        SignalLogger.setPath("/media/sda1/ctre-logs/")
+        SignalLogger.start()
         Epilogue.bind(this)
-        DriverStation.startDataLog(DataLogManager.getLog())
+        DataLogManager.start()
     }
 
     override fun driverStationConnected() {}
