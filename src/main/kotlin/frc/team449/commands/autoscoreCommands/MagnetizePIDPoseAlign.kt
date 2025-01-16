@@ -251,10 +251,8 @@ class MagnetizePIDPoseAlign(
     // magnetization power is lowered if the robot is closer to the goal, which
     // makes it so the magnetization gets more powerful as the robot gets closer
     // Values need to be adjusted I haven't tested yet
-
-    //
-    drivetrain.set(calculate(poseSubsystem.pose, pose) + controllerDesVel * (magnetizationPower))
-      //* (poseSubsystem.pose.translation.getDistance(pose.translation) / 10.0)))
+    drivetrain.set(calculate(poseSubsystem.pose, pose) + controllerDesVel *
+      (magnetizationPower * (poseSubsystem.pose.translation.getDistance(pose.translation) / 10.0)))
   }
 
   override fun isFinished(): Boolean {
