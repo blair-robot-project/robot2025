@@ -21,33 +21,6 @@ class AutoScoreCommands(
   private val controller: XboxController
 ) {
 
-  init {
-  }
-  private var prevX = 0.0
-  private var prevY = 0.0
-
-  private var prevTime = 0.0
-
-  private var dx = 0.0
-  private var dy = 0.0
-  private var magAcc = 0.0
-  private var dt = 0.0
-  private var magAccClamped = 0.0
-
-  private var rotScaled = 0.0
-
-  var headingLock = false
-
-  private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
-
-  private val timer = Timer()
-
-  private val rotCtrl = PIDController(
-    RobotConstants.SNAP_KP,
-    RobotConstants.SNAP_KI,
-    RobotConstants.SNAP_KD
-  )
-
   /**
    * This command moves the robot to one of the twelve reef locations
    * (location 1 is the most vertical location on the right, going
