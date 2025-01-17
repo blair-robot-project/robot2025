@@ -115,10 +115,11 @@ client.subscribeAllSamples(numToApp, false, false, 0.02);
 //client.connect();
 client.ws_connect();
 
-// const numberGotten = client.getValue(numToApp, -1.0) / 2
-// console.log("aaaaa");
-// console.log(numberGotten)
-// client.addSample(numToRobot, numberGotten)
+//const numberGotten = client.getValue(numToApp, -1.0) / 2
+const numberGotten = giveNumToAppValues()[-1] / 2
+console.log("aaaaa");
+console.log(numberGotten)
+client.addSample(numToRobot, numberGotten)
 
 window.addEventListener("load", () => {
       // Start NT connection

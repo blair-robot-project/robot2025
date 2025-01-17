@@ -82,18 +82,22 @@ class RobotLoop : TimedRobot(), Logged {
     //val numSubscriber = inst.getDoubleTopic("numCheck").subscribe(-2.00)
 
     // Start server
-    val app =
-      Javalin.create { config: JavalinConfig ->
-        config.staticFiles.add(
-          Paths.get(
-            Filesystem.getDeployDirectory().absolutePath.toString(),
-            "autoscore"
-          )
-            .toString(),
-          Location.EXTERNAL
-        )
-      }
-    app.start(5500)
+//    val app =
+//      Javalin.create { config: JavalinConfig ->
+//        config.staticFiles.add(
+//          Paths.get(
+//            Filesystem.getDeployDirectory().absolutePath.toString(),
+//            "autoscore"
+//          )
+//            // IPs:
+//            // Sim: 127.0.0.1
+//            // Robot: 10.4.49.2
+//            .toString(),
+//          Location.EXTERNAL
+//        )
+//      }
+//    app.start(5500)
+
     /** Example Quad Calibration
     QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
      */
