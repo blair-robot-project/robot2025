@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.RoutineChooser
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
+import frc.team449.commands.autoscoreCommands.WebConnection
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
@@ -51,9 +52,6 @@ class RobotLoop : TimedRobot(), Logged {
     if (RobotBase.isSimulation()) {
       // Don't complain about joysticks if there aren't going to be any
       DriverStation.silenceJoystickConnectionWarning(true)
-//      val instance = NetworkTableInstance.getDefault()
-//      instance.stopServer()
-//      instance.startClient4("localhost")
     }
 
     /** Example Quad Calibration
@@ -85,8 +83,8 @@ class RobotLoop : TimedRobot(), Logged {
     val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid)
     // temporary bindings for sim testing
     robot.driveController.x().onTrue(
-      autoscore.moveToReefCommand(AutoScoreCommandConstants.reefLocation.Location1)
-        .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.reefLevel.L1))
+      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
+        .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
     )
     robot.driveController.a().onTrue(
       autoscore.moveToProcessorCommand().andThen(autoscore.scoreProcessorCommand())
@@ -99,6 +97,7 @@ class RobotLoop : TimedRobot(), Logged {
       autoscore.moveToCoralIntakeCommand(true)
         .andThen(autoscore.intakeCoralCommand())
     )
+    val webCom = WebConnection()
   }
 
   override fun robotPeriodic() {

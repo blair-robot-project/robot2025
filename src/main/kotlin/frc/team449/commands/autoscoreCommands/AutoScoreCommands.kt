@@ -13,7 +13,6 @@ import frc.team449.auto.choreo.MagnetizePIDPoseAlign
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
-import kotlin.math.*
 
 class AutoScoreCommands(
   private val drive: SwerveDrive,
@@ -28,7 +27,7 @@ class AutoScoreCommands(
    * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
   fun moveToReefCommand(
-    reefLocation: AutoScoreCommandConstants.reefLocation
+    reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
     var reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
@@ -132,14 +131,14 @@ class AutoScoreCommands(
    * @param reefLevel a reefLevel enum that determines which level to score the coral on
    * does nothing right now
    */
-  fun putCoralInReef(reefLevel: AutoScoreCommandConstants.reefLevel): Command {
+  fun putCoralInReef(reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
     // we don't have score yet, but we're setting up stuff for future
     // we won't have to account for alliance here
     when (reefLevel) {
-      AutoScoreCommandConstants.reefLevel.L1 -> println("scoring coral l1")
-      AutoScoreCommandConstants.reefLevel.L2 -> println("scoring coral l2")
-      AutoScoreCommandConstants.reefLevel.L3 -> println("scoring coral l3")
-      AutoScoreCommandConstants.reefLevel.L4 -> println("scoring coral l4")
+      AutoScoreCommandConstants.ReefLevel.L1 -> println("scoring coral l1")
+      AutoScoreCommandConstants.ReefLevel.L2 -> println("scoring coral l2")
+      AutoScoreCommandConstants.ReefLevel.L3 -> println("scoring coral l3")
+      AutoScoreCommandConstants.ReefLevel.L4 -> println("scoring coral l4")
     }
     // returns a command that does nothing (for now)
     return InstantCommand()
