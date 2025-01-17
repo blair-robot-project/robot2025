@@ -1166,7 +1166,7 @@ class NT4_Client {
 
         this.clientIdx = 449; //Not great, but using it for now
 
-        var port = 8080;
+        var port = 5810;
         var prefix = "ws://";
 
         this.serverAddr = prefix + this.serverBaseAddr + ":" + port.toString() + "/nt/" + "JSClient_" + this.clientIdx.toString();

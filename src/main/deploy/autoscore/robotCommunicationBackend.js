@@ -2,14 +2,15 @@
 // using `window.location.hostname` causes the client to open a 
 // NT connection on the same machine as is serving the website.
 // It could be hardcoded to point at a roboRIO if needed.
-// var nt4Client = new NT4_Client(
-//     window.location.hostname, 
-//     topicAnnounceHandler,
-//     topicUnannounceHandler,
-//     valueUpdateHandler,
-//     onConnect,
-//     onDisconnect
-// );
+console.log(window.location.hostname);
+var nt4Client = new NT4_Client(
+    window.location.hostname, 
+    topicAnnounceHandler,
+    topicUnannounceHandler,
+    valueUpdateHandler,
+    onConnect,
+    onDisconnect
+);
 //nt4client IMPORTANT methods
 /*
 subscribeTopicNames : list of topics name to subscribe to 
