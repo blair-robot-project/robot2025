@@ -52,6 +52,8 @@ class RobotLoop : TimedRobot(), Logged {
   var table: NetworkTable = inst.getTable("autoscore")
   val numToApp = table.getDoubleTopic("numToApp").publish()
   val numToRobot = table.getDoubleTopic("numToRobot").subscribe(-2.0)
+  // val numChecked = numToRobot.get()
+  // -2 = subscribed but not published, -1 = not published and not subscribed, number = yay
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -70,6 +72,15 @@ class RobotLoop : TimedRobot(), Logged {
 //      instance.startClient4("localhost")
     }
 
+    // Create publisher and subscriber
+    //val inst = NetworkTableInstance.getDefault()
+    //val table = inst.getTable("autoscore")
+    //val numtopicmaybe = inst.getDoubleTopic("numCheck").subscribe(-2.00)
+    //val dblPub: DoublePublisher
+    //val numPublisher = table.getIntegerTopic("numCheckFromRobot").publish()
+    //val numSubscriber = table.getDoubleTopic("numCheck").subscribe(-2)
+    //val numSubscriber = inst.getDoubleTopic("numCheck").subscribe(-2.00)
+
     // Start server
     val app =
       Javalin.create { config: JavalinConfig ->
@@ -84,7 +95,7 @@ class RobotLoop : TimedRobot(), Logged {
       }
     app.start(5500)
     /** Example Quad Calibration
-     QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
+    QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
      */
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
@@ -192,6 +203,16 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+
+    /*
+    val inst = NetworkTableInstance.getDefault()
+    // val table = inst.getTable("autoscore")
+    val numSubscriber = inst.getDoubleTopic("numCheck").subscribe(-2.00)
+    val numChecked = numSubscriber.get()
+    // -2 = subscribed but not published, -1 = not published and not subscribed, number = yay
+    println("number checker")
+    println(numChecked)
+     */
 
     // robot to app
     var randomNum = Random.nextInt(0, 100) + 1.0

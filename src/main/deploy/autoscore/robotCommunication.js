@@ -36,6 +36,8 @@ const awaitCommandFinished = () => {
 }
 
 const commandsTopic = "commands";
+const numCheckTopic = "numCheck";
+const numCheckToRobotTopic = "numCheckFromRobot";
 
 const numToApp = "numToApp"
 const numToRobot = "numToRobot"
@@ -44,9 +46,9 @@ const num = -1;
 
 const scoreNet = async (isOnRedAllianceSide) => {
   console.log("scoring net");
-//  setTimeout(() => {
-//    client.addSample(commandsTopic, "netScored")
-//  }, 1000);
+  setTimeout(() => {
+    client.addSample(commandsTopic, "netScored")
+  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
   console.log("await done");
 }
@@ -58,18 +60,18 @@ const scoreProcessor = async () => {
   client.publishNewTopic(numCheckTopic, "double");
   numCheck();
   client.connect();
-//  setTimeout(() => {
-//    client.addSample(commandsTopic, "processorScored")
-//  }, 1000);
+  setTimeout(() => {
+    client.addSample(commandsTopic, "processorScored")
+  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 2000)); // Simulate asynchronous movement
   console.log("await done");
 }
 
 const intakeCoral = async (isAtTopSide) => {
   console.log("intaking coral");
-//  setTimeout(() => {
-//    client.addSample(commandsTopic, "coralIntaken")
-//  }, 1000);
+  setTimeout(() => {
+    client.addSample(commandsTopic, "coralIntaken")
+  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
   console.log("await done");
 }
@@ -77,9 +79,9 @@ const intakeCoral = async (isAtTopSide) => {
 const scoreReef = async (location, level) => {
   console.log(`Scoring on level: ${level} and location: ${location}`);
 
-//  setTimeout(() => {
-//    client.addSample(commandsTopic, "reefScored")
-//  }, 1000);
+  setTimeout(() => {
+    client.addSample(commandsTopic, "reefScored")
+  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
 }
 
@@ -109,20 +111,20 @@ let client = new NT4_Client(
   }
 );
 
-client.subscribe(numToApp, false, false, 0.02);
-client.connect();
+client.subscribeAllSamples(numToApp, false, false, 0.02);
+//client.connect();
+client.ws_connect();
 
-
-const numberGotten = client.getValue(numToApp, -1.0) / 2
-console.log("aaaaa");
-console.log(numberGotten)
-client.addSample(numToRobot, numberGotten)
+// const numberGotten = client.getValue(numToApp, -1.0) / 2
+// console.log("aaaaa");
+// console.log(numberGotten)
+// client.addSample(numToRobot, numberGotten)
 
 window.addEventListener("load", () => {
       // Start NT connection
-      client.subscribe([commandsTopic, numCheckTopic], false, false, 0.02);
+      client.subscribePeriodic([commandsTopic, numCheckTopic], false, false, 0.02);
       client.publishNewTopic(commandsTopic, "string");
       client.publishNewTopic(numCheckTopic, "int");
-      numCheck();
-      client.connect();
+      //numCheck();
+      //client.connect();
 });
