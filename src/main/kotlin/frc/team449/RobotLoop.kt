@@ -3,6 +3,8 @@ package frc.team449
 import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.networktables.NetworkTable
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -18,11 +20,17 @@ import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.vision.VisionConstants
+import io.javalin.Javalin
+import io.javalin.config.JavalinConfig
+import io.javalin.http.staticfiles.Location
 import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
+import java.nio.file.Paths
 import kotlin.jvm.optionals.getOrNull
+import kotlin.random.Random
+
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -40,6 +48,11 @@ class RobotLoop : TimedRobot(), Logged {
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
   lateinit var autoscoreCommands: Command
 
+  val inst = NetworkTableInstance.getDefault()
+  var table: NetworkTable = inst.getTable("autoscore")
+  val numToApp = table.getDoubleTopic("numToApp").publish()
+  val numToRobot = table.getDoubleTopic("numToRobot").subscribe(-2.0)
+
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
     println("Started robotInit.")
@@ -52,8 +65,24 @@ class RobotLoop : TimedRobot(), Logged {
     if (RobotBase.isSimulation()) {
       // Don't complain about joysticks if there aren't going to be any
       DriverStation.silenceJoystickConnectionWarning(true)
+//      val instance = NetworkTableInstance.getDefault()
+//      instance.stopServer()
+//      instance.startClient4("localhost")
     }
 
+    // Start server
+    val app =
+      Javalin.create { config: JavalinConfig ->
+        config.staticFiles.add(
+          Paths.get(
+            Filesystem.getDeployDirectory().absolutePath.toString(),
+            "autoscore"
+          )
+            .toString(),
+          Location.EXTERNAL
+        )
+      }
+    app.start(5500)
     /** Example Quad Calibration
      QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
      */
@@ -68,7 +97,6 @@ class RobotLoop : TimedRobot(), Logged {
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance())
 
     robot.light.defaultCommand = BlairChasing(robot.light)
-
 
     controllerBinder.bindButtons()
 
@@ -164,5 +192,15 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+
+    // robot to app
+    var randomNum = Random.nextInt(0, 100) + 1.0
+    numToApp.set(randomNum)
+    println("from robot to app: ")
+    println(randomNum)
+
+    val numReceived: Double = numToRobot.get()
+    println("from app to robot: ")
+    println(numToRobot.get())
   }
 }

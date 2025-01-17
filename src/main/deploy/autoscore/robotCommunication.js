@@ -1,5 +1,3 @@
-
-
 //CODE FOR RUNNING ASYNCHRONOUS INTERVALS v
 const asyncIntervals = [];
 
@@ -37,29 +35,94 @@ const awaitCommandFinished = () => {
   });
 }
 
+const commandsTopic = "commands";
+
+const numToApp = "numToApp"
+const numToRobot = "numToRobot"
+
+const num = -1;
+
 const scoreNet = async (isOnRedAllianceSide) => {
   console.log("scoring net");
-  //communicate with network tables somehow
+//  setTimeout(() => {
+//    client.addSample(commandsTopic, "netScored")
+//  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
   console.log("await done");
 }
 
 const scoreProcessor = async () => {
   console.log("scoring processor");
-  //communicate with network tables somehow
+  client.subscribe([commandsTopic, numCheckTopic], false, false, 0.02);
+  client.publishNewTopic(commandsTopic, "string");
+  client.publishNewTopic(numCheckTopic, "double");
+  numCheck();
+  client.connect();
+//  setTimeout(() => {
+//    client.addSample(commandsTopic, "processorScored")
+//  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 2000)); // Simulate asynchronous movement
   console.log("await done");
 }
 
 const intakeCoral = async (isAtTopSide) => {
   console.log("intaking coral");
-  //communicate with network tables somehow
+//  setTimeout(() => {
+//    client.addSample(commandsTopic, "coralIntaken")
+//  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
   console.log("await done");
 }
 
 const scoreReef = async (location, level) => {
   console.log(`Scoring on level: ${level} and location: ${location}`);
-  //communicate with network tables somehow
+
+//  setTimeout(() => {
+//    client.addSample(commandsTopic, "reefScored")
+//  }, 1000);
   await new Promise((resolve) => setTimeout(() => resolve(), 1000)); // Simulate asynchronous movement
 }
+
+//const numCheck = async () => {
+//  setTimeout(() => {
+//    num =
+//  }, 2000);
+//}
+
+let client = new NT4_Client(
+  window.location.hostname, // window.location.hostname
+  "autoscore", // topicAnnounceHandler
+  (topic) => { // topicAnnounceHandler
+    // Topic announce
+  },
+  (topic) => { // topicUnannounceHandler
+    // Topic unannounce
+  },
+  (topic) => { // valueUpdateHandler
+    // New data
+  },
+  () => { // onConnect
+    // Connected
+  },
+  () => { // onDisconnect
+    // Disconnected
+  }
+);
+
+client.subscribe(numToApp, false, false, 0.02);
+client.connect();
+
+
+const numberGotten = client.getValue(numToApp, -1.0) / 2
+console.log("aaaaa");
+console.log(numberGotten)
+client.addSample(numToRobot, numberGotten)
+
+window.addEventListener("load", () => {
+      // Start NT connection
+      client.subscribe([commandsTopic, numCheckTopic], false, false, 0.02);
+      client.publishNewTopic(commandsTopic, "string");
+      client.publishNewTopic(numCheckTopic, "int");
+      numCheck();
+      client.connect();
+});
