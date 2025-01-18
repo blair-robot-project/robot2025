@@ -70,7 +70,7 @@ class DifferentialSim(
       driveSim.pose = value
     }
 
-  override var heading: Rotation2d
+  var heading: Rotation2d
     get() = driveSim.heading.rotateBy(offset)
     set(value) {
       offset = value - driveSim.heading

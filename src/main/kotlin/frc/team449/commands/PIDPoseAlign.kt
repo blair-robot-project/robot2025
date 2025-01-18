@@ -1,4 +1,5 @@
-package frc.team449.auto.choreo
+
+package frc.team449.commands
 
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
@@ -12,29 +13,23 @@ import frc.team449.subsystems.vision.PoseSubsystem
 import kotlin.math.PI
 
 /**
- * Follower command so a robot can follow a parsed Choreo Trajectory with feedback
- * @see ChoreoTrajectory
+ * Follower command so a robot go to a predefined pose
  * @param drivetrain Swerve Drivetrain to use
- * @param trajectory Parsed Choreo Trajectory
  * @param xController PID Controller to use for x-position error (output is next desired x velocity, not volts)
  * @param yController PID Controller to use for y-position error (output is next desired y velocity, not volts)
  * @param thetaController PID Controller to use for rotation error (output is next desired rotation velocity, not volts)
  * @param poseTol Tolerance within final pose to say it is "good enough"
  * @param timeout Maximum time to wait after trajectory has finished to get in tolerance. A very low timeout may end this command before you get in tolerance.
- * @param resetPose Whether to reset the pose to the first pose in the trajectory
- * @param debug Whether to run on trajectory expected velocities only (no feedback control)
  */
-class ChoreoFollower(
+class PIDPoseAlign(
   private val drivetrain: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
-  private val trajectory: ChoreoTrajectory,
+  private val pose: Pose2d,
   private val xController: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
   private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
   private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
   poseTol: Pose2d = Pose2d(0.035, 0.035, Rotation2d(0.035)),
-  private val timeout: Double = 0.65,
-  private val resetPose: Boolean = false,
-  private val debug: Boolean = false
+  private val timeout: Double = 0.65
 ) : Command() {
 
   private val timer = Timer()
@@ -53,20 +48,12 @@ class ChoreoFollower(
     thetaController.setTolerance(poseTol.rotation.radians)
   }
 
-  private fun calculate(currPose: Pose2d, desState: ChoreoTrajectory.ChoreoState): ChassisSpeeds {
-    val xFF = desState.xVel
-    val yFF = desState.yVel
-    val angFF = desState.thetaVel
+  private fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
+    val xPID = xController.calculate(currPose.x, desState.x)
+    val yPID = yController.calculate(currPose.y, desState.y)
+    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)
 
-    val xPID = xController.calculate(currPose.x, desState.xPos)
-    val yPID = yController.calculate(currPose.y, desState.yPos)
-    val angPID = thetaController.calculate(currPose.rotation.radians, desState.theta)
-
-    return if (debug) {
-      ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, angFF, currPose.rotation)
-    } else {
-      ChassisSpeeds.fromFieldRelativeSpeeds(xFF + xPID, yFF + yPID, angFF + angPID, currPose.rotation)
-    }
+    return ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, currPose.rotation)
   }
 
   private fun allControllersAtReference(): Boolean {
@@ -78,24 +65,16 @@ class ChoreoFollower(
     yController.reset()
     thetaController.reset()
 
-    if (resetPose) {
-      poseSubsystem.pose = trajectory.initialPose()
-    }
-
     timer.restart()
   }
 
   override fun execute() {
-    val currTime = timer.get()
-
-    val desiredMatrix = trajectory.sample(currTime)
-
-    drivetrain.set(calculate(poseSubsystem.pose, desiredMatrix))
+    drivetrain.driveFieldRelative(calculate(poseSubsystem.pose, pose))
   }
 
   override fun isFinished(): Boolean {
-    return (timer.hasElapsed(trajectory.totalTime) && allControllersAtReference()) ||
-      timer.hasElapsed(trajectory.totalTime + timeout)
+    return allControllersAtReference() ||
+      timer.hasElapsed(timeout)
   }
 
   override fun end(interrupted: Boolean) {

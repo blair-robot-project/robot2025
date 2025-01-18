@@ -101,6 +101,14 @@ class PoseSubsystem(
     }
   }
 
+  fun resetOdometry(newPose: Pose2d) {
+    this.poseEstimator.resetPose(newPose)
+  }
+
+  fun getPose() {
+    getPose()
+  }
+
   override fun periodic() {
     if (isReal) {
       this.poseEstimator.update(
@@ -213,6 +221,8 @@ class PoseSubsystem(
 
   private fun setRobotPose() {
     this.field.robotPose = this.pose
+
+    drive.pose = this.pose
 
     this.field.getObject("FL").pose = this.pose.plus(
       Transform2d(

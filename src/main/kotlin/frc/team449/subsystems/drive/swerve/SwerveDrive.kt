@@ -1,5 +1,10 @@
 package frc.team449.subsystems.drive.swerve
 
+import choreo.trajectory.SwerveSample
+import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -12,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
+import frc.team449.subsystems.vision.PoseSubsystem.*
 import kotlin.math.hypot
 
 /**
@@ -30,6 +36,22 @@ open class SwerveDrive(
   protected val field: Field2d,
   val maxModuleSpeed: Double
 ) : SubsystemBase() {
+  private val xController: PIDController
+    get() = PIDController(10.0, 0.0, 0.0)
+  private val yController: PIDController
+    get() = PIDController(10.0, 0.0, 0.0)
+  private val headingController: PIDController
+    get() = PIDController(7.5, 0.0, 0.0)
+
+  var heading: Rotation2d
+    get() = Rotation2d(MathUtil.angleModulus(this.pose.rotation.radians))
+    set(value) {
+      this.pose = Pose2d(Translation2d(this.pose.x, this.pose.y), value)
+    }
+
+  var pose: Pose2d = Pose2d()
+
+  var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
@@ -39,11 +61,9 @@ open class SwerveDrive(
   /** The current speed of the robot's drive. */
   var currentSpeeds = ChassisSpeeds()
 
-  var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
-
   protected var speedMagnitude: Double = 0.0
 
-  fun set(desiredSpeeds: ChassisSpeeds) {
+  fun driveFieldRelative(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
 
     // Converts the desired [ChassisSpeeds] into an array of [SwerveModuleState].
@@ -65,16 +85,31 @@ open class SwerveDrive(
       module.update()
   }
 
+  fun followTrajectory(sample: SwerveSample) {
+    // Get the current pose of the robot
+
+    // Generate the next speeds for the robot
+    val speeds = ChassisSpeeds(
+      sample.vx,
+      sample.vy,
+      sample.omega
+    )
+
+    val newspeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading)
+
+    // Apply the generated speeds
+    driveFieldRelative(newspeeds)
+  }
+
   fun setVoltage(volts: Double) {
     modules.forEach {
       it.setVoltage(volts)
     }
   }
 
-  fun getModuleVel(): Double {
-    var totalVel = 0.0
-    modules.forEach { totalVel += it.state.speedMetersPerSecond }
-    return totalVel / modules.size
+  /** Stops the robot's drive. */
+  fun stop() {
+    this.driveFieldRelative(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 
   override fun periodic() {
@@ -89,11 +124,6 @@ open class SwerveDrive(
     )
 
     speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
-  }
-
-  /** Stops the robot's drive. */
-  fun stop() {
-    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 
   /** @return An array of [SwerveModulePosition] for each module, containing distance and angle. */
@@ -153,6 +183,10 @@ open class SwerveDrive(
       },
       null
     )
+  }
+
+  fun set(fromFieldRelativeSpeeds: ChassisSpeeds?) {
+    TODO("Not yet implemented")
   }
 
   companion object {
