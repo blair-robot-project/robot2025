@@ -185,10 +185,6 @@ open class SwerveDrive(
     )
   }
 
-  fun set(fromFieldRelativeSpeeds: ChassisSpeeds?) {
-    TODO("Not yet implemented")
-  }
-
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
     fun createSwerveKraken(field: Field2d): SwerveDrive {
