@@ -1,6 +1,7 @@
 package frc.team449
 
 import choreo.auto.AutoChooser
+import choreo.auto.AutoFactory
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
@@ -30,6 +31,8 @@ class Robot : RobotBase(), Logged {
   // NavX
   val ahrs: AHRS = AHRS()
 
+
+
   // Instantiate/declare PDP and other stuff here
   @Log.NT
   override val powerDistribution: PowerDistribution = PowerDistribution(
@@ -41,6 +44,7 @@ class Robot : RobotBase(), Logged {
   override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
 
   val autoChooser = AutoChooser()
+
 
   @Log.NT
   override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
