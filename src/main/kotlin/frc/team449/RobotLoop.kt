@@ -21,7 +21,6 @@ import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
-import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 
 /** The main class of the robot, constructs all the subsystems

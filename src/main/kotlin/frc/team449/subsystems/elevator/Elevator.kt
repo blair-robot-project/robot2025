@@ -73,6 +73,7 @@ open class Elevator(
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(
             elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
           )
@@ -141,7 +142,7 @@ open class Elevator(
       if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")
 
       val status2 = followerMotor.configurator.apply(config)
-      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status1")
+      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status2")
 
       BaseStatusSignal.setUpdateFrequencyForAll(
         ElevatorConstants.VALUE_UPDATE_RATE,
