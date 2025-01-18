@@ -111,7 +111,7 @@ fun createKraken(
   gravityType: GravityTypeValue = GravityTypeValue.Elevator_Static,
   cruiseVel: Double = 0.0,
   maxAccel: Double = 0.0,
-  maxJerk: Double = 0.0,
+  maxJerk: Double = Double.NaN,
   updateFrequency: Frequency = Hertz.of(50.0)
 ): TalonFX {
   val motor = TalonFX(id)
@@ -143,7 +143,9 @@ fun createKraken(
 
   config.MotionMagic.MotionMagicCruiseVelocity = cruiseVel
   config.MotionMagic.MotionMagicAcceleration = maxAccel
-  config.MotionMagic.MotionMagicJerk = maxJerk
+  if (!maxJerk.isNaN()) {
+    config.MotionMagic.MotionMagicJerk = maxJerk
+  }
 
   val status = motor.configurator.apply(config)
   if (!status.isOK) println("Could not apply configs, error code: $status")

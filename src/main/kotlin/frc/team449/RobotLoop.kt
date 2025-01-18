@@ -19,6 +19,9 @@ import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
+import frc.team449.subsystems.elevator.ElevatorConstants
+import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
@@ -31,6 +34,7 @@ import java.nio.file.Paths
 import kotlin.jvm.optionals.getOrNull
 import kotlin.random.Random
 
+import kotlin.math.PI
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -101,6 +105,8 @@ class RobotLoop : TimedRobot(), Logged {
     /** Example Quad Calibration
     QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
      */
+    robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
+    robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
     routineMap = routineChooser.routineMap()
@@ -146,10 +152,22 @@ class RobotLoop : TimedRobot(), Logged {
   override fun robotPeriodic() {
     CommandScheduler.getInstance().run()
 
+    // Robot Drive Logging
     robot.field.robotPose = robot.poseSubsystem.pose
-
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
+    // Superstructure Simulation
+    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
+    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
+
+    robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get() * (180 / PI)
+    robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
+
+    robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
+
+    SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+
+    // Monologue Logging
     Monologue.updateAll()
   }
 
@@ -207,6 +225,9 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+
+    // change elevator angle according to pivot position
+    robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
 
     /*
     val inst = NetworkTableInstance.getDefault()
