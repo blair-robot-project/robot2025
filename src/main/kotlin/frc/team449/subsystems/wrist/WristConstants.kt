@@ -2,7 +2,7 @@ package frc.team449.subsystems.wrist
 
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj.util.Color8Bit
@@ -35,6 +35,6 @@ object WristConstants {
   const val KI = 0.0
   const val KD = 0.0
 
-  const val CRUISE_VEL = 1.0
-  const val MAX_ACCEL = 1.0
+  val CRUISE_VEL = RadiansPerSecond.of(2 * PI)
+  val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
 }
