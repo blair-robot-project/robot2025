@@ -105,12 +105,6 @@ class PoseSubsystem(
     this.poseEstimator.resetPose(newPose)
   }
 
-  fun getPose(){
-    getPose()
-  }
-
-
-
   override fun periodic() {
     if (isReal) {
       this.poseEstimator.update(
