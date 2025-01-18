@@ -138,7 +138,7 @@ class OrbitAlign(
       poseSubsystem.heading
     )
 
-    drive.driveFieldRelative(
+    drive.set(
       desVel
     )
   }
