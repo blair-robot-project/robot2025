@@ -2,12 +2,12 @@ package frc.team449.auto
 
 object AutoConstants {
   /** PID gains */
-  const val DEFAULT_X_KP = 2.55
-  const val DEFAULT_Y_KP = 2.55
-  const val DEFAULT_X_KD = 0.05
-  const val DEFAULT_Y_KD = 0.05
-  const val DEFAULT_ROTATION_KP = 2.45 // 2.45
-  const val DEFAULT_ROTATION_KD = 0.05
+  const val DEFAULT_X_KP = 5.0
+  const val DEFAULT_Y_KP = 5.0
+  const val DEFAULT_X_KD = 0.005
+  const val DEFAULT_Y_KD = 0.005
+  const val DEFAULT_ROTATION_KP = 3.5 // 2.45
+  const val DEFAULT_ROTATION_KD = 0.005
 
   const val ORBIT_KP = 5.0
   const val ORBIT_KD = 0.00
