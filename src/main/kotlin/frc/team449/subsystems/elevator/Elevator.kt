@@ -73,6 +73,7 @@ open class Elevator(
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(
             elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
           )
