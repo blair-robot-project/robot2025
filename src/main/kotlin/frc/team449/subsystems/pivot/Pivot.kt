@@ -5,7 +5,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.units.Units.Radians
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -73,7 +73,7 @@ class Pivot(
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
 
-    motorSimState.setRawRotorPosition(request.Position / (PivotConstants.GEARING * PivotConstants.UPR))
+    motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (PivotConstants.GEARING * PivotConstants.UPR))
   }
 
   override fun initSendable(builder: SendableBuilder) {
@@ -112,8 +112,8 @@ class Pivot(
       config.Slot0.kI = PivotConstants.KI
       config.Slot0.kD = PivotConstants.KD
 
-      config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL
-      config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL
+      config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond)
+      config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL.`in`(RadiansPerSecondPerSecond)
 
       val status1 = leadMotor.configurator.apply(config)
       if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")

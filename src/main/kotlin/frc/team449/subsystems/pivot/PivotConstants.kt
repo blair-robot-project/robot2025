@@ -2,7 +2,7 @@ package frc.team449.subsystems.pivot
 
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
 import kotlin.math.PI
 
@@ -43,6 +43,6 @@ object PivotConstants {
   const val KG_MIN = 0.0 // (KG when elevator is fully retracted.)
   const val KG_MAX = 0.0 // TODO(KG when elevator is fully extended.)
 
-  const val CRUISE_VEL = 1.0
-  const val MAX_ACCEL = 1.0
+  val CRUISE_VEL = RadiansPerSecond.of(PI)
+  val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
 }

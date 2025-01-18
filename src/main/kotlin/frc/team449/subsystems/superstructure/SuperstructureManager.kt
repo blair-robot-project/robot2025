@@ -17,7 +17,6 @@ class SuperstructureManager(
   val wrist: Wrist,
   val drive: SwerveDrive
 ) {
-  var lastRequestedGoal = SuperstructureGoal.STOW
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
@@ -35,8 +34,7 @@ class SuperstructureManager(
           elevator.setPosition(goal.elevator.`in`(Meters))
             .alongWith(wrist.setPosition(goal.wrist.`in`(Radians)))
             .andThen(pivot.setPosition((goal.pivot.`in`(Radians))))
-        ) { goal.elevator > lastRequestedGoal.elevator }
-          .andThen(InstantCommand({ lastRequestedGoal = goal }))
+        ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
   }
 

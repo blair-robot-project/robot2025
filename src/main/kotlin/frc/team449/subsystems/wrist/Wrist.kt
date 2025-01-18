@@ -4,7 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.units.Units.Radians
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -54,7 +54,7 @@ class Wrist(
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
 
-    motorSimState.setRawRotorPosition(request.Position / (WristConstants.GEARING * WristConstants.UPR))
+    motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (WristConstants.GEARING * WristConstants.UPR))
   }
 
   companion object {
@@ -81,8 +81,8 @@ class Wrist(
       config.Slot0.kI = WristConstants.KI
       config.Slot0.kD = WristConstants.KD
 
-      config.MotionMagic.MotionMagicCruiseVelocity = WristConstants.CRUISE_VEL
-      config.MotionMagic.MotionMagicAcceleration = WristConstants.MAX_ACCEL
+      config.MotionMagic.MotionMagicCruiseVelocity = WristConstants.CRUISE_VEL.`in`(RadiansPerSecond)
+      config.MotionMagic.MotionMagicAcceleration = WristConstants.MAX_ACCEL.`in`(RadiansPerSecondPerSecond)
 
       val status1 = leadMotor.configurator.apply(config)
       if (!status1.isOK) println("Error applying configs to Wrist Motor -> Error Code: $status1")
