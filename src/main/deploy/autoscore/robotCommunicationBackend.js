@@ -1,26 +1,32 @@
+/**
+ *   outlineViewer.js - Simple example of using the JS network 
+ *   tables interface to produce an Outline Viewer style display 
+ *   of all NT values.
+ */
+
+
+// Import the nt4 client as a module
+
 //Instantiate the new client
 // using `window.location.hostname` causes the client to open a 
 // NT connection on the same machine as is serving the website.
 // It could be hardcoded to point at a roboRIO if needed.
-console.log(window.location.hostname);
-var nt4Client = new NT4_Client(
+const nt4Client = new NT4_Client(
     window.location.hostname, 
     topicAnnounceHandler,
     topicUnannounceHandler,
     valueUpdateHandler,
+    parameterChange,
     onConnect,
     onDisconnect
 );
-//nt4client IMPORTANT methods
-/*
-subscribeTopicNames : list of topics name to subscribe to 
-subscribePeriodic : list of topic names, data rate in seconds
-addSample : add a sample value to a topic
-publishTopic : name of topic, type
-unSubscribe
-clearAllSubscriptions
- */
 
+// Grab a reference to the HTML object where we will put values
+var table = document.getElementById("mainTable");
+
+// Create a map to remember the topics as they are announced,
+// and what HTML table cell they should populate
+var cellTopicIDMap = new Map();
 
 // Allocate a variable to hold the subscription to all topics
 var subscription = null;
@@ -32,12 +38,7 @@ var subscription = null;
  * @param {NT4_Topic} newTopic The new topic the server just announced.
  */
 function topicAnnounceHandler( newTopic ) {
-
-    //For this example, when a new topic is announced,
-    console.log("new topic id: " + newTopic.id.toString());
-    console.log("new topic name: " + newTopic.name.toString());
-    console.log("new topic type: " + newTopic.type.toString());
-    console.log("new topic properties: " + newTopic.getPropertiesString());
+    console.log("topic announced: " + newTopic.name);
 
 }
 
@@ -48,8 +49,6 @@ function topicAnnounceHandler( newTopic ) {
  * @param {NT4_Topic} removedTopic The topic the server just un-announced.
  */
 function topicUnannounceHandler( removedTopic ) {
-    //For this example, when a topic is unannounced, we remove its row.
-    console.log("removed topic name: " + removedTopic.name.toString());
 }
 
 /**
@@ -61,9 +60,10 @@ function topicUnannounceHandler( removedTopic ) {
  * @param {*} value the new value for the topic
  */
 function valueUpdateHandler( topic, timestamp_us, value ) {
-    console.log(topicAnnounceHandler(topic));
-    console.log(timestamp_us);
-    console.log(value);
+    console.log("value updated: " + topic.name);
+    if(topic.name == "/webcom/Alliance") {
+        setAlliance(value);
+    }
 }
 
 /**
@@ -71,9 +71,10 @@ function valueUpdateHandler( topic, timestamp_us, value ) {
  * The NT4_Client will call this after every time it successfully connects to an NT4 server.
  */
 function onConnect() {
-
-    console.log("robot connected")
-    
+    console.log("connected to robot");
+    subscription = nt4Client.subscribePeriodic(["/webcom"], 0.1);
+    //Finally, update status to show we've connected.
+    changeMenu(menuChoices.CHOICE);
 }
 
 /**
@@ -81,22 +82,38 @@ function onConnect() {
  * The NT4_Client will call this after every time it disconnects to an NT4 server.
  */
 function onDisconnect() {
-    // //For this example, we simply mark the status as disconnected.
-    // console.log("robot disconnected")
+    console.log("disconnected from robot");
+    //For this example, we simply mark the status as disconnected.
+    changeMenu(menuChoices.SCREEN, "NO ROBOT CONNECTION");
 
-    // //throwing an error to stop the reconnect cycle because we have nothing planned currently
-    // throw new Error("Robot disconnected");
-    // //Since we've disconnected from the server, the connection is no longer valid.
-    // subscription = null;
+    //Since we've disconnected from the server, the connection is no longer valid.
+    subscription = null;
 }
 
-const getAlliance = () => {
-    let temporaryAlliance = "Red";
-    if(temporaryAlliance == "Red") {
+function parameterChange(changeObject) {
+    //gives an object with the change
+    
+}
+
+const setAlliance = (alliance) => {
+    console.log(alliance);
+    if(alliance == "Red") {
         document.body.style.background = "radial-gradient(circle at 50% 50%, pink, rgb(114, 114, 138))";
-    } else if(temporaryAlliance == "Blue") {
+    } else if(alliance == "Blue") {
         document.body.style.background = "radial-gradient(circle at 50% 50%, cornflowerblue, rgb(114, 114, 138))";
     }
 }
-changeMenu(menuChoices.CHOICE);
-  
+
+
+const publishCommand = (commandName) => {
+
+}
+
+const commandPath = "/webcom/Command";
+const isDonePath = "/webcom/isDone";
+
+const commandPublishTopic = nt4Client.publishNewTopic(commandPath, NT4_TYPESTR.STR);
+
+setCommand = (command) => {
+    nt4Client.addSample(commandPath, nt4Client.getServerTime_us(), command);
+}

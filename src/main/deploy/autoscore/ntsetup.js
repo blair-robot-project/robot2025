@@ -1,5 +1,3 @@
-"use strict";
-
 // Serializes a value to a MessagePack byte array.
 //
 // data: The value to serialize. This can be a scalar, array or object.
@@ -569,7 +567,6 @@ else {
  */
 
 
-
 /**
  * Lookup from type string to type integer
  */
@@ -696,6 +693,9 @@ class NT4_Topic {
         for (var key in this.properties){
             retStr += key + ":" + this.properties[key] + ", ";
         }
+        if(Object.keys(this.properties).length == 1) {
+            retStr = retStr.slice(0, -2);
+        }
         retStr += "}";
         return retStr;
     }
@@ -713,6 +713,7 @@ class NT4_Client {
      * @param {function} onTopicAnnounce_in User-supplied callback function for whenever a new topic is announced.
      * @param {function} onTopicUnAnnounce_in User-supplied callback function for whenever a topic is unnanounced.
      * @param {function} onNewTopicData_in User-supplied callback function for when the client gets new values for a topic
+     * @param {function} onParameterChange User-supplied callback function for when a parameter changes
      * @param {function} onConnect_in User-supplied callback function for when the client successfully connects to the server
      * @param {function} onDisconnect_in User-supplied callback for when the client is disconnected from the server
      */
@@ -720,6 +721,7 @@ class NT4_Client {
         onTopicAnnounce_in,   
         onTopicUnAnnounce_in, 
         onNewTopicData_in,    
+        onParameterChange,
         onConnect_in,         
         onDisconnect_in) {    
 
@@ -727,6 +729,7 @@ class NT4_Client {
         this.onTopicUnAnnounce = onTopicUnAnnounce_in;
         this.onNewTopicData = onNewTopicData_in;
         this.onConnect = onConnect_in;
+        this.paramChange = onParameterChange;
         this.onDisconnect = onDisconnect_in;
 
         this.subscriptions = new Map();
@@ -903,7 +906,6 @@ class NT4_Client {
      * @param {*} value The value to pass in
      */
     addSample(topic, timestamp, value) {
-
         if (typeof topic === 'string') {
             var topicFound = false;
             //Slow-lookup - strings are assumed to be topic names for things the server has already announced.
@@ -921,6 +923,13 @@ class NT4_Client {
 
         var sourceData = [topic.pubuid, timestamp, topic.getTypeIdx(), value];
         var txData = msgpack.serialize(sourceData);
+        if(topic.name != "Time") {
+            console.log("\n\n\n");
+            console.log(value);
+            console.log(topic);
+            console.log("\n\n\n");
+        }
+
 
         this.ws_sendBinary(txData);
     }
@@ -1044,8 +1053,7 @@ class NT4_Client {
 
         //Clear out any local cache of server state
         this.announcedTopics.clear();
-
-        console.log('[NT4] Socket is closed. Reconnect will be attempted in 0.5 second.', e.reason);
+        console.log('[NT4] Socket is closed. Reconnect will be attempted in 0.5 seconds.', e.reason);
         setTimeout(this.ws_connect.bind(this), 500);
 
         if (!e.wasClean) {
@@ -1061,6 +1069,7 @@ class NT4_Client {
 
     ws_onMessage(e) {
         if (typeof e.data === 'string') {
+            console.log("1064")
             console.log("[NT4] Server Says: " + e.data);
             //JSON Message
             var rxArray = JSON.parse(e.data);
@@ -1092,6 +1101,7 @@ class NT4_Client {
                 }
 
                 // Message validates reasonably, switch based on supported methods
+                console.log(method)
                 if (method === "announce") {
 
                     //Check to see if we already knew about this topic. If not, make a new object.
@@ -1133,6 +1143,11 @@ class NT4_Client {
 
                 } else if (method === "properties") {
                     //TODO support property changes
+                    //fine, i'll do it myself - edem
+                    console.log("[NT4] Ignoring properties, not implemented yet.");
+                    console.log(params)
+                    let change = params.update
+                    this.paramChange(change);
                 } else {
                     console.log("[NT4] Ignoring text message - unknown method " + method);
                     return;
@@ -1164,9 +1179,9 @@ class NT4_Client {
 
     ws_connect() {
 
-        this.clientIdx = 449; //Not great, but using it for now
+        this.clientIdx = 449;
 
-        var port = 5810;
+        var port = 5810; //fallback - unsecured
         var prefix = "ws://";
 
         this.serverAddr = prefix + this.serverBaseAddr + ":" + port.toString() + "/nt/" + "JSClient_" + this.clientIdx.toString();

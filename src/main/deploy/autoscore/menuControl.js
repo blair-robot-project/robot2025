@@ -43,6 +43,7 @@ const changeMenu = (menuVal, screenmsg) => {
         confirmReefButton.innerText = "Choose Robot Alignment";
     } else if (menu == "screen") {
         screenChangeContainer.style.display = "";
+        document.body.style.background = "rgb(114, 114, 138)"
         document.getElementById("msgDisplayer").innerText = screenmsg;
     } else if (menu == "choice") {
         choiceContainer.style.display = "";
@@ -98,4 +99,4 @@ confirmReefButton.onclick = async () => {
     }
 }
 
-changeMenu("none");
+changeMenu(menuChoices.SCREEN, "NO ROBOT CONNECTION");
