@@ -1,22 +1,22 @@
 package frc.team449.subsystems.elevator
 
+import com.ctre.phoenix6.BaseStatusSignal
+import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.util.sendable.SendableBuilder
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.subsystems.RobotConstants
-import frc.team449.subsystems.SuperstructureConstants
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.wrist.WristConstants
-import frc.team449.system.motor.createKraken
 import java.util.function.Supplier
-import kotlin.math.PI
 import kotlin.math.abs
 
 open class Elevator(
@@ -27,21 +27,12 @@ open class Elevator(
   open val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
   open val targetSupplier = Supplier { request.Position }
 
-  val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
-    DCMotor.getKrakenX60(1),
-    1 / ElevatorConstants.GEARING,
-    ElevatorConstants.CARRIAGE_MASS,
-    ElevatorConstants.PULLEY_RADIUS,
-    ElevatorConstants.MIN_HEIGHT,
-    ElevatorConstants.MAX_HEIGHT,
-    simulateGravity = false,
-    PI / 12
-  )
+  lateinit var elevatorFeedForward: ElevatorFeedForward
 
-  val simPositionSupplier = Supplier { elevatorSim.positionMeters }
+  open val elevatorSim: TiltedElevatorSim? = null
 
   val mech: Mechanism2d = Mechanism2d(3.0, 3.0, Color8Bit(0, 0, 0))
-  val rootElevator: MechanismRoot2d = mech.getRoot("elevatorRoot", 0.25, 0.25)
+  private val rootElevator: MechanismRoot2d = mech.getRoot("elevatorRoot", 0.25, 0.25)
   val elevatorLigament: MechanismLigament2d = rootElevator.append(
     MechanismLigament2d(
       "elevatorLigament",
@@ -73,16 +64,20 @@ open class Elevator(
   )
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
-    SuperstructureConstants.STOW_POSITIONS.second
+    SuperstructureGoal.STOW.elevator.`in`(Meters)
   )
 
-  private fun setPosition(position: Double): Command {
-    return this.runOnce {
+  // last request is sticky
+  fun setPosition(position: Double): Command {
+    return this.run {
       motor.setControl(
-        request.withPosition(position)
-          .withFeedForward(0.0)
+        request
+          .withPosition(position)
+          .withFeedForward(
+            elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
+          )
       )
-    }
+    }.until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -93,32 +88,8 @@ open class Elevator(
     return runOnce { motor.setVoltage(3.0) }
   }
 
-  fun stow(): Command {
-    return setPosition(SuperstructureConstants.STOW_POSITIONS.second)
-  }
-
-  fun L1(): Command {
-    return setPosition(SuperstructureConstants.L1_POSITIONS.second)
-  }
-
-  fun L2(): Command {
-    return setPosition(SuperstructureConstants.L2_POSITIONS.second)
-  }
-
-  fun L3(): Command {
-    return setPosition(SuperstructureConstants.L3_POSITIONS.second)
-  }
-
-  fun L4(): Command {
-    return setPosition(SuperstructureConstants.L4_POSITIONS.second)
-  }
-
-  fun hold(): Command {
-    return setPosition(targetSupplier.get())
-  }
-
   fun stop(): Command {
-    return this.run { motor.stopMotor() }
+    return this.runOnce { motor.stopMotor() }
   }
 
   private fun atSetpoint(): Boolean {
@@ -126,11 +97,6 @@ open class Elevator(
   }
 
   override fun periodic() {}
-
-  override fun simulationPeriodic() {
-    elevatorSim.setInputVoltage(MathUtil.clamp(motor.motorVoltage.valueAsDouble, -12.0, 12.0))
-    elevatorSim.update(RobotConstants.LOOP_TIME)
-  }
 
   override fun initSendable(builder: SendableBuilder) {
     builder.publishConstString("1.0", "Elevator Info")
@@ -144,8 +110,68 @@ open class Elevator(
 
   companion object {
     fun createElevator(): Elevator {
-      val elevatorMotor: TalonFX = createKraken(ElevatorConstants.MOTOR_ID, false)
-      return Elevator(elevatorMotor)
+      // TODO(Fill in parameters.)
+      val leadMotor = TalonFX(ElevatorConstants.LEAD_MOTOR_ID)
+      val followerMotor = TalonFX(ElevatorConstants.FOLLOWER_MOTOR_ID)
+      val config = TalonFXConfiguration()
+
+      config.MotorOutput.Inverted = ElevatorConstants.INVERTED
+      config.MotorOutput.NeutralMode = ElevatorConstants.BRAKE_MODE
+      config.MotorOutput.DutyCycleNeutralDeadband = 0.001
+      config.Feedback.SensorToMechanismRatio = 1 / (ElevatorConstants.GEARING * ElevatorConstants.UPR)
+
+      config.CurrentLimits.StatorCurrentLimitEnable = true
+      config.CurrentLimits.SupplyCurrentLimitEnable = true
+      config.CurrentLimits.StatorCurrentLimit = ElevatorConstants.STATOR_LIM
+      config.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.SUPPLY_LIM
+
+      /** If we gonna have FOC in the future
+       config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)
+       config.TorqueCurrent.PeakReverseTorqueCurrent = -torqueCurrentLimit.`in`(Amps)
+       **/
+
+      config.Slot0.kP = ElevatorConstants.KP
+      config.Slot0.kI = ElevatorConstants.KI
+      config.Slot0.kD = ElevatorConstants.KD
+
+      config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.CRUISE_VEL
+      config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL
+
+      val status1 = leadMotor.configurator.apply(config)
+      if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")
+
+      val status2 = followerMotor.configurator.apply(config)
+      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status1")
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        ElevatorConstants.VALUE_UPDATE_RATE,
+        leadMotor.position,
+        leadMotor.velocity,
+        leadMotor.motorVoltage,
+        leadMotor.supplyCurrent,
+        leadMotor.statorCurrent,
+        leadMotor.deviceTemp
+      )
+
+      leadMotor.optimizeBusUtilization()
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        ElevatorConstants.VALUE_UPDATE_RATE,
+        followerMotor.position,
+        followerMotor.velocity,
+        followerMotor.motorVoltage,
+        followerMotor.supplyCurrent,
+        followerMotor.statorCurrent,
+        followerMotor.deviceTemp
+      )
+
+      followerMotor.optimizeBusUtilization()
+
+      followerMotor.setControl(
+        Follower(ElevatorConstants.LEAD_MOTOR_ID, ElevatorConstants.FOLLOWER_INVERTED_TO_MASTER)
+      )
+
+      return if (RobotBase.isReal()) Elevator(leadMotor) else ElevatorSim(leadMotor)
     }
   }
 }
