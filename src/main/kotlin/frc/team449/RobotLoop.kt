@@ -14,11 +14,15 @@ import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorConstants
+import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
+import kotlin.jvm.optionals.getOrNull
+import kotlin.math.PI
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -48,6 +52,9 @@ class RobotLoop : TimedRobot(), Logged {
 //      instance.stopServer()
 //      instance.startClient4("localhost")
     }
+
+    robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
+    robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
     val routines = Routines(robot)
@@ -84,19 +91,13 @@ class RobotLoop : TimedRobot(), Logged {
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
     // Superstructure Simulation
-    if (RobotBase.isReal()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
+    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
+    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
-      robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get()
-      robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get()
-    } else if (RobotBase.isSimulation()) {
-      robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.simPositionSupplier.get()
-      robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_HEIGHT + robot.elevator.targetSupplier.get()
+    robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get() * (180 / PI)
+    robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
 
-      robot.elevator.elevatorSim.changeAngle(robot.pivot.simPositionSupplier.get())
-      robot.pivot.pivotSim.changeArmLength(robot.elevator.simPositionSupplier.get())
-    }
+    robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 
@@ -140,5 +141,8 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+
+    // change elevator angle according to pivot position
+    robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
   }
 }

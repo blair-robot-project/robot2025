@@ -111,7 +111,7 @@ class OrbitAlign(
     dx = xScaled - prevX
     dy = yScaled - prevY
     magAcc = hypot(dx / dt, dy / dt)
-    magAccClamped = MathUtil.clamp(magAcc, -RobotConstants.MAX_ACCEL, RobotConstants.MAX_ACCEL)
+    magAccClamped = MathUtil.clamp(magAcc, -drive.accel, drive.accel)
 
     val factor = if (magAcc == 0.0) 0.0 else magAccClamped / magAcc
     val dxClamped = dx * factor

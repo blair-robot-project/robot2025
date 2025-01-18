@@ -52,7 +52,7 @@ class LengthPivotSim(
     *measurementStdDevs
   )
 
-  fun changeArmLength(newArmLengthMeters: Double) {
+  fun setArmLength(newArmLengthMeters: Double) {
     this.m_armLenMeters = newArmLengthMeters
   }
 

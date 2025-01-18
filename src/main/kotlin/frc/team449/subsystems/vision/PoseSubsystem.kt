@@ -158,14 +158,16 @@ class PoseSubsystem(
           visionPose[1 + 3 * index] = estVisionPose.y
           visionPose[2 + 3 * index] = estVisionPose.rotation.radians
 
+          val inAmbiguityTolerance = avgAmbiguity[index] <= VisionConstants.MAX_AMBIGUITY
+          val inDistanceTolerance = (numTargets[index] < 2 && tagDistance[index] <= VisionConstants.MAX_DISTANCE_SINGLE_TAG) ||
+            (numTargets[index] >= 2 && tagDistance[index] <= VisionConstants.MAX_DISTANCE_MULTI_TAG + (numTargets[index] - 2) * VisionConstants.NUM_TAG_FACTOR)
+          val inHeightTolerance = heightError[index] < VisionConstants.MAX_HEIGHT_ERR_METERS
+
           if (presentResult.timestampSeconds > 0 &&
             inGyroTolerance(estVisionPose.rotation) &&
-            avgAmbiguity[index] <= VisionConstants.MAX_AMBIGUITY &&
-            (
-              numTargets[index] < 2 && tagDistance[index] <= VisionConstants.MAX_DISTANCE_SINGLE_TAG ||
-                numTargets[index] >= 2 && tagDistance[index] <= VisionConstants.MAX_DISTANCE_MULTI_TAG + (numTargets[index] - 2) * VisionConstants.NUM_TAG_FACTOR
-              ) &&
-            heightError[index] < VisionConstants.MAX_HEIGHT_ERR_METERS
+            inAmbiguityTolerance &&
+            inDistanceTolerance &&
+            inHeightTolerance
           ) {
             if (enableVisionFusion) {
               val interpolatedPose = InterpolatedVision.interpolatePose(estVisionPose, index)

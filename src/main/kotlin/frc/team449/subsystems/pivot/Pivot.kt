@@ -1,14 +1,14 @@
 package frc.team449.subsystems.pivot
 
+import com.ctre.phoenix6.BaseStatusSignal
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.units.Units.Radians
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.subsystems.SuperstructureConstants
-import frc.team449.subsystems.elevator.ElevatorConstants
-import frc.team449.system.motor.createKraken
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import java.util.function.Supplier
 import kotlin.math.abs
 
@@ -20,30 +20,34 @@ class Pivot(
   val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
   val targetSupplier = Supplier { request.Position }
 
-  val pivotSim = LengthPivotSim(
-    DCMotor.getKrakenX60(1),
-    1 / PivotConstants.GEARING,
-    PivotConstants.MOMENT_OF_INERTIA,
-    PivotConstants.ARM_LENGTH,
-    PivotConstants.MIN_ANGLE,
-    PivotConstants.MAX_ANGLE,
-    false,
-    PivotConstants.MIN_ANGLE
-  )
+  lateinit var pivotFeedForward: PivotFeedForward
 
-  val simPositionSupplier = Supplier { pivotSim.angleRads }
+//  val pivotSim = LengthPivotSim(
+//    DCMotor.getKrakenX60(1),
+//    1 / PivotConstants.GEARING,
+//    PivotConstants.MOMENT_OF_INERTIA,
+//    PivotConstants.ARM_LENGTH,
+//    PivotConstants.MIN_ANGLE,
+//    PivotConstants.MAX_ANGLE,
+//    false,
+//    PivotConstants.MIN_ANGLE
+//  )
+//
+//  val simPositionSupplier = Supplier { pivotSim.angleRads }
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
-    SuperstructureConstants.STOW_POSITIONS.first
+    SuperstructureGoal.STOW.pivot.`in`(Radians)
   )
 
-  private fun setPosition(position: Double): Command {
-    return this.runOnce {
+  // last request is sticky
+  fun setPosition(position: Double): Command {
+    return this.run {
       motor.setControl(
-        request.withPosition(position)
-          .withFeedForward(0.0)
+        request
+          .withPosition(position)
+          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble))
       )
-    }
+    }.until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -54,41 +58,20 @@ class Pivot(
     return runOnce { motor.setVoltage(3.0) }
   }
 
-  fun stow(): Command {
-    return setPosition(SuperstructureConstants.STOW_POSITIONS.first)
-  }
-
-  fun L1(): Command {
-    return setPosition(SuperstructureConstants.L1_POSITIONS.first)
-  }
-
-  fun L2(): Command {
-    return setPosition(SuperstructureConstants.L2_POSITIONS.first)
-  }
-
-  fun L3(): Command {
-    return setPosition(SuperstructureConstants.L3_POSITIONS.first)
-  }
-
-  fun L4(): Command {
-    return setPosition(SuperstructureConstants.L4_POSITIONS.first)
-  }
-
-  fun hold(): Command {
-    return setPosition(targetSupplier.get())
-  }
-
   fun stop(): Command {
-    return this.run { motor.stopMotor() }
+    return this.runOnce { motor.stopMotor() }
   }
 
   private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < ElevatorConstants.TOLERANCE)
+    return (abs(positionSupplier.get() - request.Position) < PivotConstants.TOLERANCE)
   }
 
   override fun periodic() {}
 
   override fun simulationPeriodic() {
+    val motorSimState = motor.simState
+
+    motorSimState.setRawRotorPosition(request.Position / (PivotConstants.GEARING * PivotConstants.UPR))
   }
 
   override fun initSendable(builder: SendableBuilder) {
@@ -103,9 +86,45 @@ class Pivot(
 
   companion object {
     fun createPivot(): Pivot {
-      val motor: TalonFX = createKraken(PivotConstants.MOTOR_ID, false)
+      val leadMotor = TalonFX(PivotConstants.MOTOR_ID)
+      val config = TalonFXConfiguration()
 
-      return Pivot(motor)
+      config.MotorOutput.Inverted = PivotConstants.INVERTED
+      config.MotorOutput.NeutralMode = PivotConstants.BRAKE_MODE
+      config.MotorOutput.DutyCycleNeutralDeadband = 0.001
+      config.Feedback.SensorToMechanismRatio = 1 / (PivotConstants.GEARING * PivotConstants.UPR)
+
+      config.CurrentLimits.StatorCurrentLimitEnable = true
+      config.CurrentLimits.SupplyCurrentLimitEnable = true
+      config.CurrentLimits.StatorCurrentLimit = PivotConstants.STATOR_LIM
+      config.CurrentLimits.SupplyCurrentLimit = PivotConstants.SUPPLY_LIM
+
+      /** If we gonna have FOC in the future
+       config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)
+       config.TorqueCurrent.PeakReverseTorqueCurrent = -torqueCurrentLimit.`in`(Amps)
+       **/
+
+      config.Slot0.kP = PivotConstants.KP
+      config.Slot0.kI = PivotConstants.KI
+      config.Slot0.kD = PivotConstants.KD
+
+      config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL
+      config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL
+
+      val status1 = leadMotor.configurator.apply(config)
+      if (!status1.isOK) println("Error applying configs to Pivot Motor -> Error Code: $status1")
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        PivotConstants.VALUE_UPDATE_RATE,
+        leadMotor.position,
+        leadMotor.velocity,
+        leadMotor.motorVoltage,
+        leadMotor.supplyCurrent,
+        leadMotor.statorCurrent,
+        leadMotor.deviceTemp
+      )
+
+      return Pivot(leadMotor)
     }
   }
 }
