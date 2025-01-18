@@ -2,6 +2,7 @@ package frc.team449.subsystems.pivot
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.units.Units.Radians
@@ -45,6 +46,7 @@ class Pivot(
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble))
       )
     }.until(::atSetpoint)
@@ -86,7 +88,9 @@ class Pivot(
 
   companion object {
     fun createPivot(): Pivot {
-      val leadMotor = TalonFX(PivotConstants.MOTOR_ID)
+      val leadMotor = TalonFX(PivotConstants.LEAD_MOTOR_ID)
+      val followerMotor = TalonFX(PivotConstants.FOLLOWER_MOTOR_ID)
+
       val config = TalonFXConfiguration()
 
       config.MotorOutput.Inverted = PivotConstants.INVERTED
@@ -112,7 +116,10 @@ class Pivot(
       config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL
 
       val status1 = leadMotor.configurator.apply(config)
-      if (!status1.isOK) println("Error applying configs to Pivot Motor -> Error Code: $status1")
+      if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")
+
+      val status2 = followerMotor.configurator.apply(config)
+      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status2")
 
       BaseStatusSignal.setUpdateFrequencyForAll(
         PivotConstants.VALUE_UPDATE_RATE,
@@ -122,6 +129,24 @@ class Pivot(
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
         leadMotor.deviceTemp
+      )
+
+      leadMotor.optimizeBusUtilization()
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        PivotConstants.VALUE_UPDATE_RATE,
+        followerMotor.position,
+        followerMotor.velocity,
+        followerMotor.motorVoltage,
+        followerMotor.supplyCurrent,
+        followerMotor.statorCurrent,
+        followerMotor.deviceTemp
+      )
+
+      followerMotor.optimizeBusUtilization()
+
+      followerMotor.setControl(
+        Follower(PivotConstants.LEAD_MOTOR_ID, PivotConstants.FOLLOWER_INVERTED_TO_MASTER)
       )
 
       return Pivot(leadMotor)
