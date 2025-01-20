@@ -3,7 +3,6 @@ package frc.team449
 import com.ctre.phoenix6.SignalLogger
 import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
-import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.util.Units
@@ -29,14 +28,12 @@ import kotlin.jvm.optionals.getOrNull
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
-@Logged(name = "Robot2025")
 class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
-  private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
@@ -85,6 +82,9 @@ class RobotLoop : TimedRobot() {
 
     DogLog.setPdh(robot.powerDistribution)
 
+    SmartDashboard.putData("Field", robot.field)
+    SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+
     URCL.start()
   }
 
@@ -107,8 +107,6 @@ class RobotLoop : TimedRobot() {
     robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
 
     robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
-
-    SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
   }
 
   override fun autonomousInit() {
