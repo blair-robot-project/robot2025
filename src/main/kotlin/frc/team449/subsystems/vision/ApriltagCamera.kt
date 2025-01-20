@@ -110,17 +110,22 @@ class ApriltagCamera(
 
   private val reefAprilTagIDs = setOf(6, 7, 8, 9, 10, 11, 17)
 
-  fun tagAim() {
-    val results = cam.allUnreadResults
-    if (!results.isEmpty()) {
-      var result = results.get(results.size - 1);
-      if (result.hasTargets()) {
+  fun joe() {
 
-      }
+      //
+      //  joe joe joe   joe joe joe
+      //  joe     joe   joe     joe
+      //  joe joe joe   joe joe joe
+      //
+      //             joe
+      //
+      //   joe                 joe
+      //      joe           joe
+      //         joe joe joe
     }
 
     fun simulationPeriodic(robotSimPose: Pose2d?) {
       visionSystemSim!!.update(robotSimPose)
     }
   }
-}
+
