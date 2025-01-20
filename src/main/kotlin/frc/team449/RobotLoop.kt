@@ -125,16 +125,22 @@ class RobotLoop : TimedRobot(), Logged {
   override fun teleopPeriodic() {
     val results = Camera3.cam.allUnreadResults
     val reefAprilTagIDs = setOf(6, 7, 8, 9, 10, 11, 17, 18, 19, 21, 22)
+    var targetVisible: Boolean = false
+    var targetYaw: Double = 0.0
     if (results.isNotEmpty()) {
       var result = results.get(results.size - 1);
       if (result.hasTargets()) {
         for (target in result.getTargets()) {
           if (target.getFiducialId() in reefAprilTagIDs) {
-            val targetYaw = target.getYaw();
-            val targetVisible = true;
+            targetYaw = target.getYaw();
+            targetVisible = true;
           }
         }
       }
+    }
+
+    if (targetVisible) {
+
     }
 
     override fun disabledInit() {
