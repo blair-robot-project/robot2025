@@ -35,7 +35,8 @@ class ChoreoRoutine(
   private val resetPosition: Boolean = false,
   private val resetPositionTolerance: Pose2d = Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)),
   private val timeout: Double = 0.65,
-  private val debug: Boolean = false
+  private val debug: Boolean = false,
+  private val stopDriveAfterTraj: Boolean = true
 ) {
 
   private fun resetPose(trajectory: ChoreoTrajectory): Command {
@@ -74,8 +75,9 @@ class ChoreoRoutine(
             poseTol,
             timeout,
             resetPosition,
-            debug
-          ).andThen(drive::stop, drive),
+            debug,
+            stopDriveAfterTraj
+          ),
           parallelEventMap.getOrDefault(i, InstantCommand())
         )
       )

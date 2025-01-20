@@ -35,14 +35,9 @@ object VisionConstants {
   val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape)
 
   /** Robot to Camera distance */
-  val backLeft = Transform3d(
-    Translation3d(Units.inchesToMeters(-10.696), Units.inchesToMeters(10.848), Units.inchesToMeters(9.11)),
-    Rotation3d(0.0, Units.degreesToRadians(-20.0), Units.degreesToRadians(180.0 + 7.5))
-  )
-
-  val backRight = Transform3d(
-    Translation3d(Units.inchesToMeters(-10.696), Units.inchesToMeters(-10.848), Units.inchesToMeters(9.11)),
-    Rotation3d(0.0, Units.degreesToRadians(-28.125), Units.degreesToRadians(180.0 - 7.5))
+  val front = Transform3d(
+    Translation3d(Units.inchesToMeters(-2.0), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.0)),
+    Rotation3d(0.0, Units.degreesToRadians(-28.5), Units.degreesToRadians(25.0))
   )
 
   val TAG_MODEL = TargetModel(
@@ -68,9 +63,9 @@ object VisionConstants {
 
   /** Vision Sim Setup Constants */
   const val SIM_FPS = 25.0
-  const val SIM_CAMERA_HEIGHT_PX = 800
-  const val SIM_CAMERA_WIDTH_PX = 1280
-  const val SIM_FOV_DEG = 79.09
+  const val SIM_CAMERA_HEIGHT_PX = 1200 // 800
+  const val SIM_CAMERA_WIDTH_PX = 1600 // 1280
+  const val SIM_FOV_DEG = 87.6115 // 79.09
   const val SIM_CALIB_AVG_ERR_PX = 0.35
   const val SIM_CALIB_ERR_STDDEV_PX = 0.30
   const val SIM_AVG_LATENCY = 40.0
@@ -80,21 +75,15 @@ object VisionConstants {
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
 //    ApriltagCamera(
-//      "back_left",
+//      "reefCam",
 //      TAG_LAYOUT,
-//      backLeft,
+//      front,
 //      VISION_SIM
 //    ),
-//    ApriltagCamera(
-//      "back_right",
-//      TAG_LAYOUT,
-//      backRight,
-//      VISION_SIM
-//    )
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(
-//    InterpolatedVisionDataset.HOMELEFT,
+//    InterpolatedVisionDataset.HOMEFRONT,
 //    InterpolatedVisionDataset.HOMERIGHT
   )
 
