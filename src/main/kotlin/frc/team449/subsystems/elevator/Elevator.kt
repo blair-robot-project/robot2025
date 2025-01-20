@@ -25,7 +25,8 @@ open class Elevator(
 
   open val positionSupplier = Supplier { motor.position.valueAsDouble }
   open val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
-  open val targetSupplier = Supplier { request.Position }
+  open val targetSupplier = Supplier { motor.closedLoopReference.valueAsDouble }
+  open val goalSupplier = Supplier { request.Position }
 
   lateinit var elevatorFeedForward: ElevatorFeedForward
 
@@ -73,6 +74,7 @@ open class Elevator(
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(
             elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
           )
@@ -103,8 +105,9 @@ open class Elevator(
     builder.addDoubleProperty("1.1 Voltage", { motor.motorVoltage.valueAsDouble }, null)
     builder.addDoubleProperty("1.2 Position", { positionSupplier.get() }, null)
     builder.addDoubleProperty("1.3 Velocity", { velocitySupplier.get() }, null)
-    builder.addDoubleProperty("1.4 Desired Position", { request.Position }, null)
-    builder.addBooleanProperty("1.5 At Tolerance", { atSetpoint() }, null)
+    builder.addDoubleProperty("1.4 Desired Target", { request.Position }, null)
+    builder.addDoubleProperty("1.5 Desired Target", { goalSupplier.get() }, null)
+    builder.addBooleanProperty("1.6 At Tolerance", { atSetpoint() }, null)
     // builder.addStringProperty("1.7 Command", {this.currentCommand.name}, null)
   }
 
@@ -118,7 +121,7 @@ open class Elevator(
       config.MotorOutput.Inverted = ElevatorConstants.INVERTED
       config.MotorOutput.NeutralMode = ElevatorConstants.BRAKE_MODE
       config.MotorOutput.DutyCycleNeutralDeadband = 0.001
-      config.Feedback.SensorToMechanismRatio = 1 / (ElevatorConstants.GEARING * ElevatorConstants.UPR)
+      config.Feedback.SensorToMechanismRatio = ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR
 
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
@@ -141,7 +144,7 @@ open class Elevator(
       if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")
 
       val status2 = followerMotor.configurator.apply(config)
-      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status1")
+      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status2")
 
       BaseStatusSignal.setUpdateFrequencyForAll(
         ElevatorConstants.VALUE_UPDATE_RATE,

@@ -21,7 +21,7 @@ object AutoUtil {
   )
 
   /** You will need to change this based on how the field is set up each year */
-  fun transformForRed(pathGroup: MutableList<ChoreoTrajectory>): MutableList<ChoreoTrajectory> {
+  fun transformForRedAlliance(pathGroup: MutableList<ChoreoTrajectory>): MutableList<ChoreoTrajectory> {
     for (index in 0 until pathGroup.size) {
       for (time in pathGroup[index].objectiveTimestamps) {
         val currentMatrix = pathGroup[index].stateMap.get(time)
@@ -34,6 +34,29 @@ object AutoUtil {
           MathUtil.angleModulus(PI - currentMatrix[0, 2]),
           -currentMatrix[1, 0],
           currentMatrix[1, 1],
+          -currentMatrix[1, 2]
+        )
+
+        pathGroup[index].stateMap.put(time, newMatrix)
+      }
+    }
+
+    return pathGroup
+  }
+
+  fun transformForBlueStage(pathGroup: MutableList<ChoreoTrajectory>): MutableList<ChoreoTrajectory> {
+    for (index in 0 until pathGroup.size) {
+      for (time in pathGroup[index].objectiveTimestamps) {
+        val currentMatrix = pathGroup[index].stateMap.get(time)
+
+        val newMatrix = MatBuilder.fill(
+          Nat.N2(),
+          Nat.N3(),
+          currentMatrix[0, 0],
+          FieldConstants.fieldWidth - currentMatrix[0, 1],
+          -currentMatrix[0, 2],
+          currentMatrix[1, 0],
+          -currentMatrix[1, 1],
           -currentMatrix[1, 2]
         )
 

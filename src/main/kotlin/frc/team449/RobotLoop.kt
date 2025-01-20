@@ -3,6 +3,7 @@ package frc.team449
 import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -13,6 +14,7 @@ import frc.team449.auto.RoutineChooser
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
+import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorConstants
 import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
@@ -22,8 +24,8 @@ import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
+import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
-import kotlin.math.PI
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -57,9 +59,11 @@ class RobotLoop : TimedRobot(), Logged {
 //      instance.startClient4("localhost")
     }
 
+    // Custom Feedforwards
     robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
     robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
 
+    // Generate Auto Routines
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
     routineMap = routineChooser.routineMap()
     println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
@@ -81,6 +85,8 @@ class RobotLoop : TimedRobot(), Logged {
 
   override fun driverStationConnected() {
     Monologue.setFileOnly(DriverStation.isFMSAttached())
+
+    FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
   }
 
   override fun robotPeriodic() {
@@ -94,10 +100,10 @@ class RobotLoop : TimedRobot(), Logged {
     robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
     robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
-    robot.elevator.elevatorLigament.angle = robot.pivot.positionSupplier.get() * (180 / PI)
-    robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
+    robot.elevator.elevatorLigament.angle = Units.radiansToDegrees(robot.pivot.positionSupplier.get())
+    robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
 
-    robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
+    robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 

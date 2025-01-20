@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -22,13 +23,20 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
-    driveController.a().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-    )
+    /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
+     * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
+     */
+    SCORE_L1()
+    SCORE_L2()
+    SCORE_L3()
+    SCORE_L4()
 
-    driveController.b().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
-    )
+    PREMOVE_L1()
+    PREMOVE_L2()
+    PREMOVE_L3()
+    PREMOVE_L4()
+
+    STOW()
   }
 
   private fun nonRobotBindings() {
@@ -37,6 +45,64 @@ class ControllerBindings(
     if (RobotBase.isSimulation()) resetOdometrySim()
 
     resetGyro()
+  }
+
+  private fun STOW() {
+    mechanismController.rightBumper().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+    )
+  }
+
+  private fun SCORE_L1() {
+    driveController.a().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+    )
+  }
+
+  private fun SCORE_L2() {
+    driveController.x().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
+        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+    )
+  }
+
+  private fun SCORE_L3() {
+    driveController.b().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
+        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+    )
+  }
+
+  private fun SCORE_L4() {
+    mechanismController.y().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+    )
+  }
+
+  private fun PREMOVE_L1() {
+    mechanismController.a().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
+    )
+  }
+
+  private fun PREMOVE_L2() {
+    mechanismController.x().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PREMOVE)
+    )
+  }
+
+  private fun PREMOVE_L3() {
+    mechanismController.b().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)
+    )
+  }
+
+  private fun PREMOVE_L4() {
+    mechanismController.y().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+    )
   }
 
   private fun slowDrive() {

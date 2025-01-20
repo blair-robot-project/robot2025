@@ -32,7 +32,7 @@ class ExampleRoutine(
 
   override val trajectory: MutableList<ChoreoTrajectory> =
     if (isRed) {
-      AutoUtil.transformForRed(
+      AutoUtil.transformForRedAlliance(
         ChoreoTrajectory.createTrajectory(arrayListOf("part1", "part2"), "example")
       )
     } else {
