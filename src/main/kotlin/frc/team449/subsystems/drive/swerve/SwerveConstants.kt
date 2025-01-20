@@ -62,6 +62,9 @@ object SwerveConstants {
   const val TURN_UPR = 2 * PI
   val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.85) // (12 - DRIVE_KS) / DRIVE_KV
 
+  val MAX_DRIVE_SPEED = 3.5 // estimate
+  val DRIVE_CURRENT_LIMIT = 40.0
+
   val DRIVE_SUPPLY_LIMIT = Amps.of(0.0)
   val DRIVE_FOC_CURRENT_LIMIT = Amps.of(80.0)
   val DRIVE_SUPPLY_BOOST = Amps.of(55.0)
@@ -75,6 +78,11 @@ object SwerveConstants {
   const val JOYSTICK_FILTER_ORDER = 2
   const val ROT_FILTER_ORDER = 1.25
   const val SKEW_CONSTANT = 15.5
+
+  /** module config **/
+  const val MASS: Double = 135.0 // estimate
+  const val MOI: Double = 6.0 // estimate
+  const val COF_WHEELS_CARPET: Double = 0.8 // estimate
 
   /** Wheelbase = wheel-to-wheel distance from front to back of the robot */
   /** Trackwidth = wheel-to-wheel distance from side to side of the robot */

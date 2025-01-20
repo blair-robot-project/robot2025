@@ -1,12 +1,3 @@
-/**
- *   outlineViewer.js - Simple example of using the JS network 
- *   tables interface to produce an Outline Viewer style display 
- *   of all NT values.
- */
-
-
-// Import the nt4 client as a module
-
 //Instantiate the new client
 // using `window.location.hostname` causes the client to open a 
 // NT connection on the same machine as is serving the website.
@@ -92,7 +83,6 @@ function onDisconnect() {
 
 function parameterChange(changeObject) {
     //gives an object with the change
-    
 }
 
 const setAlliance = (alliance) => {

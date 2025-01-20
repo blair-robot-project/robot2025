@@ -1,14 +1,23 @@
 package frc.team449.subsystems.drive.swerve
 
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.config.ModuleConfig
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.config.RobotConfig
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.util.sendable.SendableBuilder
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
@@ -31,6 +40,53 @@ open class SwerveDrive(
   val maxModuleSpeed: Double
 ) : SubsystemBase() {
 
+  init {
+
+    AutoBuilder.configure(
+      //this.getPose() , // poseSupplier - a supplier for the robot's current pose
+      { Robot().poseSubsystem.pose } ,
+      { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
+      // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds:
+      { this.currentSpeeds } ,
+//     output - Output function that accepts robot-relative ChassisSpeeds:
+      { speeds: ChassisSpeeds -> set(speeds) } ,
+      // controller - Path following controller that will be used to follow paths:
+      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
+        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
+      ) ,
+      RobotConfig (
+        SwerveConstants.MASS ,
+        SwerveConstants.MOI ,
+        ModuleConfig(
+          SwerveConstants.WHEEL_RADIUS ,
+          SwerveConstants.MAX_DRIVE_SPEED ,
+          SwerveConstants.COF_WHEELS_CARPET ,
+          DCMotor.getKrakenX60(2) ,
+          SwerveConstants.DRIVE_GEARING ,
+          SwerveConstants.DRIVE_CURRENT_LIMIT ,
+          2 ) ,
+        * arrayOf(
+          Translation2d(
+            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+            -SwerveConstants.TRACKWIDTH / 2 ) ,
+          Translation2d(
+            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+            -SwerveConstants.TRACKWIDTH / 2 ) ,
+          Translation2d(
+            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+            -SwerveConstants.TRACKWIDTH / 2 ) ,
+          Translation2d(
+            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+            -SwerveConstants.TRACKWIDTH / 2 ) )
+      ) ,
+      // shouldFlipPath - Supplier that determines if paths should be flipped to the other side of the field. This will maintain a global blue alliance origin:
+      { if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) true else false },
+      // driveRequirements - the subsystem requirements for the robot's drive train:
+      this
+    )
+
+  }
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()

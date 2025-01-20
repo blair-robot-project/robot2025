@@ -1,18 +1,19 @@
 package frc.team449.commands.autoscoreCommands
 
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.filter.SlewRateLimiter
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.choreo.MagnetizePIDPoseAlign
-import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
+
 
 class AutoScoreCommands(
   private val drive: SwerveDrive,
@@ -26,6 +27,25 @@ class AutoScoreCommands(
    * clockwise)
    * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
+
+//  // Since we are using a holonomic drivetrain, the rotation component of this pose
+//  // represents the goal holonomic rotation
+//  var targetPose: Pose2d = AutoScoreCommandConstants.reef1PoseRed
+//
+//  // Create the constraints to use while pathfinding
+//  var constraints: PathConstraints = PathConstraints(
+//    3.0, 4.0,
+//    Units.degreesToRadians(540.0), Units.degreesToRadians(720.0)
+//  )
+//
+//  // Since AutoBuilder is configured, we can use it to build pathfinding commands
+//  var pathfindingCommand: Command = AutoBuilder.pathfindToPose(
+//    targetPose,
+//    constraints,
+//    0.0,  // Goal end velocity in meters/sec
+//    // 0.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+//  )
+
   fun moveToReefCommand(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
@@ -65,7 +85,6 @@ class AutoScoreCommands(
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseRed
       }
     }
-
     return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
   }
 
