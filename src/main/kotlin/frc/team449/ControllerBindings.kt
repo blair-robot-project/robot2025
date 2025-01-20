@@ -75,7 +75,7 @@ class ControllerBindings(
   }
 
   private fun SCORE_L4() {
-    mechanismController.y().onTrue(
+    driveController.y().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
