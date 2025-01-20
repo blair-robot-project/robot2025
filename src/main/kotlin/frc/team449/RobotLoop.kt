@@ -1,8 +1,10 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -13,12 +15,15 @@ import frc.team449.auto.RoutineChooser
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
+import frc.team449.control.vision.ApriltagCamera
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.vision.VisionConstants
 import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
+import org.photonvision.PhotonCamera
+import org.photonvision.simulation.VisionSystemSim
 import kotlin.jvm.optionals.getOrNull
 
 /** The main class of the robot, constructs all the subsystems
@@ -29,8 +34,11 @@ class RobotLoop : TimedRobot(), Logged {
   private val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
+  private val Camera3 =
+    ApriltagCamera("cam3", AprilTagFieldLayout(a, b, c, d), Transform3d(), VisionSystemSim("filler")) // All values in the parameter are filler, will be changed later for the actual robot
 
   @Log.NT
+
   private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
@@ -54,7 +62,7 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     /** Example Quad Calibration
-     QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
+    QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
      */
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
@@ -115,34 +123,46 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
   override fun teleopPeriodic() {
-  }
-
-  override fun disabledInit() {
-    robot.drive.stop()
-
-    (robot.light.currentCommand ?: InstantCommand()).cancel()
-    Rainbow(robot.light).schedule()
-  }
-
-  override fun disabledPeriodic() {}
-
-  override fun testInit() {
-    if (autoCommand != null) {
-      CommandScheduler.getInstance().cancel(autoCommand)
-    }
-  }
-
-  override fun testPeriodic() {}
-
-  override fun simulationInit() {}
-
-  override fun simulationPeriodic() {
-    robot.drive as SwerveSim
-
-    VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
+    val results = Camera3.cam.allUnreadResults
+    if (results.isNotEmpty()) {
+      var result = results.get(results.size - 1);
+      if (result.hasTargets()) {
+        for (target in result.getTargets()) {
+          if (target.getFiducialId() == 7) {
+            val targetYaw = target.getYaw();
+            val targetVisible = true;
+          }
+        }
+      }
     }
 
-    VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+    override fun disabledInit() {
+      robot.drive.stop()
+
+      (robot.light.currentCommand ?: InstantCommand()).cancel()
+      Rainbow(robot.light).schedule()
+    }
+
+    override fun disabledPeriodic() {}
+
+    override fun testInit() {
+      if (autoCommand != null) {
+        CommandScheduler.getInstance().cancel(autoCommand)
+      }
+    }
+
+    override fun testPeriodic() {}
+
+    override fun simulationInit() {}
+
+    override fun simulationPeriodic() {
+      robot.drive as SwerveSim
+
+      VisionConstants.ESTIMATORS.forEach {
+        it.simulationPeriodic(robot.drive.odometryPose)
+      }
+
+      VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+    }
   }
 }
