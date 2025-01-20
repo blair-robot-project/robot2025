@@ -106,6 +106,15 @@ class ApriltagCamera(
       1 + avgDist.pow(VisionConstants.ORDER) * VisionConstants.PROPORTION
     )
   }
+  private val reefAprilTagIDs = setOf(6, 7, 8, 9, 10, 11, 17, )
+
+  fun joe() {
+    val results = cam.allUnreadResults
+
+    if (results.hasTargets()) {
+
+    }
+  }
 
   fun simulationPeriodic(robotSimPose: Pose2d?) {
     visionSystemSim!!.update(robotSimPose)
