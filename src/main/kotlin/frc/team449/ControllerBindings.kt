@@ -22,13 +22,13 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
-    driveController.a().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-    )
-
-    driveController.b().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
-    )
+//    driveController.a().onTrue(
+//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+//    )
+//
+//    driveController.b().onTrue(
+//      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+//    )
   }
 
   private fun nonRobotBindings() {
