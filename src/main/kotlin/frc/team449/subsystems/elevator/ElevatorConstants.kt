@@ -32,19 +32,20 @@ object ElevatorConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  // Simulation Constants TODO(Adjust all of these.)
-  const val GEARING = 2 / 6.4
+  // Physical Constants TODO(Adjust all of these.)
+  const val GEARING_MOTOR_TO_PULLEY = 5.0 / 3
   const val PULLEY_RADIUS = 0.018415
+  const val GEARING_MOTOR_TO_ELEVATOR = GEARING_MOTOR_TO_PULLEY / (PULLEY_RADIUS * 2 * PI)
   const val UPR = 2 * PI * PULLEY_RADIUS
-  const val CARRIAGE_MASS = 9.45
+  const val CARRIAGE_MASS = 7.0
 
   const val TOLERANCE = 0.025 // TODO(Adjust tolerance.)
 
   // TODO(Adjust gains.)
   const val KS = 0.0
   const val KV = 0.0
-  const val KA = 0.0
   const val KG = 0.0
+  const val BASE_PIVOT_TO_CG_M = 0.1
 
   const val KP = 10.0
   const val KI = 0.0
@@ -52,5 +53,5 @@ object ElevatorConstants {
 
   // Motion Magic
   const val CRUISE_VEL = 1.0
-  const val MAX_ACCEL = 1.0
+  const val MAX_ACCEL = 10.0
 }
