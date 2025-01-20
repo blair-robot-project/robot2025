@@ -107,50 +107,18 @@ open class SwerveDrive(
   }
 
   fun logData() {
-    DogLog.log(
-      "Swerve/Current Module States/Rotation",
-      doubleArrayOf(
-        modules[0].state.angle.radians,
-        modules[1].state.angle.radians,
-        modules[2].state.angle.radians,
-        modules[3].state.angle.radians,
-      )
-    )
+    DogLog.log("Swerve/FL Module Current State", modules[0].state)
+    DogLog.log("Swerve/FR Module Current State", modules[1].state)
+    DogLog.log("Swerve/BL Module Current State", modules[2].state)
+    DogLog.log("Swerve/BR Module Current State", modules[3].state)
 
-    DogLog.log(
-      "Swerve/Current Module States/Speeds",
-      doubleArrayOf(
-        modules[0].state.speedMetersPerSecond,
-        modules[1].state.speedMetersPerSecond,
-        modules[2].state.speedMetersPerSecond,
-        modules[3].state.speedMetersPerSecond,
-      )
-    )
-
-    DogLog.log(
-      "Swerve/Desired Module States/Rotation",
-      doubleArrayOf(
-        modules[0].desiredState.angle.radians,
-        modules[1].desiredState.angle.radians,
-        modules[2].desiredState.angle.radians,
-        modules[3].desiredState.angle.radians,
-      )
-    )
-
-    DogLog.log(
-      "Swerve/Desired Module States/Speed",
-      doubleArrayOf(
-        modules[0].desiredState.speedMetersPerSecond,
-        modules[1].desiredState.speedMetersPerSecond,
-        modules[2].desiredState.speedMetersPerSecond,
-        modules[3].desiredState.speedMetersPerSecond,
-      )
-    )
+    DogLog.log("Swerve/FL Module Desired State", modules[0].desiredState)
+    DogLog.log("Swerve/FR Module Desired State", modules[1].desiredState)
+    DogLog.log("Swerve/BL Module Desired State", modules[2].desiredState)
+    DogLog.log("Swerve/BR Module Desired State", modules[3].desiredState)
 
     DogLog.log("Swerve/Current Speeds", currentSpeeds)
-
     DogLog.log("Swerve/Desired Speeds", desiredSpeeds)
-
     DogLog.log("Swerve/Translation Speed", hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond))
   }
 
