@@ -4,14 +4,19 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import dev.doglog.DogLog
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
+import kotlin.math.log
 
 // TODO(the entire class bru)
+@Logged
 class Wrist(
   private val motor: TalonFX
 ) : SubsystemBase() {
@@ -30,7 +35,7 @@ class Wrist(
         request
           .withPosition(position)
       )
-    } // .until(::atSetpoint)
+    }
   }
 
   fun manualDown(): Command {
@@ -49,12 +54,21 @@ class Wrist(
     return (abs(positionSupplier.get() - request.Position) < WristConstants.TOLERANCE)
   }
 
-  override fun periodic() {}
+  override fun periodic() {
+    logData()
+  }
 
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
 
     motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (WristConstants.GEARING * WristConstants.UPR))
+  }
+
+  private fun logData() {
+    DogLog.log("Wrist/Desired Target", request.Position)
+    DogLog.log("Wrist/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
+    DogLog.log("Wrist/In Tolerance", atSetpoint())
+    KrakenDogLog.log("Wrist/Motor", motor)
   }
 
   companion object {

@@ -1,6 +1,9 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import dev.doglog.DogLog
+import dev.doglog.DogLogOptions
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.util.Units
@@ -20,23 +23,19 @@ import frc.team449.subsystems.elevator.ElevatorConstants
 import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
-import monologue.Annotations.Log
-import monologue.Logged
-import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
-class RobotLoop : TimedRobot(), Logged {
+@Logged(name = "Robot2025")
+class RobotLoop : TimedRobot() {
 
-  @Log.NT
   private val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
-  @Log.NT
   private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
@@ -77,15 +76,19 @@ class RobotLoop : TimedRobot(), Logged {
 
     controllerBinder.bindButtons()
 
-    DriverStation.startDataLog(DataLogManager.getLog())
-    Monologue.setupMonologue(this, "/Monologuing", false, false)
+    DogLog.setOptions(
+      DogLogOptions()
+        .withCaptureDs(true)
+        .withCaptureNt(true)
+        .withLogExtras(true)
+    )
+
+    DogLog.setPdh(robot.powerDistribution)
 
     URCL.start()
   }
 
   override fun driverStationConnected() {
-    Monologue.setFileOnly(DriverStation.isFMSAttached())
-
     FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
   }
 
@@ -106,9 +109,6 @@ class RobotLoop : TimedRobot(), Logged {
     robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
-
-    // Monologue Logging
-    Monologue.updateAll()
   }
 
   override fun autonomousInit() {

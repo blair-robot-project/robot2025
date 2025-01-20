@@ -5,14 +5,17 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import dev.doglog.DogLog
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
+@Logged
 class Pivot(
   private val motor: TalonFX
 ) : SubsystemBase() {
@@ -68,7 +71,9 @@ class Pivot(
     return (abs(positionSupplier.get() - request.Position) < PivotConstants.TOLERANCE)
   }
 
-  override fun periodic() {}
+  override fun periodic() {
+    logData()
+  }
 
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
@@ -76,14 +81,11 @@ class Pivot(
     motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (PivotConstants.GEARING * PivotConstants.UPR))
   }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("1.0", "Pivot Info")
-    builder.addDoubleProperty("1.1 Voltage", { motor.motorVoltage.valueAsDouble }, null)
-    builder.addDoubleProperty("1.2 Position", { positionSupplier.get() }, null)
-    builder.addDoubleProperty("1.3 Velocity", { velocitySupplier.get() }, null)
-    builder.addDoubleProperty("1.4 Desired Position", { request.Position }, null)
-    builder.addBooleanProperty("1.5 At Tolerance", { atSetpoint() }, null)
-    // builder.addStringProperty("1.7 Command", {this.currentCommand.name}, null)
+  private fun logData() {
+    DogLog.log("Pivot/Desired Target", request.Position)
+    DogLog.log("Pivot/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
+    DogLog.log("Pivot/In Tolerance", atSetpoint())
+    KrakenDogLog.log("Pivot/Motor", motor)
   }
 
   companion object {

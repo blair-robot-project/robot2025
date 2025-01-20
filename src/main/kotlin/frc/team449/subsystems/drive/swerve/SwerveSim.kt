@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.wpilibj.Timer.getFPGATimestamp
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
-import kotlin.math.hypot
 
 class SwerveSim(
   modules: List<SwerveModule>,
@@ -51,7 +50,7 @@ class SwerveSim(
       getPositions()
     )
 
-    speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+    logData()
   }
 
   fun resetOdometryOnly(pose: Pose2d) {

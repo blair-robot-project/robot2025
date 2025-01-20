@@ -1,11 +1,12 @@
 package frc.team449.subsystems.drive.swerve
 
+import dev.doglog.DogLog
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -22,6 +23,7 @@ import kotlin.math.hypot
  * @param maxRotSpeed The maximum rotation speed of the chassis.
  * @param field The SmartDashboard [Field2d] widget that shows the robot's pose.
  */
+@Logged
 open class SwerveDrive(
   val modules: List<SwerveModule>,
   var maxLinearSpeed: Double,
@@ -40,8 +42,6 @@ open class SwerveDrive(
   var currentSpeeds = ChassisSpeeds()
 
   var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
-
-  protected var speedMagnitude: Double = 0.0
 
   fun set(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
@@ -88,7 +88,7 @@ open class SwerveDrive(
       )
     )
 
-    speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+    logData()
   }
 
   /** Stops the robot's drive. */
@@ -106,53 +106,52 @@ open class SwerveDrive(
     return Array(modules.size) { i -> modules[i].state }
   }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("3.0", "Driving & Steering (Std Order FL, FR, BL, BR)")
-    builder.addDoubleArrayProperty(
-      "3.1 Current States",
-      {
-        doubleArrayOf(
-          modules[0].state.angle.radians,
-          modules[0].state.speedMetersPerSecond,
-          modules[1].state.angle.radians,
-          modules[1].state.speedMetersPerSecond,
-          modules[2].state.angle.radians,
-          modules[2].state.speedMetersPerSecond,
-          modules[3].state.angle.radians,
-          modules[3].state.speedMetersPerSecond,
-        )
-      },
-      null
-    )
-    builder.addDoubleArrayProperty(
-      "3.2 Desired States",
-      {
-        doubleArrayOf(
-          modules[0].desiredState.angle.radians,
-          modules[0].desiredState.speedMetersPerSecond,
-          modules[1].desiredState.angle.radians,
-          modules[1].desiredState.speedMetersPerSecond,
-          modules[2].desiredState.angle.radians,
-          modules[2].desiredState.speedMetersPerSecond,
-          modules[3].desiredState.angle.radians,
-          modules[3].desiredState.speedMetersPerSecond,
-        )
-      },
-      null
+  fun logData() {
+    DogLog.log(
+      "Swerve/Current Module States/Rotation",
+      doubleArrayOf(
+        modules[0].state.angle.radians,
+        modules[1].state.angle.radians,
+        modules[2].state.angle.radians,
+        modules[3].state.angle.radians,
+      )
     )
 
-    builder.addDoubleArrayProperty(
-      "3.3 Steering Rotation",
-      {
-        doubleArrayOf(
-          modules[0].state.angle.rotations,
-          modules[1].state.angle.rotations,
-          modules[2].state.angle.rotations,
-          modules[3].state.angle.rotations,
-        )
-      },
-      null
+    DogLog.log(
+      "Swerve/Current Module States/Speeds",
+      doubleArrayOf(
+        modules[0].state.speedMetersPerSecond,
+        modules[1].state.speedMetersPerSecond,
+        modules[2].state.speedMetersPerSecond,
+        modules[3].state.speedMetersPerSecond,
+      )
     )
+
+    DogLog.log(
+      "Swerve/Desired Module States/Rotation",
+      doubleArrayOf(
+        modules[0].desiredState.angle.radians,
+        modules[1].desiredState.angle.radians,
+        modules[2].desiredState.angle.radians,
+        modules[3].desiredState.angle.radians,
+      )
+    )
+
+    DogLog.log(
+      "Swerve/Desired Module States/Speed",
+      doubleArrayOf(
+        modules[0].desiredState.speedMetersPerSecond,
+        modules[1].desiredState.speedMetersPerSecond,
+        modules[2].desiredState.speedMetersPerSecond,
+        modules[3].desiredState.speedMetersPerSecond,
+      )
+    )
+
+    DogLog.log("Swerve/Current Speeds", currentSpeeds)
+
+    DogLog.log("Swerve/Desired Speeds", desiredSpeeds)
+
+    DogLog.log("Swerve/Translation Speed", hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond))
   }
 
   companion object {
