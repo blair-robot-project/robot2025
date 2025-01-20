@@ -14,6 +14,7 @@ import frc.team449.auto.RoutineChooser
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
+import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorConstants
 import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
@@ -23,6 +24,7 @@ import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
+import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
 
 /** The main class of the robot, constructs all the subsystems
@@ -83,6 +85,8 @@ class RobotLoop : TimedRobot(), Logged {
 
   override fun driverStationConnected() {
     Monologue.setFileOnly(DriverStation.isFMSAttached())
+
+    FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
   }
 
   override fun robotPeriodic() {

@@ -39,10 +39,9 @@ object PivotConstants {
   // TODO(Adjust gains.)
   const val KS = 0.0
   const val KV = 0.0
-  const val KA = 0.0
   const val KG_MIN = 0.0 // (KG when elevator is fully retracted.)
   const val KG_MAX = 0.0 // TODO(KG when elevator is fully extended.)
 
-  val CRUISE_VEL = RadiansPerSecond.of(PI)
-  val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
+  val CRUISE_VEL = RotationsPerSecond.of(0.3)
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0)
 }

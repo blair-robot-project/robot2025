@@ -8,7 +8,7 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 
 object SuperstructureGoal {
-
+  /** TODO: All placeholder guesses, need actual values */
   val L1 = SuperstructureState(
     Degrees.of(30.0),
     Meters.of(0.25),
@@ -32,7 +32,7 @@ object SuperstructureGoal {
 
   val L4 = SuperstructureState(
     Degrees.of(60.0),
-    Meters.of(1.75),
+    Meters.of(1.65),
     Degrees.of(-50.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
@@ -75,7 +75,7 @@ object SuperstructureGoal {
   val L4_PREMOVE = SuperstructureState(
     L4.pivot,
     STOW.elevator,
-    STOW.wrist,
+    SUBSTATION_INTAKE.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

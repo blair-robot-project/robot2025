@@ -12,10 +12,10 @@ import frc.team449.subsystems.pivot.Pivot
 import frc.team449.subsystems.wrist.Wrist
 
 class SuperstructureManager(
-  val elevator: Elevator,
-  val pivot: Pivot,
-  val wrist: Wrist,
-  val drive: SwerveDrive
+  private val elevator: Elevator,
+  private val pivot: Pivot,
+  private val wrist: Wrist,
+  private val drive: SwerveDrive
 ) {
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
