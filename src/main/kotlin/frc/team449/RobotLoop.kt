@@ -19,6 +19,8 @@ import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
+import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import monologue.Annotations.Log
 import monologue.Logged
@@ -29,9 +31,8 @@ import kotlin.jvm.optionals.getOrNull
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
 class RobotLoop : TimedRobot(), Logged {
-
   @Log.NT
-  private val robot = Robot()
+  val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
@@ -41,7 +42,7 @@ class RobotLoop : TimedRobot(), Logged {
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
   private var webCom: WebConnection? = null
-  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid)
+  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -56,6 +57,9 @@ class RobotLoop : TimedRobot(), Logged {
       // Don't complain about joysticks if there aren't going to be any
       DriverStation.silenceJoystickConnectionWarning(true)
     }
+
+    robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
+    robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
 
     /** Example Quad Calibration
      QuadCalibration(robot.pivot).ignoringDisable(true).schedule()

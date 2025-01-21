@@ -10,15 +10,19 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import frc.team449.Robot
+import frc.team449.RobotLoop
 import frc.team449.auto.choreo.MagnetizePIDPoseAlign
 import frc.team449.subsystems.drive.swerve.SwerveDrive
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.vision.PoseSubsystem
 
 
 class AutoScoreCommands(
   private val drive: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
-  private val controller: XboxController
+  private val controller: XboxController,
+  private val robot: Robot
 ) {
 
   /**
@@ -151,16 +155,19 @@ class AutoScoreCommands(
    * does nothing right now
    */
   fun putCoralInReef(reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
-    // we don't have score yet, but we're setting up stuff for future
-    // we won't have to account for alliance here
     when (reefLevel) {
       AutoScoreCommandConstants.ReefLevel.L1 -> println("scoring coral l1")
       AutoScoreCommandConstants.ReefLevel.L2 -> println("scoring coral l2")
       AutoScoreCommandConstants.ReefLevel.L3 -> println("scoring coral l3")
       AutoScoreCommandConstants.ReefLevel.L4 -> println("scoring coral l4")
     }
-    // returns a command that does nothing (for now)
-    return InstantCommand()
+    return when (reefLevel) { // add premove?
+      AutoScoreCommandConstants.ReefLevel.L1 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+      AutoScoreCommandConstants.ReefLevel.L2 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
+      AutoScoreCommandConstants.ReefLevel.L3 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
+      AutoScoreCommandConstants.ReefLevel.L4 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+    }
+    //return InstantCommand()
   }
 
   /**
@@ -184,12 +191,10 @@ class AutoScoreCommands(
   }
 
   /**
-   * intakes coral from coral intake
-   * does nothing right now
+   * intakes coral from coral station
    * */
   fun intakeCoralCommand(): Command {
-    // we don't have coral intake yet, just setting up.
-    // returns a command that does nothing (for now)
-    return InstantCommand()
+    return robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+    //return InstantCommand()
   }
 }

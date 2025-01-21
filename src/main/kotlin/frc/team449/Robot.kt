@@ -21,7 +21,6 @@ import monologue.Annotations.Log
 import monologue.Logged
 
 class Robot : RobotBase(), Logged {
-
   // Driver/Operator Controllers
   val driveController: CommandXboxController = CommandXboxController(0)
   val mechController: CommandXboxController = CommandXboxController(1)
