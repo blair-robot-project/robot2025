@@ -56,8 +56,8 @@ class RobotLoop : TimedRobot(), Logged {
     robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
-    val routines = Routines(robot)
 
+    val routines = Routines(robot)
     routines.addOptions(robot.autoChooser)
 
     println("Putting the thing on the other thing")
