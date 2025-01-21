@@ -1,5 +1,6 @@
 package frc.team449.subsystems.drive.swerve
 
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -8,8 +9,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.drive.swerve.SwerveConstants.TURN_KD
+import frc.team449.subsystems.drive.swerve.SwerveConstants.TURN_KI
+import frc.team449.subsystems.drive.swerve.SwerveConstants.TURN_KP
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
 import kotlin.math.hypot
@@ -91,9 +96,33 @@ open class SwerveDrive(
   }
 
   /** Stops the robot's drive. */
-  fun stop() {
-    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
+  fun stop(): Command {
+    return runOnce {
+      this.set(ChassisSpeeds(0.0, 0.0, 0.0))
+    }
   }
+
+  fun turnToDesiredDisplacement(desiredDisplacementDeg: Double): Command {
+
+    val pidController = PIDController(TURN_KP, TURN_KI, TURN_KD).apply {
+      setTolerance(Math.toRadians(2.0))
+    }
+
+    val desiredDisplacementRad = Math.toRadians(desiredDisplacementDeg)
+
+    return run {
+
+      run {
+        val currentAngle = //idk
+        val omegaRadPerSec = pidController.calculate(currentAngle, desiredDisplacementRad)
+        this.set(ChassisSpeeds(0.0, 0.0, omegaRadPerSec))
+        //need to make sure max rot speed isnt exceeded
+      }
+    }.until {
+      pidController.atSetpoint()
+    }.andThen(stop())
+  }
+
 
   /** @return An array of [SwerveModulePosition] for each module, containing distance and angle. */
   fun getPositions(): Array<SwerveModulePosition> {

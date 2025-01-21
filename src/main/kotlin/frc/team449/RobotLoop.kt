@@ -1,10 +1,12 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import com.sun.tools.sjavac.Util.set
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.geometry.Transform3d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -18,6 +20,7 @@ import frc.team449.commands.light.Rainbow
 import frc.team449.control.vision.ApriltagCamera
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.vision.VisionConstants
+import frc.team449.subsystems.drive.swerve.SwerveDrive
 import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
@@ -140,7 +143,11 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     if (targetVisible) {
-
+      class SwerveDriveWrapper(private val swerveDrive: SwerveDrive) {
+        fun turnToDesiredDisplacement(desiredDisplacementDeg: Double): Command {
+          return swerveDrive.turnToDesiredDisplacement(targetYaw)
+        }
+      }
     }
 
     override fun disabledInit() {
@@ -172,4 +179,6 @@ class RobotLoop : TimedRobot(), Logged {
       VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
     }
   }
+
+
 }
