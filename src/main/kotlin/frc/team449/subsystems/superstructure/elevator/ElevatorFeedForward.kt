@@ -1,7 +1,7 @@
-package frc.team449.subsystems.elevator
+package frc.team449.subsystems.superstructure.elevator
 
 import edu.wpi.first.math.controller.ElevatorFeedforward
-import frc.team449.subsystems.pivot.Pivot
+import frc.team449.subsystems.superstructure.pivot.Pivot
 import kotlin.math.pow
 import kotlin.math.sign
 import kotlin.math.sin

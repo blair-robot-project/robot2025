@@ -24,10 +24,10 @@ import kotlin.math.min
 class SimpleReefAlign(
   private val drive: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
-  translationSpeedLim: Double = 0.8 * RobotConstants.MAX_LINEAR_SPEED,
-  translationAccelLim: Double = 7.0,
+  translationSpeedLim: Double = 0.825 * RobotConstants.MAX_LINEAR_SPEED,
+  translationAccelLim: Double = 5.75,
   headingSpeedLim: Double = PI,
-  headingAccelLim: Double = 5 * PI,
+  headingAccelLim: Double = 6 * PI,
   translationPID: Triple<Double, Double, Double> = Triple(7.5, 0.0, 0.0),
   headingPID: Triple<Double, Double, Double> = Triple(7.5, 0.0, 0.0),
   private val translationTolerance: Double = Units.inchesToMeters(0.75),

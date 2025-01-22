@@ -1,4 +1,4 @@
-package frc.team449.subsystems.wrist
+package frc.team449.subsystems.superstructure.wrist
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
@@ -13,7 +13,6 @@ import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
-import kotlin.math.log
 
 // TODO(the entire class bru)
 @Logged

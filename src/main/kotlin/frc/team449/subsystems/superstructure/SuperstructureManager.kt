@@ -7,9 +7,9 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveDrive
-import frc.team449.subsystems.elevator.Elevator
-import frc.team449.subsystems.pivot.Pivot
-import frc.team449.subsystems.wrist.Wrist
+import frc.team449.subsystems.superstructure.elevator.Elevator
+import frc.team449.subsystems.superstructure.pivot.Pivot
+import frc.team449.subsystems.superstructure.wrist.Wrist
 
 class SuperstructureManager(
   private val elevator: Elevator,

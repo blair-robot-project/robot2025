@@ -18,9 +18,9 @@ import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.elevator.ElevatorConstants
-import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
-import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
+import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault

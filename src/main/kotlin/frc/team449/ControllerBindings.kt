@@ -26,17 +26,17 @@ class ControllerBindings(
     /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
      * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
      */
-    SCORE_L1()
-    SCORE_L2()
-    SCORE_L3()
-    SCORE_L4()
+    score_l1()
+    score_l2()
+    score_l3()
+    score_l4()
 
-    PREMOVE_L1()
-    PREMOVE_L2()
-    PREMOVE_L3()
-    PREMOVE_L4()
+    premove_l1()
+    premove_l2()
+    premove_l3()
+    premove_l4()
 
-    STOW()
+    stow()
   }
 
   private fun nonRobotBindings() {
@@ -47,59 +47,59 @@ class ControllerBindings(
     resetGyro()
   }
 
-  private fun STOW() {
+  private fun stow() {
     mechanismController.rightBumper().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
     )
   }
 
-  private fun SCORE_L1() {
+  private fun score_l1() {
     driveController.a().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
-  private fun SCORE_L2() {
+  private fun score_l2() {
     driveController.x().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
-  private fun SCORE_L3() {
+  private fun score_l3() {
     driveController.b().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
-  private fun SCORE_L4() {
+  private fun score_l4() {
     driveController.y().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
-  private fun PREMOVE_L1() {
+  private fun premove_l1() {
     mechanismController.a().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
     )
   }
 
-  private fun PREMOVE_L2() {
+  private fun premove_l2() {
     mechanismController.x().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PREMOVE)
     )
   }
 
-  private fun PREMOVE_L3() {
+  private fun premove_l3() {
     mechanismController.b().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)
     )
   }
 
-  private fun PREMOVE_L4() {
+  private fun premove_l4() {
     mechanismController.y().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
     )
