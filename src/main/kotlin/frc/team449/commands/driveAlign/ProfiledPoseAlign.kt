@@ -93,7 +93,7 @@ class ProfiledPoseAlign(
     val yFeedback = yPID.calculate(poseSubsystem.pose.y, yProfCalc.position)
     val headingFeedback = headingPID.calculate(poseSubsystem.heading.radians)
 
-    drive.driveFieldRelative(
+    drive.driveRobotRelative(
       ChassisSpeeds.fromFieldRelativeSpeeds(
         xFeedback + xProfCalc.velocity,
         yFeedback + yProfCalc.velocity,

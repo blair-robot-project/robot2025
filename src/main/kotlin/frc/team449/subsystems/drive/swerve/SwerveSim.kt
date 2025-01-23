@@ -34,7 +34,7 @@ class SwerveSim(
     currHeading = currHeading.plus(Rotation2d(super.desiredSpeeds.omegaRadiansPerSecond * (currTime - lastTime)))
     this.lastTime = currTime
 
-    driveFieldRelative(super.desiredSpeeds)
+    driveRobotRelative(super.desiredSpeeds)
 
     // Updates the robot's currentSpeeds.
     currentSpeeds = kinematics.toChassisSpeeds(

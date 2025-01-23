@@ -60,7 +60,7 @@ open class SwerveDrive(
 
   protected var speedMagnitude: Double = 0.0
 
-  fun driveFieldRelative(desiredSpeeds: ChassisSpeeds) {
+  fun driveRobotRelative(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
     // Converts the desired [ChassisSpeeds] into an array of [SwerveModuleState].
     val desiredModuleStates =
@@ -86,18 +86,16 @@ open class SwerveDrive(
   }
 
   /** Stops the robot's drive. */
-  fun stop(){
-    this.driveFieldRelative(ChassisSpeeds(0.0, 0.0, 0.0))
+  fun stop() {
+    this.driveRobotRelative(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 
-
-  fun driveStop(): Command{
+  fun driveStop(): Command {
     return runOnce {
-      driveFieldRelative(ChassisSpeeds(0.0, 0.0, 0.0))
+      driveRobotRelative(ChassisSpeeds(0.0, 0.0, 0.0))
     }
-
-
   }
+
   override fun periodic() {
     // Updates the robot's currentSpeeds.
     currentSpeeds = kinematics.toChassisSpeeds(
@@ -337,5 +335,4 @@ open class SwerveDrive(
       }
     }
   }
-
 }
