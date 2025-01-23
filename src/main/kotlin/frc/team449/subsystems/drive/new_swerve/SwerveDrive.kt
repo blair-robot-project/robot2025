@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.Subsystem
 interface SwerveDrive: Subsystem{
   fun drive(speeds: ChassisSpeeds, fieldRelative: Boolean, isOpenLoop: Boolean)
   fun setModuleStates(desiredStates: Array<SwerveModuleState>)
-  fun getMeasuredSpeeds()
-  fun getGyroYaw()
-  fun getPose()
+  fun getMeasuredSpeeds(): ChassisSpeeds
+  fun getGyroYaw(): Rotation2d
+  fun getPose(): Pose2d
   fun setPose(pose: Pose2d)
   fun getHeading(){
     return getPose().getRotation();
