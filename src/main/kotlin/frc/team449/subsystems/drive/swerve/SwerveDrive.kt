@@ -37,14 +37,15 @@ open class SwerveDrive(
   var accel: Double,
   var maxRotSpeed: Double,
   protected val field: Field2d,
-  val maxModuleSpeed: Double
+  val maxModuleSpeed: Double,
+  val robot: Robot
 ) : SubsystemBase() {
 
   init {
 
     AutoBuilder.configure(
       //this.getPose() , // poseSupplier - a supplier for the robot's current pose
-      { Robot().poseSubsystem.pose } ,
+      { robot.poseSubsystem.pose } ,
       { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
       // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds:
       { this.currentSpeeds } ,
@@ -213,7 +214,7 @@ open class SwerveDrive(
 
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
-    fun createSwerveKraken(field: Field2d): SwerveDrive {
+    fun createSwerveKraken(field: Field2d, robot: Robot): SwerveDrive {
       val modules = listOf(
         createKrakenModule(
           "FLModule",
@@ -279,7 +280,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          robot
         )
       } else {
         SwerveSim(
@@ -288,12 +290,13 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          robot
         )
       }
     }
 
-    fun createSwerveNEO(field: Field2d): SwerveDrive {
+    fun createSwerveNEO(field: Field2d, robot: Robot): SwerveDrive {
       val modules = listOf(
         createNEOModule(
           "FLModule",
@@ -359,7 +362,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          robot
         )
       } else {
         SwerveSim(
@@ -368,7 +372,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          robot
         )
       }
     }

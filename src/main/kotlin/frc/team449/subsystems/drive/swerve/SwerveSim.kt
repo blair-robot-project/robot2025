@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.wpilibj.Timer.getFPGATimestamp
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import frc.team449.Robot
 import kotlin.math.hypot
 
 class SwerveSim(
@@ -13,8 +14,9 @@ class SwerveSim(
   accel: Double,
   maxRotSpeed: Double,
   field: Field2d,
-  maxModuleSpeed: Double
-) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed) {
+  maxModuleSpeed: Double,
+  robot: Robot
+) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed, robot) {
 
   private var lastTime = getFPGATimestamp()
   var currHeading = Rotation2d()

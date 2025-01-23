@@ -6,11 +6,9 @@ import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandScheduler
-import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Commands.print
 import edu.wpi.first.wpilibj2.command.Commands.runOnce
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.RoutineChooser
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
@@ -88,20 +86,20 @@ class RobotLoop : TimedRobot(), Logged {
   override fun driverStationConnected() {
     Monologue.setFileOnly(DriverStation.isFMSAttached())
     // temporary bindings for sim testing
-    robot.driveController.x().onTrue(
-      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-        .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+    robot.driveController.x().onTrue(PrintCommand("move to reef button pressed").andThen(
+      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)).andThen(PrintCommand("moved to reef"))
+        .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1)).andThen(PrintCommand("coral put in reef"))
     )
-    robot.driveController.a().onTrue(
-      autoscore.moveToProcessorCommand().andThen(autoscore.scoreProcessorCommand())
+    robot.driveController.a().onTrue(PrintCommand("move to processor button pressed").andThen(
+      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
     )
-    robot.driveController.b().onTrue(
-      autoscore.moveToNetCommand(false)
-        .andThen(autoscore.scoreNetCommand())
+    robot.driveController.b().onTrue(PrintCommand("move to net button pressed").andThen(
+      autoscore.moveToNetCommand(false)).andThen(PrintCommand("moved to net"))
+        .andThen(autoscore.scoreNetCommand()).andThen(PrintCommand("net scored"))
     )
-    robot.driveController.y().onTrue(
-      autoscore.moveToCoralIntakeCommand(true)
-        .andThen(autoscore.intakeCoralCommand())
+    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
+      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
+        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
     )
     webCom = WebConnection()
   }
