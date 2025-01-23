@@ -24,10 +24,10 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
 
   val drive = module
     .useGenericMotorControllerForDrive()
-    .withCurrentLimit(Amps.of(60.));
+    .withCurrentLimit(Amps.of(60.0));
   val turn = module
     .useGenericControllerForSteer()
-    .withCurrentLimit(Amps.of(20.));
+    .withCurrentLimit(Amps.of(20.0));
   //val location = Translation2d();
 
   //val desiredState = SwerveModuleState();
