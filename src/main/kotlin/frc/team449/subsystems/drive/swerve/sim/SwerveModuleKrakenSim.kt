@@ -24,10 +24,10 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
 
   val drive = module
     .useGenericMotorControllerForDrive()
-    .withCurrentLimit(Amps.of(60));
+    .withCurrentLimit(Amps.of(60.));
   val turn = module
     .useGenericControllerForSteer()
-    .withCurrentLimit(Amps.of(20));
+    .withCurrentLimit(Amps.of(20.));
   //val location = Translation2d();
 
   //val desiredState = SwerveModuleState();
@@ -40,13 +40,13 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
 
 
   override fun setVoltage(volts: Double) {
-    drive.requestVoltage(volts);
+    drive.requestVoltage(Volts.of(volts));
   //SwerveModuleSimulation.driveMotor.requestVoltage(voltage);
   }
 
   /** Set module speed to zero but keep module angle the same. */
   fun stop() {
-    drive.requestVoltage(0.);}
+    drive.requestVoltage(Volts.of(0.));}
 
-  fun update() {}
+  override fun update() {}
 }
