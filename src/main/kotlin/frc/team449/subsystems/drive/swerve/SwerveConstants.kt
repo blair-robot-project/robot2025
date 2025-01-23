@@ -58,6 +58,7 @@ object SwerveConstants {
   /** Drive configuration */
   val WHEEL_RADIUS = Units.inchesToMeters(1.895)
   const val DRIVE_GEARING = (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0)
+  const val TURN_GEARING = 0  // TODO
   val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
   const val TURN_UPR = 2 * PI
   val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.85) // (12 - DRIVE_KS) / DRIVE_KV
@@ -68,6 +69,12 @@ object SwerveConstants {
   val DRIVE_SUPPLY_BOOST_TIME = Seconds.of(0.0)
   val DRIVE_STATOR_LIMIT = Amps.of(85.0)
   val STEERING_CURRENT_LIM = Amps.of(40.0)
+
+  val DRIVE_FRICTION_VOLTAGE = Volts.of(0.0)  // TODO
+  val TURN_FRICTION_VOLTAGE = Volts.of(0.0) // TODO
+
+  val WHEEL_COEFFICIENT_OF_FRICTION = 0.0 // TODO
+  val STEER_ROTATIONAL_INERTIA = KilogramSquareMeters.of(0) // TODO
 
   val KRAKEN_UPDATE_RATE = Hertz.of(100.0)
   val VALUE_UPDATE_RATE = Hertz.of(50.0)
