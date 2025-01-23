@@ -46,7 +46,7 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
 
   /** Set module speed to zero but keep module angle the same. */
   fun stop() {
-    drive.requestVoltage(Volts.of(0.));}
+    drive.requestVoltage(Volts.of(0.0));}
 
   override fun update() {}
 }
