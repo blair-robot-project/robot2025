@@ -27,9 +27,10 @@ class AutoScoreCommands(
     Units.degreesToRadians(540.0), Units.degreesToRadians(720.0)
   )
 
-  val pathfindnotmag = true // true if pathfind, false if mag
+  //we'll use magnetize if not
+  val usingPathfinding = false
   init {
-    if (pathfindnotmag) println("                                                                               pathfinding") else println("                                                                                      magnetize")
+    if (usingPathfinding) println("pathfinding") else println("magnetize")
   }
 
   /**
@@ -78,16 +79,14 @@ class AutoScoreCommands(
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseRed
       }
     }
-    if (pathfindnotmag) {
+    if (usingPathfinding) {
       /*** pathfinding ***/
-      val pathfindingCommand = AutoBuilder.pathfindToPose(
+      return AutoBuilder.pathfindToPose(
         reefPose,
         constraints,
         0.0,  // Goal end velocity in meters/sec
       )
-      return pathfindingCommand
-    }
-    else {
+    } else {
       /*** magnetize ***/
       return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
     }
@@ -100,37 +99,36 @@ class AutoScoreCommands(
   fun moveToProcessorCommand(): Command {
     // val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
 
-    if (pathfindnotmag) {
-      /*** pathfinding ***/
-      var returnCommand = AutoBuilder.pathfindToPose(
-        AutoScoreCommandConstants.processorPoseBlue,
-        constraints,
-        0.0,
-      )
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-        //Since AutoBuilder is configured, we can use it to build pathfinding commands
-        returnCommand = AutoBuilder.pathfindToPose(
-          AutoScoreCommandConstants.processorPoseRed,
-          constraints,
-          0.0,  // Goal end velocity in meters/sec
-        )
-      }
-      return returnCommand
-    }
-
-    else {
-      /*** magnetize ***/
-      var returnCommand = MagnetizePIDPoseAlign(
+    var returnCommand = AutoBuilder.pathfindToPose(
+      AutoScoreCommandConstants.processorPoseBlue,
+      constraints,
+      0.0,
+    )
+    if (!usingPathfinding) {
+      returnCommand = MagnetizePIDPoseAlign(
         drive,
         poseSubsystem,
         AutoScoreCommandConstants.processorPoseBlue,
         controller
       )
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-        returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.processorPoseRed, controller)
-      }
-      return returnCommand
     }
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      if (usingPathfinding) {
+        returnCommand = AutoBuilder.pathfindToPose(
+          AutoScoreCommandConstants.processorPoseRed,
+          constraints,
+          0.0,  // Goal end velocity in meters/sec
+        )
+      } else {
+        returnCommand = MagnetizePIDPoseAlign(
+          drive,
+          poseSubsystem,
+          AutoScoreCommandConstants.processorPoseBlue,
+          controller
+        )
+      }
+    }
+    return returnCommand
   }
 
   /**
@@ -140,50 +138,35 @@ class AutoScoreCommands(
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
   fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
-    if (pathfindnotmag) {
-      /*** pathfinding ***/
-      var returnCommand = AutoBuilder.pathfindToPose(
+    var returnCommand = AutoBuilder.pathfindToPose(
+      AutoScoreCommandConstants.coralIntakePoseBlueTop,
+      constraints,
+      0.0,
+    )
+    if (!usingPathfinding) {
+      returnCommand = MagnetizePIDPoseAlign(
+        drive,
+        poseSubsystem,
         AutoScoreCommandConstants.coralIntakePoseBlueTop,
+        controller
+      )
+    }
+    if (!isAtTopSource) {
+      returnCommand = AutoBuilder.pathfindToPose(
+        AutoScoreCommandConstants.coralIntakePoseRedBottom,
         constraints,
         0.0,
       )
-      if (!isAtTopSource) {
-        returnCommand = AutoBuilder.pathfindToPose(
-          AutoScoreCommandConstants.coralIntakePoseBlueBottom,
-          constraints,
-          0.0,
+      if (!usingPathfinding) {
+        returnCommand = MagnetizePIDPoseAlign(
+          drive,
+          poseSubsystem,
+          AutoScoreCommandConstants.coralIntakePoseRedBottom,
+          controller
         )
       }
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-        returnCommand = AutoBuilder.pathfindToPose(
-          AutoScoreCommandConstants.coralIntakePoseRedTop,
-          constraints,
-          0.0,
-        )
-        if (!isAtTopSource) {
-          returnCommand = AutoBuilder.pathfindToPose(
-            AutoScoreCommandConstants.coralIntakePoseRedBottom,
-            constraints,
-            0.0,
-          )
-        }
-      }
-      return returnCommand
     }
-    else {
-      /*** magnetize ***/
-      var returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueTop, controller)
-      if (!isAtTopSource) {
-        returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseBlueBottom, controller)
-      }
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-        returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedTop, controller)
-        if (!isAtTopSource) {
-          returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, AutoScoreCommandConstants.coralIntakePoseRedBottom, controller)
-        }
-      }
-      return returnCommand
-    }
+    return returnCommand
   }
 
   /**
@@ -201,7 +184,7 @@ class AutoScoreCommands(
      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
    }
 
-    if (pathfindnotmag) {
+    if (usingPathfinding) {
       /*** pathfinding ***/
       val pathfindingCommand = AutoBuilder.pathfindToPose(
         netPose,
@@ -224,18 +207,13 @@ class AutoScoreCommands(
    * does nothing right now
    */
   fun putCoralInReef(reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
-    when (reefLevel) {
-      AutoScoreCommandConstants.ReefLevel.L1 -> println("scoring coral l1")
-      AutoScoreCommandConstants.ReefLevel.L2 -> println("scoring coral l2")
-      AutoScoreCommandConstants.ReefLevel.L3 -> println("scoring coral l3")
-      AutoScoreCommandConstants.ReefLevel.L4 -> println("scoring coral l4")
-    }
-    return when (reefLevel) { // add premove?
+    return when (reefLevel) {
       AutoScoreCommandConstants.ReefLevel.L1 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
       AutoScoreCommandConstants.ReefLevel.L2 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
       AutoScoreCommandConstants.ReefLevel.L3 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
       AutoScoreCommandConstants.ReefLevel.L4 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
     }
+    //premove will be added in the bindings instead of here
   }
 
   /**
