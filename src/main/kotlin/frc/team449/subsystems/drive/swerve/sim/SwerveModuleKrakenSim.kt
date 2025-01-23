@@ -7,6 +7,7 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 
 abstract class SwerveModuleKrakenSim: SwerveModule {
+
   val module: SwerveModuleSimulation = SwerveModuleSimulation(
     SwerveModuleSimulationConfig(
       DCMotor.getKrakenX60(1),
@@ -20,4 +21,32 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
       0.0
     )
   )
+
+  val drive = module
+    .useGenericMotorControllerForDrive()
+    .withCurrentLimit(Amps.of(60));
+  val turn = module
+    .useGenericControllerForSteer()
+    .withCurrentLimit(Amps.of(20));
+  //val location = Translation2d();
+
+  //val desiredState = SwerveModuleState();
+
+  /** The module's [SwerveModuleState], containing speed and angle. */
+  //var state = SwerveModuleState();
+
+  /** The module's [SwerveModulePosition], containing distance and angle. */
+  //val position = SwerveModulePosition();
+
+
+  override fun setVoltage(volts: Double) {
+    drive.requestVoltage(volts);
+  //SwerveModuleSimulation.driveMotor.requestVoltage(voltage);
+  }
+
+  /** Set module speed to zero but keep module angle the same. */
+  fun stop() {
+    drive.requestVoltage(0.);}
+
+  fun update() {}
 }
