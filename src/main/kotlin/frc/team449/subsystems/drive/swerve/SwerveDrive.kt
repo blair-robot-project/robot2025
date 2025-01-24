@@ -41,46 +41,6 @@ open class SwerveDrive(
   val robot: Robot
 ) : SubsystemBase() {
 
-  init {
-    AutoBuilder.configure(
-      { robot.poseSubsystem.pose } , // poseSupplier - a supplier for the robot's current pose
-      { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
-      { this.currentSpeeds } , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      { speeds: ChassisSpeeds -> set(speeds) } , // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ) ,
-      RobotConfig (
-        SwerveConstants.MASS ,
-        SwerveConstants.MOI ,
-        ModuleConfig(
-          SwerveConstants.WHEEL_RADIUS ,
-          SwerveConstants.MAX_DRIVE_SPEED ,
-          SwerveConstants.COF_WHEELS_CARPET ,
-          DCMotor.getKrakenX60(1) ,
-          SwerveConstants.DRIVE_GEARING ,
-          SwerveConstants.DRIVE_CURRENT_LIMIT ,
-          1 ) ,
-        // FL, FR, BL, BR
-        Translation2d(
-          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          SwerveConstants.TRACKWIDTH / 2 ),
-        Translation2d(
-          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          SwerveConstants.TRACKWIDTH / 2 ),
-        Translation2d(
-          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          -SwerveConstants.TRACKWIDTH / 2 ),
-        Translation2d(
-          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          -SwerveConstants.TRACKWIDTH / 2 )
-      ) ,
-      { if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) true else false },
-      this // driveRequirements - the subsystem requirements for the robot's drive train
-    )
-  }
-
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
@@ -208,6 +168,7 @@ open class SwerveDrive(
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
     fun createSwerveKraken(field: Field2d, robot: Robot): SwerveDrive {
+
       val modules = listOf(
         createKrakenModule(
           "FLModule",

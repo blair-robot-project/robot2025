@@ -1,8 +1,17 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.config.ModuleConfig
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.config.RobotConfig
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
@@ -17,6 +26,7 @@ import frc.team449.commands.autoscoreCommands.WebConnection
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
+import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
@@ -85,6 +95,45 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
   override fun driverStationConnected() {
+    println("configuring the driv")
+    AutoBuilder.configure(
+      { robot.poseSubsystem.pose } , // poseSupplier - a supplier for the robot's current pose
+      { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
+      { robot.drive.currentSpeeds } , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+      { speeds: ChassisSpeeds -> robot.drive.set(speeds) } , // output - Output function that accepts robot-relative ChassisSpeeds
+      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
+        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
+      ) ,
+      RobotConfig (
+        SwerveConstants.MASS ,
+        SwerveConstants.MOI ,
+        ModuleConfig(
+          SwerveConstants.WHEEL_RADIUS ,
+          SwerveConstants.MAX_DRIVE_SPEED ,
+          SwerveConstants.COF_WHEELS_CARPET ,
+          DCMotor.getKrakenX60(1) ,
+          SwerveConstants.DRIVE_GEARING ,
+          SwerveConstants.DRIVE_CURRENT_LIMIT ,
+          1 ) ,
+        // FL, FR, BL, BR
+        Translation2d(
+          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          SwerveConstants.TRACKWIDTH / 2 ),
+        Translation2d(
+          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          SwerveConstants.TRACKWIDTH / 2 ),
+        Translation2d(
+          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          -SwerveConstants.TRACKWIDTH / 2 ),
+        Translation2d(
+          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          -SwerveConstants.TRACKWIDTH / 2 )
+      ) ,
+      { if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) true else false },
+      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
+    )
+    println("driv configured")
     Monologue.setFileOnly(DriverStation.isFMSAttached())
     // temporary bindings for sim testing
 //    robot.driveController.x().onTrue(
@@ -104,6 +153,7 @@ class RobotLoop : TimedRobot(), Logged {
     robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(
       autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
     )
+
 
     webCom = WebConnection()
   }
