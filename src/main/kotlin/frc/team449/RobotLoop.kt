@@ -95,7 +95,8 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
   override fun driverStationConnected() {
-    println("configuring the driv")
+
+    println("configuring the drive")
     AutoBuilder.configure(
       { robot.poseSubsystem.pose } , // poseSupplier - a supplier for the robot's current pose
       { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
@@ -133,7 +134,8 @@ class RobotLoop : TimedRobot(), Logged {
       { if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) true else false },
       robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
     )
-    println("driv configured")
+
+    println("drive configured")
     Monologue.setFileOnly(DriverStation.isFMSAttached())
     // temporary bindings for sim testing
 //    robot.driveController.x().onTrue(
@@ -153,7 +155,6 @@ class RobotLoop : TimedRobot(), Logged {
     robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(
       autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
     )
-
 
     webCom = WebConnection()
   }
