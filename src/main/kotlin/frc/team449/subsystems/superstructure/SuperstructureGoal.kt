@@ -92,6 +92,34 @@ object SuperstructureGoal {
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
+  val L1_PREMOVE = SuperstructureState(
+    L1.pivot,
+    STOW.elevator,
+    STOW.wrist,
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  val L2_PREMOVE = SuperstructureState(
+    L2.pivot,
+    STOW.elevator,
+    STOW.wrist,
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  val L3_PREMOVE = SuperstructureState(
+    L3.pivot,
+    STOW.elevator,
+    STOW.wrist,
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  val L4_PREMOVE = SuperstructureState(
+    L4.pivot,
+    STOW.elevator,
+    STOW.wrist,
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
   data class SuperstructureState(
     val pivot: Angle,
     val elevator: Distance,

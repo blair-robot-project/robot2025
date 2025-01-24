@@ -46,7 +46,6 @@ class Pivot(
       motor.setControl(
         request
           .withPosition(position)
-          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble))
       )
     }.until(::atSetpoint)
@@ -148,6 +147,7 @@ class Pivot(
       followerMotor.setControl(
         Follower(PivotConstants.LEAD_MOTOR_ID, PivotConstants.FOLLOWER_INVERTED_TO_MASTER)
       )
+
       return Pivot(leadMotor)
     }
   }
