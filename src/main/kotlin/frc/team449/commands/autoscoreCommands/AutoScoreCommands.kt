@@ -30,9 +30,9 @@ class AutoScoreCommands(
   )
 
   //we'll use magnetize if not
-  val usingPathfinding = false
+  val usingPathfinding = true
   init {
-    if (usingPathfinding) println("pathfinding") else println("magnetize")
+    if (usingPathfinding) println("                                      pathfinding") else println("                                                         magnetize")
   }
 
   /**

@@ -100,7 +100,10 @@ class RobotLoop : TimedRobot(), Logged {
 //      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
 //        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
 //    )
-    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
+
+    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(
+      autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+    )
 
     webCom = WebConnection()
   }

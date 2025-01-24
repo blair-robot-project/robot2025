@@ -43,14 +43,10 @@ open class SwerveDrive(
 
   init {
     AutoBuilder.configure(
-      //this.getPose() , // poseSupplier - a supplier for the robot's current pose
-      { robot.poseSubsystem.pose } ,
+      { robot.poseSubsystem.pose } , // poseSupplier - a supplier for the robot's current pose
       { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
-      // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds:
-      { this.currentSpeeds } ,
-//     output - Output function that accepts robot-relative ChassisSpeeds:
-      { speeds: ChassisSpeeds -> set(speeds) } ,
-      // controller - Path following controller that will be used to follow paths:
+      { this.currentSpeeds } , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+      { speeds: ChassisSpeeds -> set(speeds) } , // output - Output function that accepts robot-relative ChassisSpeeds
       PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
         PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
         PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
@@ -66,27 +62,25 @@ open class SwerveDrive(
           SwerveConstants.DRIVE_GEARING ,
           SwerveConstants.DRIVE_CURRENT_LIMIT ,
           1 ) ,
-        * arrayOf(
-          Translation2d(
-            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            -SwerveConstants.TRACKWIDTH / 2 ) ,
-          Translation2d(
-            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            -SwerveConstants.TRACKWIDTH / 2 ) ,
-          Translation2d(
-            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            -SwerveConstants.TRACKWIDTH / 2 ) ,
-          Translation2d(
-            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            -SwerveConstants.TRACKWIDTH / 2 ) )
+        // FL, FR, BL, BR
+        Translation2d(
+          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          SwerveConstants.TRACKWIDTH / 2 ),
+        Translation2d(
+          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          SwerveConstants.TRACKWIDTH / 2 ),
+        Translation2d(
+          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          -SwerveConstants.TRACKWIDTH / 2 ),
+        Translation2d(
+          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          -SwerveConstants.TRACKWIDTH / 2 )
       ) ,
-      // shouldFlipPath - Supplier that determines if paths should be flipped to the other side of the field. This will maintain a global blue alliance origin:
       { if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) true else false },
-      // driveRequirements - the subsystem requirements for the robot's drive train:
-      this
+      this // driveRequirements - the subsystem requirements for the robot's drive train
     )
-
   }
+
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
