@@ -23,8 +23,10 @@ class AutoScoreCommands(
 ) {
 
   val constraints = PathConstraints(
-    3.0, 4.0,
-    Units.degreesToRadians(540.0), Units.degreesToRadians(720.0)
+    30.0,
+    40.0,
+    Units.degreesToRadians(540.0),
+    Units.degreesToRadians(720.0)
   )
 
   //we'll use magnetize if not
@@ -43,6 +45,7 @@ class AutoScoreCommands(
   fun moveToReefCommand(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
+    println("reef thing pressed")
     var reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
     // var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
@@ -179,6 +182,7 @@ class AutoScoreCommands(
    * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
   fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
+    println("Net Command")
     var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     if (onRedAllianceSide) {
      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
@@ -189,7 +193,8 @@ class AutoScoreCommands(
       val pathfindingCommand = AutoBuilder.pathfindToPose(
         netPose,
         constraints,
-        0.0,  // Goal end velocity in meters/sec
+        10.0,
+        // Goal end velocity in meters/sec
       )
       return pathfindingCommand
     }

@@ -42,7 +42,6 @@ open class SwerveDrive(
 ) : SubsystemBase() {
 
   init {
-
     AutoBuilder.configure(
       //this.getPose() , // poseSupplier - a supplier for the robot's current pose
       { robot.poseSubsystem.pose } ,
@@ -63,10 +62,10 @@ open class SwerveDrive(
           SwerveConstants.WHEEL_RADIUS ,
           SwerveConstants.MAX_DRIVE_SPEED ,
           SwerveConstants.COF_WHEELS_CARPET ,
-          DCMotor.getKrakenX60(2) ,
+          DCMotor.getKrakenX60(1) ,
           SwerveConstants.DRIVE_GEARING ,
           SwerveConstants.DRIVE_CURRENT_LIMIT ,
-          2 ) ,
+          1 ) ,
         * arrayOf(
           Translation2d(
             -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,

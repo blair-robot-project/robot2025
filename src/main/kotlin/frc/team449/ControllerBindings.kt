@@ -65,7 +65,6 @@ class ControllerBindings(
       })
     )
   }
-
   private fun resetGyro() {
     driveController.start().onTrue(
       ConditionalCommand(

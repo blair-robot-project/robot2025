@@ -4,6 +4,7 @@ import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.*
@@ -86,21 +87,21 @@ class RobotLoop : TimedRobot(), Logged {
   override fun driverStationConnected() {
     Monologue.setFileOnly(DriverStation.isFMSAttached())
     // temporary bindings for sim testing
-    robot.driveController.x().onTrue(PrintCommand("move to reef button pressed").andThen(
-      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)).andThen(PrintCommand("moved to reef"))
-        .andThen(autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1)).andThen(PrintCommand("coral put in reef"))
-    )
-    robot.driveController.a().onTrue(PrintCommand("move to processor button pressed").andThen(
-      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
-    )
-    robot.driveController.b().onTrue(PrintCommand("move to net button pressed").andThen(
-      autoscore.moveToNetCommand(false)).andThen(PrintCommand("moved to net"))
-        .andThen(autoscore.scoreNetCommand()).andThen(PrintCommand("net scored"))
-    )
-    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
-      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
-        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
-    )
+//    robot.driveController.x().onTrue(
+//      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
+//    )
+//    robot.driveController.a().onTrue(PrintCommand("move to processor button pressed").andThen(
+//      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
+//    )
+//    robot.driveController.b().onTrue(
+//      autoscore.moveToNetCommand(DriverStation.getAlliance().get() == Alliance.Red)
+//    )
+//    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
+//      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
+//        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
+//    )
+    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
+
     webCom = WebConnection()
   }
 
