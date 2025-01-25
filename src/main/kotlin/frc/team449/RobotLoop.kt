@@ -1,7 +1,6 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
-import com.sun.tools.sjavac.Util.set
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
@@ -18,6 +17,8 @@ import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.control.vision.ApriltagCamera
+import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.vision.VisionConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
@@ -25,7 +26,6 @@ import monologue.Annotations.Log
 import monologue.Logged
 import monologue.Monologue
 import org.littletonrobotics.urcl.URCL
-import org.photonvision.PhotonCamera
 import org.photonvision.simulation.VisionSystemSim
 import kotlin.jvm.optionals.getOrNull
 
@@ -35,10 +35,8 @@ class RobotLoop : TimedRobot(), Logged {
 
   @Log.NT
   private val robot = Robot()
-
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
-  private val Camera3 =
-    ApriltagCamera("cam3", AprilTagFieldLayout(a, b, c, d), Transform3d(), VisionSystemSim("filler")) // All values in the parameter are filler, will be changed later for the actual robot
+  private val Camera3 = ApriltagCamera("cam3", VisionConstants.TAG_LAYOUT, VisionConstants.backRight, VisionConstants.VISION_SIM) // All values in the parameter are filler, will be changed later for the actual robot
 
   @Log.NT
 
@@ -126,19 +124,19 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
   override fun teleopPeriodic() {
+
     val results = Camera3.cam.allUnreadResults
-    val reefAprilTagIDs = setOf(6, 7, 8, 9, 10, 11, 17, 18, 19, 21, 22)
     var targetVisible: Boolean = false
     var targetYaw: Double = 0.0
     if (results.isNotEmpty()) {
       var result = results.get(results.size - 1);
       if (result.hasTargets()) {
         for (target in result.getTargets()) {
-          if (target.getFiducialId() in reefAprilTagIDs) {
+          if (target.getFiducialId() in VisionConstants.reefAprilTagIDs) {
             targetYaw = target.getYaw();
             targetVisible = true;
           }
-        }
+        }}
       }
     }
 
@@ -177,4 +175,4 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
 
-}
+

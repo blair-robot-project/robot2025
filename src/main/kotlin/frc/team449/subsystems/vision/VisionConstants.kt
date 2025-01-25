@@ -76,6 +76,7 @@ object VisionConstants {
   const val SIM_AVG_LATENCY = 40.0
   const val SIM_STDDEV_LATENCY = 10.0
   const val ENABLE_WIREFRAME = true
+  var reefAprilTagIDs = setOf(6, 7, 8, 9, 10, 11, 17, 18, 19, 21, 22)
 
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
