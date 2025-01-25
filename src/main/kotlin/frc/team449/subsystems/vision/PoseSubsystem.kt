@@ -18,6 +18,7 @@ import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.vision.interpolation.InterpolatedVision
 import frc.team449.system.AHRS
+import kotlin.jvm.optionals.getOrDefault
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.pow
@@ -103,6 +104,15 @@ class PoseSubsystem(
 
   fun resetOdometry(newPose: Pose2d) {
     this.poseEstimator.resetPose(newPose)
+  }
+
+  fun resetPoseChoreo(newPose: Pose2d) {
+    this.poseEstimator.resetPose(newPose)
+    this.heading += if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
+      Rotation2d(-PI)
+    } else {
+      Rotation2d(0.0)
+    }
   }
 
   fun getPose() {

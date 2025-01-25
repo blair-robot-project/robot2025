@@ -25,24 +25,26 @@ open class Routines(
     get() = PIDController(6.7, 0.0, 0.0)
 
   init {
-    headingController.enableContinuousInput(-Math.PI, Math.PI )
+    headingController.enableContinuousInput(-Math.PI, Math.PI)
   }
 
   private fun followTrajectory(sample: SwerveSample) {
     val speeds = ChassisSpeeds(
       sample.vx + xController.calculate(robot.poseSubsystem.pose.x, sample.x),
       sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
-      sample.omega + headingController.calculate(robot.poseSubsystem.pose.rotation.radians + if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) PI else 0.0,  sample.heading)
+      sample.omega + headingController.calculate(
+        robot.poseSubsystem.pose.rotation.radians + if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) PI else 0.0,
+        sample.heading
+      )
     )
     val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, robot.poseSubsystem.heading)
     // Apply the generated speeds
     robot.drive.driveRobotRelative(newSpeeds)
   }
 
-
   val autoFactory = AutoFactory(
     robot.poseSubsystem::pose,
-    robot.poseSubsystem::resetOdometry,
+    robot.poseSubsystem::resetPoseChoreo,
     { sample: SwerveSample -> followTrajectory(sample) },
     true,
     robot.drive
@@ -136,7 +138,9 @@ open class Routines(
         reefJTrajectory.resetOdometry(),
         reefJTrajectory.cmd(),
         robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
+        Commands.deadline(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+        )
       )
     )
     return J
