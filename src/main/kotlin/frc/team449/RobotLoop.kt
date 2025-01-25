@@ -143,11 +143,7 @@ class RobotLoop : TimedRobot(), Logged {
     }
 
     if (targetVisible) {
-      class SwerveDriveWrapper(private val swerveDrive: SwerveDrive) {
-        fun turnToDesiredDisplacement(desiredDisplacementDeg: Double): Command {
-          return swerveDrive.turnToDesiredDisplacement(targetYaw)
-        }
-      }
+      robot.drive.turnToDesiredDisplacement(targetYaw)
     }
 
     override fun disabledInit() {
