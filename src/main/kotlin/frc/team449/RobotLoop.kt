@@ -83,9 +83,6 @@ class RobotLoop : TimedRobot(), Logged {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-
-    controllerBinder.bindButtons()
-
     DriverStation.startDataLog(DataLogManager.getLog())
     Monologue.setupMonologue(this, "/Monologuing", false, false)
 
@@ -93,83 +90,9 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
   override fun driverStationConnected() {
+    controllerBinder.bindButtons()
 
-    println("configuring the drive")
-    AutoBuilder.configure(
-      robot.poseSubsystem::getPosea , // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry , // resetPose - a consumer for resetting the robot's pose\
-      robot.drive::getCurrentSpeedsa , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ) ,
-      RobotConfig (
-        SwerveConstants.MASS ,
-        SwerveConstants.MOI ,
-        ModuleConfig(
-          SwerveConstants.WHEEL_RADIUS ,
-          SwerveConstants.MAX_DRIVE_SPEED ,
-          SwerveConstants.COF_WHEELS_CARPET ,
-          DCMotor.getKrakenX60(1) ,
-          SwerveConstants.DRIVE_GEARING ,
-          SwerveConstants.DRIVE_CURRENT_LIMIT ,
-          1 ) ,
-        // FL, FR, BL, BR
-        Translation2d(
-          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          SwerveConstants.TRACKWIDTH / 2 ),
-        Translation2d(
-          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          SwerveConstants.TRACKWIDTH / 2 ),
-        Translation2d(
-          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          -SwerveConstants.TRACKWIDTH / 2 ),
-        Translation2d(
-          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          -SwerveConstants.TRACKWIDTH / 2 )
-      ) ,
-      { DriverStation.getAlliance().get() == Alliance.Red },
-      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
-    )
-
-    println("drive configured")
     Monologue.setFileOnly(DriverStation.isFMSAttached())
-    // temporary bindings for sim testing
-//    robot.driveController.x().onTrue(
-//      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-//    )
-//    robot.driveController.a().onTrue(PrintCommand("move to processor button pressed").andThen(
-//      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
-//    )
-//    robot.driveController.b().onTrue(
-//      autoscore.moveToNetCommand(DriverStation.getAlliance().get() == Alliance.Red)
-//    )
-//    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
-//      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
-//        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
-//    )
-    var reefPose = AutoScoreCommandConstants.testPose
-    val constraints = PathConstraints(
-      30.0,
-      40.0,
-      Units.degreesToRadians(540.0),
-      Units.degreesToRadians(720.0)
-    )
-    robot.driveController.x().onTrue(
-      AutoBuilder.pathfindToPose(
-        reefPose,
-        constraints,
-        0.0,
-        // Goal end velocity in meters/sec
-      )
-
-    )
-
-//    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
-
-//    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
-
 
     webCom = WebConnection()
   }

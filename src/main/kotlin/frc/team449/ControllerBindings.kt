@@ -1,13 +1,25 @@
 package frc.team449
 
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.config.ModuleConfig
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.config.RobotConfig
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrNull
@@ -21,6 +33,84 @@ class ControllerBindings(
 ) {
 
   private fun robotBindings() {
+    println("configuring the drive")
+    AutoBuilder.configure(
+      robot.poseSubsystem::getPosea , // poseSupplier - a supplier for the robot's current pose
+      robot.poseSubsystem::resetOdometry , // resetPose - a consumer for resetting the robot's pose\
+      robot.drive::getCurrentSpeedsa , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
+      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
+        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
+      ) ,
+      RobotConfig (
+        SwerveConstants.MASS ,
+        SwerveConstants.MOI ,
+        ModuleConfig(
+          SwerveConstants.WHEEL_RADIUS ,
+          SwerveConstants.MAX_DRIVE_SPEED ,
+          SwerveConstants.COF_WHEELS_CARPET ,
+          DCMotor.getKrakenX60(1) ,
+          SwerveConstants.DRIVE_GEARING ,
+          SwerveConstants.DRIVE_CURRENT_LIMIT ,
+          1 ) ,
+        // FL, FR, BL, BR
+        Translation2d( // FL
+          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          SwerveConstants.TRACKWIDTH / 2
+        ),
+        Translation2d( // FR
+          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          -SwerveConstants.TRACKWIDTH / 2
+        ),
+        Translation2d( // BL
+          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          SwerveConstants.TRACKWIDTH / 2
+        ),
+        Translation2d( // BR
+          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+          -SwerveConstants.TRACKWIDTH / 2
+        )
+      ) ,
+      { DriverStation.getAlliance().get() == Alliance.Red },
+      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
+    )
+
+    println("drive configured")
+    // temporary bindings for sim testing
+//    robot.driveController.x().onTrue(
+//      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
+//    )
+//    robot.driveController.a().onTrue(PrintCommand("move to processor button pressed").andThen(
+//      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
+//    )
+//    robot.driveController.b().onTrue(
+//      autoscore.moveToNetCommand(DriverStation.getAlliance().get() == Alliance.Red)
+//    )
+//    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
+//      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
+//        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
+//    )
+    var reefPose = AutoScoreCommandConstants.testPose
+    val constraints = PathConstraints(
+      30.0,
+      40.0,
+      Units.degreesToRadians(540.0),
+      Units.degreesToRadians(720.0)
+    )
+    robot.driveController.x().onTrue(
+      AutoBuilder.pathfindToPose(
+        reefPose,
+        constraints,
+        0.0,
+        // Goal end velocity in meters/sec
+      )
+    )
+
+//    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
+
+//    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
+
     /** Call robot functions you create below */
 //    driveController.a().onTrue(
 //      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)

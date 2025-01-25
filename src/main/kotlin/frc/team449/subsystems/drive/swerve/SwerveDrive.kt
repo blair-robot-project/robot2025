@@ -217,7 +217,7 @@ open class SwerveDrive(
           )
         ),
         createKrakenModule(
-          "BLModule",
+          "BRModule",
           SwerveConstants.DRIVE_MOTOR_BR,
           SwerveConstants.DRIVE_INVERTED,
           SwerveConstants.TURN_MOTOR_BR,
