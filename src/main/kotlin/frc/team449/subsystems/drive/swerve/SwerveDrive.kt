@@ -104,7 +104,6 @@ open class SwerveDrive(
 
 
 
-
   /** @return An array of [SwerveModulePosition] for each module, containing distance and angle. */
   fun getPositions(): Array<SwerveModulePosition> {
     return Array(modules.size) { i -> modules[i].position }
