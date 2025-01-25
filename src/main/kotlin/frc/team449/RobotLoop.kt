@@ -6,19 +6,17 @@ import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
-import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.*
-import edu.wpi.first.wpilibj2.command.Commands.print
-import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import frc.team449.auto.RoutineChooser
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
@@ -98,10 +96,10 @@ class RobotLoop : TimedRobot(), Logged {
 
     println("configuring the drive")
     AutoBuilder.configure(
-      { robot.poseSubsystem.pose } , // poseSupplier - a supplier for the robot's current pose
-      { newPose: Pose2d -> Robot().poseSubsystem.resetOdometry(newPose) } , // resetPose - a consumer for resetting the robot's pose
-      { robot.drive.currentSpeeds } , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      { speeds: ChassisSpeeds -> robot.drive.set(speeds) } , // output - Output function that accepts robot-relative ChassisSpeeds
+      robot.poseSubsystem::getPosea , // poseSupplier - a supplier for the robot's current pose
+      robot.poseSubsystem::resetOdometry , // resetPose - a consumer for resetting the robot's pose\
+      robot.drive::getCurrentSpeedsa , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
       PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
         PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
         PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
@@ -131,7 +129,7 @@ class RobotLoop : TimedRobot(), Logged {
           SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
           -SwerveConstants.TRACKWIDTH / 2 )
       ) ,
-      { if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) true else false },
+      { DriverStation.getAlliance().get() == Alliance.Red },
       robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
     )
 
@@ -151,10 +149,27 @@ class RobotLoop : TimedRobot(), Logged {
 //      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
 //        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
 //    )
-
-    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(
-      autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+    var reefPose = AutoScoreCommandConstants.testPose
+    val constraints = PathConstraints(
+      30.0,
+      40.0,
+      Units.degreesToRadians(540.0),
+      Units.degreesToRadians(720.0)
     )
+    robot.driveController.x().onTrue(
+      AutoBuilder.pathfindToPose(
+        reefPose,
+        constraints,
+        0.0,
+        // Goal end velocity in meters/sec
+      )
+
+    )
+
+//    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
+
+//    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
+
 
     webCom = WebConnection()
   }
@@ -171,10 +186,10 @@ class RobotLoop : TimedRobot(), Logged {
 
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
-    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
+    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
     CommandScheduler.getInstance().schedule(this.autoCommand)
 
-    if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
+    if (DriverStation.getAlliance().getOrNull() == Alliance.Red) {
       BreatheHue(robot.light, 0).schedule()
     } else {
       BreatheHue(robot.light, 95).schedule()

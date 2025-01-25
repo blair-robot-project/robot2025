@@ -215,6 +215,10 @@ class PoseSubsystem(
     return result
   }
 
+  fun getPosea(): Pose2d {
+    return pose
+  }
+
   private fun setRobotPose() {
     this.field.robotPose = this.pose
 

@@ -42,6 +42,12 @@ class AutoScoreCommands(
    * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
 
+  fun magnetizeToTestCommand(): Command {
+    println("test command pressed")
+    val reefPose = AutoScoreCommandConstants.testPose
+    return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
+  }
+
   fun moveToReefCommand(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
@@ -87,7 +93,8 @@ class AutoScoreCommands(
       return AutoBuilder.pathfindToPose(
         reefPose,
         constraints,
-        0.0,  // Goal end velocity in meters/sec
+        0.0,
+        // Goal end velocity in meters/sec
       )
     } else {
       /*** magnetize ***/

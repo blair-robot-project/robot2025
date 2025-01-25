@@ -44,6 +44,10 @@ class AutoScoreCommandConstants() {
     val processorRotation2dBlue = Rotation2d(3 * Math.PI / 2) // in radians
     val processorPoseBlue = Pose2d(processorTranslation2dBlue, processorRotation2dBlue)
 
+    val testTranslation = Translation2d(6.358, 1.622)
+    val testRotation = Rotation2d(3 * Math.PI / 2) // in radians
+    val testPose = Pose2d(testTranslation, testRotation)
+
     // RED
     val processorTranslation2dRed = Translation2d(11.520, 7.500)
     val processorRotation2dRed = Rotation2d(Math.PI / 2) // in radians

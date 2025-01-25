@@ -87,6 +87,10 @@ open class SwerveDrive(
     return totalVel / modules.size
   }
 
+  fun getCurrentSpeedsa(): ChassisSpeeds {
+    return currentSpeeds
+  }
+
   override fun periodic() {
     // Updates the robot's currentSpeeds.
     currentSpeeds = kinematics.toChassisSpeeds(
