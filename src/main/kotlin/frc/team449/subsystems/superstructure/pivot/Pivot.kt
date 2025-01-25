@@ -11,13 +11,17 @@ import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.system.encoder.AbsoluteEncoder
+import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
 @Logged
 class Pivot(
-  private val motor: TalonFX
+  private val motor: TalonFX,
+  val absoluteEncoder: AbsoluteEncoder,
+  val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
 
   val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -73,6 +77,10 @@ class Pivot(
 
   override fun periodic() {
     logData()
+
+    if (motor.position.valueAsDouble - quadEncoder.position > PivotConstants.RESET_ENC_LIMIT.`in`(Radians)) {
+      motor.setPosition(quadEncoder.position)
+    }
   }
 
   override fun simulationPeriodic() {
@@ -85,6 +93,10 @@ class Pivot(
     DogLog.log("Pivot/Desired Target", request.Position)
     DogLog.log("Pivot/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
     DogLog.log("Pivot/In Tolerance", atSetpoint())
+    DogLog.log("Pivot/Abs/Pos", absoluteEncoder.position)
+    DogLog.log("Pivot/Abs/Vel", absoluteEncoder.velocity)
+    DogLog.log("Pivot/Quad/Pos", quadEncoder.position)
+    DogLog.log("Pivot/Quad/Vel", quadEncoder.velocity)
     KrakenDogLog.log("Pivot/Motor", motor)
   }
 
@@ -151,7 +163,27 @@ class Pivot(
         Follower(PivotConstants.LEAD_MOTOR_ID, PivotConstants.FOLLOWER_INVERTED_TO_MASTER)
       )
 
-      return Pivot(leadMotor)
+      val absEnc = AbsoluteEncoder.createAbsoluteEncoder(
+        "Pivot Absolute Enc",
+        PivotConstants.ABS_ENC_DIO_PORT,
+        PivotConstants.ABS_OFFSET,
+        PivotConstants.ENC_RATIO,
+        PivotConstants.ENC_INVERTED,
+        min = PivotConstants.ABS_RANGE.first,
+        max = PivotConstants.ABS_RANGE.second
+      )
+
+      val quadEnc = QuadEncoder.createQuadEncoder(
+        "Pivot Quad Enc",
+        PivotConstants.QUAD_ENCODER,
+        PivotConstants.ENC_CPR,
+        PivotConstants.ENC_RATIO,
+        1.0,
+        PivotConstants.ENC_INVERTED,
+        PivotConstants.SAMPLES_TO_AVERAGE
+      )
+
+      return Pivot(leadMotor, absEnc, quadEnc)
     }
   }
 }

@@ -20,6 +20,10 @@ class QuadCalibration(
 
   private var samples = mutableListOf<Double>()
 
+  override fun initialize() {
+    println("**** Starting Encoder Calibration for $name ****")
+  }
+
   override fun execute() {
     samples.add(absolute.position)
   }
@@ -31,7 +35,7 @@ class QuadCalibration(
   override fun end(interrupted: Boolean) {
     val angle = clusterAndComputeLowAverage(samples)
     encoder.resetPosition(angle)
-    println("***** Finished Calibrating $name Quadrature reading, Low Side Avg of $angle*****")
+    println("**** Finished Calibrating $name Quadrature reading, Low Side Avg of $angle ****")
   }
 
   // K-Means clustering implementation

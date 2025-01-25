@@ -22,6 +22,7 @@ import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
+import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
@@ -86,6 +87,14 @@ class RobotLoop : TimedRobot() {
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 
     URCL.start()
+
+    QuadCalibration(robot.pivot, robot.pivot.absoluteEncoder, robot.pivot.quadEncoder, name = "Pivot")
+      .ignoringDisable(true)
+      .schedule()
+
+    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
+      .ignoringDisable(true)
+      .schedule()
   }
 
   override fun driverStationConnected() {

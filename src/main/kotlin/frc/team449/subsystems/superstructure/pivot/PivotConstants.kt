@@ -4,6 +4,7 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
+import edu.wpi.first.wpilibj.Encoder
 import kotlin.math.PI
 
 object PivotConstants {
@@ -12,7 +13,7 @@ object PivotConstants {
 
   // TODO(Adjust gearing and UPR.)
   const val GEARING = 1.0 / 75.0
-  const val UPR = 2.0 * PI * (26.0 / 36.0)
+  const val UPR = 2.0 * PI
 
   // Simulation Constants
   const val MOMENT_OF_INERTIA = 0.57125221 + 0.085
@@ -44,4 +45,16 @@ object PivotConstants {
 
   val CRUISE_VEL = RotationsPerSecond.of(0.3)
   val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0)
+
+  val RESET_ENC_LIMIT = Degrees.of(0.5)
+
+  /** Encoder Values */
+  const val ABS_ENC_DIO_PORT = 4
+  const val ABS_OFFSET = 0.0
+  const val ENC_INVERTED = false
+  val ABS_RANGE = Pair(-0.25, 0.75)
+  const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
+  val QUAD_ENCODER = Encoder(5, 10)
+  const val ENC_CPR = 2048
+  const val SAMPLES_TO_AVERAGE = 127
 }
