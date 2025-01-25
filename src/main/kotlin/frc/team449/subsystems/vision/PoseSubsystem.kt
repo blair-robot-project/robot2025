@@ -127,7 +127,7 @@ class PoseSubsystem(
 
   private fun localize() = try {
     for ((index, camera) in cameras.withIndex()) {
-      val results = camera.estimatedPose()
+      val results = camera.estimatedPose(pose)
       for (result in results) {
         if (result.isPresent) {
           val presentResult = result.get()

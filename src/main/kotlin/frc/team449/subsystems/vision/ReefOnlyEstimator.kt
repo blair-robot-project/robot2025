@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.RobotBase
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
@@ -13,6 +14,8 @@ import org.photonvision.targeting.PhotonTrackedTarget
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.tan
 
 /**
  * This class uses normal multi-tag PNP and lowest ambiguity using the gyro rotation
@@ -23,26 +26,15 @@ class ReefOnlyEstimator(
   val camera: PhotonCamera,
   private val robotToCam: Transform3d
 ) : PhotonPoseEstimator(tagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam) {
+
   private val reportedErrors: HashSet<Int> = HashSet()
   private var driveHeading: Rotation2d? = null
   private var lastPose: Pose3d? = null
 
-  fun estimatedPose(currPose: Pose2d): List<Optional<EstimatedRobotPose>> {
+  fun updatePose(cameraResult: PhotonPipelineResult?, currPose: Pose2d): Optional<EstimatedRobotPose> {
     driveHeading = currPose.rotation
     lastPose = Pose3d(currPose.x, currPose.y, 0.0, Rotation3d(0.0, 0.0, currPose.rotation.radians))
 
-    val results = camera.allUnreadResults
-
-    val poses = ArrayList<Optional<EstimatedRobotPose>>()
-
-    for (result in results) {
-      poses.add(updatePose(result))
-    }
-
-    return poses
-  }
-
-  private fun updatePose(cameraResult: PhotonPipelineResult?): Optional<EstimatedRobotPose> {
     // Time in the past -- give up, since the following if expects times > 0
     if (cameraResult!!.timestampSeconds < 0) {
       return Optional.empty()
@@ -97,13 +89,6 @@ class ReefOnlyEstimator(
 
       val visionPose = checkBest(lastPose, best, alternate) ?: best
 
-      if ((!multitagResult.fiducialIDsUsed.containsAll(listOf(3, 4)) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
-        (!multitagResult.fiducialIDsUsed.containsAll(listOf(7, 8)) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue)
-      ) {
-        println("throwing away estimate, non reef")
-        return Optional.empty()
-      }
-
       Optional.of(
         EstimatedRobotPose(
           visionPose,
@@ -113,56 +98,8 @@ class ReefOnlyEstimator(
         )
       )
     } else {
-      lowestAmbiguityStrategy(result)
-      Optional.empty()
+      lowestAmbiguityStrat(result)
     }
-  }
-
-  private fun useCenter(result: PhotonPipelineResult): Optional<EstimatedRobotPose> {
-    var usedTarget: PhotonTrackedTarget? = null
-    for (target: PhotonTrackedTarget in result.targets) {
-      if (target.fiducialId == 4 && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red ||
-        target.fiducialId == 7 && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue
-      ) {
-        usedTarget = target
-      }
-    }
-
-    if (usedTarget == null) {
-      return Optional.empty()
-    }
-
-    // Although there are confirmed to be targets, none of them may be fiducial
-    // targets.
-    val targetPosition = tagLayout.getTagPose(usedTarget.fiducialId)
-
-    val bestPose = targetPosition
-      .get()
-      .transformBy(
-        usedTarget.bestCameraToTarget.inverse()
-      )
-      .transformBy(robotToCam.inverse())
-
-    if (abs(
-        MathUtil.angleModulus(
-          MathUtil.angleModulus(bestPose.rotation.z) -
-            MathUtil.angleModulus(driveHeading!!.radians)
-        )
-      )
-      > VisionConstants.TAG_HEADING_MAX_DEV_RAD
-    ) {
-      DriverStation.reportWarning("Best Single Tag Heading over Max Deviation, deviated by ${Units.radiansToDegrees(abs(bestPose.rotation.z - driveHeading!!.radians))}", false)
-      return Optional.empty()
-    }
-
-    return Optional.of(
-      EstimatedRobotPose(
-        bestPose,
-        result.timestampSeconds,
-        listOf(usedTarget),
-        PoseStrategy.LOWEST_AMBIGUITY
-      )
-    )
   }
 
   /**
@@ -173,15 +110,18 @@ class ReefOnlyEstimator(
    * @return the estimated position of the robot in the FCS and the estimated timestamp of this
    * estimation.
    */
-  private fun lowestAmbiguityStrategy(result: PhotonPipelineResult): Optional<EstimatedRobotPose> {
+  private fun lowestAmbiguityStrat(result: PhotonPipelineResult): Optional<EstimatedRobotPose> {
     var lowestAmbiguityTarget: PhotonTrackedTarget? = null
     var lowestAmbiguityScore = 10.0
     for (target: PhotonTrackedTarget in result.targets) {
       val targetPoseAmbiguity = target.poseAmbiguity
       // Make sure the target is a Fiducial target.
-      if (targetPoseAmbiguity != -1.0 && targetPoseAmbiguity < lowestAmbiguityScore) {
+      if (targetPoseAmbiguity != -1.0 && targetPoseAmbiguity < lowestAmbiguityScore &&
+        ((listOf(6,7,8,9,10,11).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
+        (listOf(17,18,19,20,21,22).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue))) {
         lowestAmbiguityScore = targetPoseAmbiguity
         lowestAmbiguityTarget = target
+        print("getting here")
       }
     }
 
@@ -202,21 +142,18 @@ class ReefOnlyEstimator(
       )
       .transformBy(robotToCam.inverse())
 
-    if (abs(
-        MathUtil.angleModulus(
-          MathUtil.angleModulus(bestPose.rotation.z) -
-            MathUtil.angleModulus(driveHeading!!.radians)
-        )
+    val altPose = targetPosition
+      .get()
+      .transformBy(
+        lowestAmbiguityTarget.altCameraToTarget.inverse()
       )
-      > VisionConstants.TAG_HEADING_MAX_DEV_RAD
-    ) {
-      DriverStation.reportWarning("Best Single Tag Heading over Max Deviation, deviated by ${Units.radiansToDegrees(abs(bestPose.rotation.z - driveHeading!!.radians))}", false)
-      return Optional.empty()
-    }
+      .transformBy(robotToCam.inverse())
+
+    val visionPose = checkBest(lastPose, bestPose, altPose) ?: bestPose
 
     return Optional.of(
       EstimatedRobotPose(
-        bestPose,
+        visionPose,
         result.timestampSeconds,
         result.getTargets(),
         PoseStrategy.LOWEST_AMBIGUITY

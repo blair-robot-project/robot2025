@@ -50,7 +50,7 @@ object VisionConstants {
   const val MAX_AMBIGUITY = 0.25
   var MAX_DISTANCE_SINGLE_TAG = 5.0
   var MAX_DISTANCE_MULTI_TAG = 6.0
-  val TAG_HEADING_MAX_DEV_RAD = Units.degreesToRadians(3.5)
+  val TAG_HEADING_MAX_DEV_RAD = Units.degreesToRadians(360.0)
   var MAX_HEIGHT_ERR_METERS = 0.25
   const val NUM_TAG_FACTOR = 2.0
 
@@ -80,7 +80,7 @@ object VisionConstants {
       TAG_LAYOUT,
       front,
       VISION_SIM
-    ),
+    )
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(
