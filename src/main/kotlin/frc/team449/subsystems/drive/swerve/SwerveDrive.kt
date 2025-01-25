@@ -102,26 +102,7 @@ open class SwerveDrive(
     }
   }
 
-  fun turnToDesiredDisplacement(desiredDisplacementDeg: Double): Command {
 
-    val pidController = PIDController(TURN_KP, TURN_KI, TURN_KD).apply {
-      setTolerance(Math.toRadians(2.0))
-    }
-
-    val desiredDisplacementRad = Math.toRadians(desiredDisplacementDeg)
-
-    return run {
-
-      run {
-        val currentAngle = //idk
-        val omegaRadPerSec = pidController.calculate(currentAngle, desiredDisplacementRad)
-        this.set(ChassisSpeeds(0.0, 0.0, omegaRadPerSec))
-        //need to make sure max rot speed isnt exceeded
-      }
-    }.until {
-      pidController.atSetpoint()
-    }.andThen(stop())
-  }
 
 
   /** @return An array of [SwerveModulePosition] for each module, containing distance and angle. */
