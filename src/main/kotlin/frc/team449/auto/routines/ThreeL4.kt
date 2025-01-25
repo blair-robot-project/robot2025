@@ -51,7 +51,7 @@ class ThreeL4(
 
   private fun premoveSubstation(robot: Robot): Command {
     return robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
-      .alongWith(PrintCommand("start intaking"))
+      .alongWith(robot.intake.intakeCoral())
   }
 
   private fun scoreL4(robot: Robot): Command {
@@ -64,6 +64,7 @@ class ThreeL4(
       .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
       .andThen(PrintCommand("wait until coral detected placeholder "))
       .andThen(WaitCommand(1.0))
+      .andThen(robot.intake.stop())
   }
 
   override val trajectory: MutableList<ChoreoTrajectory> =

@@ -26,7 +26,7 @@ class ControllerBindings(
     /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
      * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
      */
-    score_l1()
+//    score_l1()
     score_l2()
     score_l3()
     score_l4()
@@ -53,12 +53,12 @@ class ControllerBindings(
     )
   }
 
-  private fun score_l1() {
-    driveController.a().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-    )
-  }
+//  private fun score_l1() {
+//    driveController.a().onTrue(
+//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+//        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+//    )
+//  }
 
   private fun score_l2() {
     driveController.x().onTrue(
