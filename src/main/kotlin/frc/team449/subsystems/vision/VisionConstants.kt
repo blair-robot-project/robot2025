@@ -2,7 +2,6 @@ package frc.team449.subsystems.vision
 
 import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
@@ -64,9 +63,9 @@ object VisionConstants {
 
   /** Vision Sim Setup Constants */
   const val SIM_FPS = 25.0
-  const val SIM_CAMERA_HEIGHT_PX = 800// 1200 // 800
-  const val SIM_CAMERA_WIDTH_PX = 1280//1600 // 1280
-  const val SIM_FOV_DEG = 79.09//87.6115 // 79.09
+  const val SIM_CAMERA_HEIGHT_PX = 800 // 1200 // 800
+  const val SIM_CAMERA_WIDTH_PX = 1280 // 1600 // 1280
+  const val SIM_FOV_DEG = 79.09 // 87.6115 // 79.09
   const val SIM_CALIB_AVG_ERR_PX = 0.45
   const val SIM_CALIB_ERR_STDDEV_PX = 0.65
   const val SIM_AVG_LATENCY = 60.0

@@ -1,11 +1,8 @@
 package frc.team449.subsystems.vision
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.*
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.RobotBase
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
@@ -14,8 +11,6 @@ import org.photonvision.targeting.PhotonTrackedTarget
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.tan
 
 /**
  * This class uses normal multi-tag PNP and lowest ambiguity using the gyro rotation
@@ -117,8 +112,11 @@ class ReefOnlyEstimator(
       val targetPoseAmbiguity = target.poseAmbiguity
       // Make sure the target is a Fiducial target.
       if (targetPoseAmbiguity != -1.0 && targetPoseAmbiguity < lowestAmbiguityScore &&
-        ((listOf(6,7,8,9,10,11).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
-        (listOf(17,18,19,20,21,22).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue))) {
+        (
+          (listOf(6, 7, 8, 9, 10, 11).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
+            (listOf(17, 18, 19, 20, 21, 22).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue)
+          )
+      ) {
         lowestAmbiguityScore = targetPoseAmbiguity
         lowestAmbiguityTarget = target
         print("getting here")
