@@ -1,15 +1,12 @@
 package frc.team449
 
 import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
@@ -19,9 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.subsystems.RobotConstants
-import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -35,43 +30,15 @@ class ControllerBindings(
   private fun robotBindings() {
     println("configuring the drive")
     AutoBuilder.configure(
-      robot.poseSubsystem::getPosea , // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry , // resetPose - a consumer for resetting the robot's pose\
-      robot.drive::getCurrentSpeedsa , // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
+      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose\
+      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
       robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
       PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
         PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
         PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ) ,
-      RobotConfig (
-        SwerveConstants.MASS ,
-        SwerveConstants.MOI ,
-        ModuleConfig(
-          SwerveConstants.WHEEL_RADIUS ,
-          SwerveConstants.MAX_DRIVE_SPEED ,
-          SwerveConstants.COF_WHEELS_CARPET ,
-          DCMotor.getKrakenX60(1) ,
-          SwerveConstants.DRIVE_GEARING ,
-          SwerveConstants.DRIVE_CURRENT_LIMIT ,
-          1 ) ,
-        // FL, FR, BL, BR
-        Translation2d( // FL
-          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          SwerveConstants.TRACKWIDTH / 2
-        ),
-        Translation2d( // FR
-          SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          -SwerveConstants.TRACKWIDTH / 2
-        ),
-        Translation2d( // BL
-          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          SwerveConstants.TRACKWIDTH / 2
-        ),
-        Translation2d( // BR
-          -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-          -SwerveConstants.TRACKWIDTH / 2
-        )
-      ) ,
+      ),
+      RobotConfig.fromGUISettings(),
       { DriverStation.getAlliance().get() == Alliance.Red },
       robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
     )
@@ -93,8 +60,8 @@ class ControllerBindings(
 //    )
     var reefPose = AutoScoreCommandConstants.testPose
     val constraints = PathConstraints(
-      30.0,
-      40.0,
+      3.0,
+      4.0,
       Units.degreesToRadians(540.0),
       Units.degreesToRadians(720.0)
     )
@@ -119,7 +86,6 @@ class ControllerBindings(
 //    driveController.b().onTrue(
 //      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
 //    )
-
   }
 
   private fun nonRobotBindings() {
