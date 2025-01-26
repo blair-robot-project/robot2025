@@ -13,8 +13,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
+import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import kotlin.jvm.optionals.getOrNull
@@ -26,6 +28,8 @@ class ControllerBindings(
   private val mechanismController: CommandXboxController,
   private val robot: Robot
 ) {
+
+  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
 
   private fun robotBindings() {
     println("configuring the drive")
@@ -45,34 +49,35 @@ class ControllerBindings(
 
     println("drive configured")
     // temporary bindings for sim testing
-//    robot.driveController.x().onTrue(
-//      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-//    )
-//    robot.driveController.a().onTrue(PrintCommand("move to processor button pressed").andThen(
-//      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
-//    )
-//    robot.driveController.b().onTrue(
-//      autoscore.moveToNetCommand(DriverStation.getAlliance().get() == Alliance.Red)
-//    )
-//    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
-//      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
-//        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
-//    )
-    var reefPose = AutoScoreCommandConstants.testPose
-    val constraints = PathConstraints(
-      3.0,
-      4.0,
-      Units.degreesToRadians(540.0),
-      Units.degreesToRadians(720.0)
-    )
     robot.driveController.x().onTrue(
-      AutoBuilder.pathfindToPose(
-        reefPose,
-        constraints,
-        0.0,
-        // Goal end velocity in meters/sec
-      )
+      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
     )
+    robot.driveController.a().onTrue(
+      PrintCommand("move to processor button pressed").andThen(
+      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
+    )
+    robot.driveController.b().onTrue(
+      autoscore.moveToNetCommand(DriverStation.getAlliance().get() == Alliance.Red)
+    )
+    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
+      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
+        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
+    )
+//    var reefPose = AutoScoreCommandConstants.testPose
+//    val constraints = PathConstraints(
+//      3.0,
+//      4.0,
+//      Units.degreesToRadians(540.0),
+//      Units.degreesToRadians(720.0)
+//    )
+//    robot.driveController.x().onTrue(
+//      AutoBuilder.pathfindToPose(
+//        reefPose,
+//        constraints,
+//        0.0,
+//        // Goal end velocity in meters/sec
+//      )
+//    )
 
 //    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
 
