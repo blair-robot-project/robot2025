@@ -2,8 +2,8 @@ package frc.team449.auto.routines
 
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
 import frc.team449.auto.AutoUtil
 import frc.team449.auto.choreo.ChoreoRoutine
@@ -18,9 +18,6 @@ class ThreeL4(
   isRedStage: Boolean
 ) : ChoreoRoutineStructure {
 
-  /** TODO: Add logic to scoring to outtake and wait until coral isn't detected
-   * TODO: Add logic to substation to intake and wait until coral is detected
-   */
   override val routine =
     ChoreoRoutine(
       drive = robot.drive,
@@ -57,13 +54,17 @@ class ThreeL4(
   private fun scoreL4(robot: Robot): Command {
     return robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
       .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+      .andThen(robot.intake.outtakeCoral())
+      .andThen(WaitUntilCommand { !robot.intake.infrared.get() })
+      .andThen(WaitCommand(0.15))
   }
 
   private fun intakeSubstation(robot: Robot): Command {
     return InstantCommand(robot.drive::stop)
+      .andThen(robot.intake.intakeCoral())
       .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
-      .andThen(PrintCommand("wait until coral detected placeholder "))
-      .andThen(WaitCommand(1.0))
+      .andThen(WaitUntilCommand { !robot.intake.infrared.get() })
+      .andThen(WaitCommand(0.15))
       .andThen(robot.intake.stop())
   }
 
