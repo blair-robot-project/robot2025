@@ -8,6 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -47,6 +48,8 @@ class Pivot(
     SuperstructureGoal.STOW.pivot.`in`(Radians)
   )
 
+  private val isReal = RobotBase.isReal()
+
   // last request is sticky
   fun setPosition(position: Double): Command {
     return this.run {
@@ -78,7 +81,7 @@ class Pivot(
   override fun periodic() {
     logData()
 
-    if (motor.position.valueAsDouble - quadEncoder.position > PivotConstants.RESET_ENC_LIMIT.`in`(Radians)) {
+    if (motor.position.valueAsDouble - quadEncoder.position > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
       motor.setPosition(quadEncoder.position)
     }
   }
