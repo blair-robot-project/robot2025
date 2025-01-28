@@ -81,7 +81,7 @@ class Pivot(
   override fun periodic() {
     logData()
 
-    if (motor.position.valueAsDouble - quadEncoder.position > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
+    if (abs(motor.position.valueAsDouble - quadEncoder.position) > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
       motor.setPosition(quadEncoder.position)
     }
   }
