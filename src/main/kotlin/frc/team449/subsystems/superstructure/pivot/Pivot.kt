@@ -70,6 +70,10 @@ class Pivot(
     return runOnce { motor.setVoltage(3.0) }
   }
 
+  fun setVoltage(voltage: Double): Command {
+    return runOnce { motor.setVoltage(voltage) }
+  }
+
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }

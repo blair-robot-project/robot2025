@@ -1,12 +1,17 @@
 package frc.team449
 
+import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.units.Measure
+import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
@@ -187,6 +192,74 @@ class ControllerBindings(
      exampleSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
      )
      */
+  }
+
+  private fun elevatorCharacterizaton() {
+    val elevatorSubsystemRoutine = SysIdRoutine(
+      SysIdRoutine.Config(
+        Volts.of(0.5).per(Second),
+        Volts.of(3.0),
+        Seconds.of(10.0)
+      ) { state -> SignalLogger.writeString("state", state.toString()) },
+      SysIdRoutine.Mechanism(
+        { voltage: Voltage ->
+          run { robot.elevator.setVoltage(voltage.`in`(Volts)) }
+        },
+        null,
+        robot.elevator,
+        "elevator"
+      )
+    )
+
+    driveController.povUp().onTrue(
+      elevatorSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+    )
+
+    driveController.povDown().onTrue(
+      elevatorSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+    )
+
+    driveController.povRight().onTrue(
+      elevatorSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
+    )
+
+    driveController.povLeft().onTrue(
+      elevatorSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+    )
+  }
+
+  fun pivotCharacterizaton() {
+    val pivotSubsystemRoutine = SysIdRoutine(
+      SysIdRoutine.Config(
+        Volts.of(0.5).per(Second),
+        Volts.of(3.0),
+        Seconds.of(10.0)
+      ) { state -> SignalLogger.writeString("state", state.toString()) },
+      SysIdRoutine.Mechanism(
+        { voltage: Voltage ->
+          run { robot.pivot.setVoltage(voltage.`in`(Volts)) }
+        },
+        null,
+        robot.pivot,
+        "elevator"
+      )
+    )
+
+    driveController.povUp().onTrue(
+      pivotSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+    )
+
+    driveController.povDown().onTrue(
+      pivotSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+    )
+
+    driveController.povRight().onTrue(
+      pivotSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
+    )
+
+    driveController.povLeft().onTrue(
+      pivotSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+    )
   }
 
   /** Try not to touch, just add things to the robot or nonrobot bindings */

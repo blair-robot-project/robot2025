@@ -7,7 +7,6 @@ import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
@@ -48,7 +47,7 @@ class RobotLoop : TimedRobot() {
 
     HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
 
-    if (RobotBase.isSimulation()) {
+    if (isSimulation()) {
       // Don't complain about joysticks if there aren't going to be any
       DriverStation.silenceJoystickConnectionWarning(true)
 //      val instance = NetworkTableInstance.getDefault()
