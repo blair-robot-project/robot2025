@@ -36,7 +36,7 @@ class Robot : RobotBase(), Logged {
   )
 
   @Log.NT
-  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field, this)
+  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field, this, driveController)
 
   @Log.NT
   override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)

@@ -5,6 +5,7 @@ import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -17,10 +18,13 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.Robot
+import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
+import frc.team449.subsystems.vision.PoseSubsystem
 import kotlin.math.hypot
 
 /**
@@ -38,7 +42,8 @@ open class SwerveDrive(
   var maxRotSpeed: Double,
   protected val field: Field2d,
   val maxModuleSpeed: Double,
-  val robot: Robot
+  val robot: Robot,
+  val controller: CommandXboxController
 ) : SubsystemBase() {
 
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
@@ -80,6 +85,18 @@ open class SwerveDrive(
       it.setVoltage(volts)
     }
   }
+
+  fun setWithControl(desiredSpeeds: ChassisSpeeds) {
+    var vx = desiredSpeeds.vxMetersPerSecond
+    vx += controller.leftX*100
+    var vy = desiredSpeeds.vyMetersPerSecond
+    vy += controller.leftY*100
+    var rot = desiredSpeeds.omegaRadiansPerSecond
+    rot += controller.rightX*100
+    val newSpeeds = ChassisSpeeds(vx/2, vy/2, rot/2)
+    this.set(newSpeeds)
+  }
+
 
   fun getModuleVel(): Double {
     var totalVel = 0.0
@@ -171,7 +188,7 @@ open class SwerveDrive(
 
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
-    fun createSwerveKraken(field: Field2d, robot: Robot): SwerveDrive {
+    fun createSwerveKraken(field: Field2d, robot: Robot, controller: CommandXboxController): SwerveDrive {
 
       val modules = listOf(
         createKrakenModule(
@@ -239,7 +256,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
-          robot
+          robot,
+          controller
         )
       } else {
         SwerveSim(
@@ -249,12 +267,13 @@ open class SwerveDrive(
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
-          robot
+          robot,
+          controller
         )
       }
     }
 
-    fun createSwerveNEO(field: Field2d, robot: Robot): SwerveDrive {
+    fun createSwerveNEO(field: Field2d, robot: Robot, controller: CommandXboxController): SwerveDrive {
       val modules = listOf(
         createNEOModule(
           "FLModule",
@@ -321,7 +340,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
-          robot
+          robot,
+          controller
         )
       } else {
         SwerveSim(
@@ -331,7 +351,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ROT_SPEED,
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
-          robot
+          robot,
+          controller
         )
       }
     }

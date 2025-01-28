@@ -79,7 +79,6 @@ class MagnetizePIDPoseAlign(
   private var stopMagnetization = false
 
   init {
-
     addRequirements(drivetrain)
 
     xController.reset()
@@ -219,7 +218,6 @@ class MagnetizePIDPoseAlign(
         )
     }
 
-
     var angle = abs(atan2(controllerDesVel.vxMetersPerSecond,
       controllerDesVel.vyMetersPerSecond) -
       atan2(pose.translation.x, pose.translation.y))
@@ -240,8 +238,11 @@ class MagnetizePIDPoseAlign(
     // magnetization power is lowered if the robot is closer to the goal, which
     // makes it so the magnetization gets more powerful as the robot gets closer
     // Values need to be adjusted I haven't tested yet
+
+    //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
     drivetrain.set(calculate(poseSubsystem.pose, pose) + controllerDesVel *
       (magnetizationPower * (poseSubsystem.pose.translation.getDistance(pose.translation) / 10.0)))
+    // constant                     pose rn                 distance to     desired pose
   }
 
   override fun isFinished(): Boolean {
