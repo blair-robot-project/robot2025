@@ -95,11 +95,11 @@ open class SwerveDrive(
   fun setWithControl(desiredSpeeds: ChassisSpeeds) {
 
     var vx = desiredSpeeds.vxMetersPerSecond
-    vx += controller.leftX*100
+    vx += controller.leftX*-50
     var vy = desiredSpeeds.vyMetersPerSecond
-    vy += controller.leftY*100
+    vy += controller.leftY*50
     var rot = desiredSpeeds.omegaRadiansPerSecond
-    rot += controller.rightX*100
+    rot += controller.rightX*50
     val controllerDesVel = ChassisSpeeds(controller.leftX*100, controller.leftY*100, controller.rightX*100)
     val newSpeeds = ChassisSpeeds(vx/2, vy/2, rot/2)
     //this.set(newSpeeds)
