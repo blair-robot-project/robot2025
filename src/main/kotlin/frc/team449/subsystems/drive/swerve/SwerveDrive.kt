@@ -7,6 +7,7 @@ import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -21,10 +22,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.Robot
 import frc.team449.auto.AutoConstants
+import frc.team449.auto.choreo.MagnetizePIDPoseAlign
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
 import frc.team449.subsystems.vision.PoseSubsystem
+import org.photonvision.EstimatedRobotPose
 import kotlin.math.hypot
 
 /**
@@ -43,7 +46,10 @@ open class SwerveDrive(
   protected val field: Field2d,
   val maxModuleSpeed: Double,
   val robot: Robot,
-  val controller: CommandXboxController
+  val controller: CommandXboxController,
+  private val xController: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
+  private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
+  private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
 ) : SubsystemBase() {
 
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
@@ -87,14 +93,21 @@ open class SwerveDrive(
   }
 
   fun setWithControl(desiredSpeeds: ChassisSpeeds) {
+
     var vx = desiredSpeeds.vxMetersPerSecond
     vx += controller.leftX*100
     var vy = desiredSpeeds.vyMetersPerSecond
     vy += controller.leftY*100
     var rot = desiredSpeeds.omegaRadiansPerSecond
     rot += controller.rightX*100
+    val controllerDesVel = ChassisSpeeds(controller.leftX*100, controller.leftY*100, controller.rightX*100)
     val newSpeeds = ChassisSpeeds(vx/2, vy/2, rot/2)
-    this.set(newSpeeds)
+    //this.set(newSpeeds)
+    var pose: Pose2d
+
+    this.set(ChassisSpeeds(desiredSpeeds.vxMetersPerSecond,
+      desiredSpeeds.vyMetersPerSecond, desiredSpeeds.omegaRadiansPerSecond)
+    + controllerDesVel)
   }
 
 
@@ -257,7 +270,7 @@ open class SwerveDrive(
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
           robot,
-          controller
+          controller,
         )
       } else {
         SwerveSim(
@@ -341,7 +354,7 @@ open class SwerveDrive(
           field,
           SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
           robot,
-          controller
+          controller,
         )
       } else {
         SwerveSim(
