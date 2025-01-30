@@ -20,7 +20,7 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
       DCMotor.getKrakenX60(1),
       DCMotor.getKrakenX60(1),
       SwerveConstants.DRIVE_GEARING,
-      0.0,
+      SwerveConstants.TURN_GEARING,
       SwerveConstants.DRIVE_FRICTION_VOLTAGE,
       SwerveConstants.TURN_FRICTION_VOLTAGE,
       Meters.of(SwerveConstants.WHEEL_RADIUS),
