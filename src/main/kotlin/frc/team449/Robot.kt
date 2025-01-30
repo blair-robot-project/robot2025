@@ -42,6 +42,7 @@ class Robot : RobotBase(), Logged {
 
   val autoChooser = AutoChooser()
 
+
   @Log.NT
   override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
 

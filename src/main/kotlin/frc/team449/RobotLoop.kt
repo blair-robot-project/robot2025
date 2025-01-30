@@ -5,6 +5,7 @@ import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -97,6 +98,7 @@ class RobotLoop : TimedRobot(), Logged {
     robot.elevator.desiredElevatorLigament.angle = robot.pivot.targetSupplier.get() * (180 / PI)
 
     robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
+
 
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 

@@ -9,6 +9,8 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrDefault
@@ -50,204 +52,65 @@ open class Routines(
     robot.drive
   )
 
-  // do nothing
-  fun doNothing(): AutoRoutine {
-    val nothing: AutoRoutine = autoFactory.newRoutine("Nothing")
-    return nothing
-  }
+  fun americanRoutine(): AutoRoutine {
+    val autoRoutine: AutoRoutine = autoFactory.newRoutine("L4 Routine")
 
-  // right taxi
-  fun rightTaxi(): AutoRoutine {
-    val rTaxi: AutoRoutine = autoFactory.newRoutine("Right Taxi")
-    val rTaxiTrajectory: AutoTrajectory = rTaxi.trajectory("rightTaxi")
-    rTaxi.active().onTrue(
+
+    val l4fTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To L4F")
+    val rightStationTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To Right Station(2)")
+    val l1CTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To L1C")
+    val rightStationTrajectory2: AutoTrajectory = autoRoutine.trajectory("Go To Right Station(Again)")
+    val l1bTrajectory:AutoTrajectory=autoRoutine.trajectory("Go To L1B")
+    val leftStationTrajectory:AutoTrajectory=autoRoutine.trajectory("Go To Left Station")
+    val l4kTrajectory:AutoTrajectory=autoRoutine.trajectory("Go To L4K")
+
+    autoRoutine.active().onTrue(
       Commands.sequence(
-        rTaxiTrajectory.resetOdometry(),
-        rTaxiTrajectory.cmd(),
-        robot.drive.driveStop()
-      )
-    )
-    return rTaxi
-  }
+        l4fTrajectory.resetOdometry(),
+        l4fTrajectory.cmd(),
+        PrintCommand("Traveling to l4"),
 
-  // left taxi
-  fun leftTaxi(): AutoRoutine {
-    val lTaxi: AutoRoutine = autoFactory.newRoutine("Left Taxi")
-    val lTaxiTrajectory: AutoTrajectory = lTaxi.trajectory("leftTaxi")
-    lTaxi.active().onTrue(
-      Commands.sequence(
-        lTaxiTrajectory.resetOdometry(),
-        lTaxiTrajectory.cmd(),
-        robot.drive.driveStop()
-      )
-    )
-    return lTaxi
-  }
-
-  // coral at l1 one on reef E
-  fun l1reefE(): AutoRoutine {
-    val l1E: AutoRoutine = autoFactory.newRoutine("L1 reef E")
-    val reefETrajectory: AutoTrajectory = l1E.trajectory("right_E")
-    l1E.active().onTrue(
-      Commands.sequence(
-        reefETrajectory.resetOdometry(),
-        reefETrajectory.cmd(),
-        robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
-      )
-    )
-    return l1E
-  }
-
-  // coral at l4 one on reef F
-  fun l1reefF(): AutoRoutine {
-    val F: AutoRoutine = autoFactory.newRoutine("L4 reef F")
-    val reefFTrajectory: AutoTrajectory = F.trajectory("left_F")
-    F.active().onTrue(
-      Commands.sequence(
-        reefFTrajectory.resetOdometry(),
-        reefFTrajectory.cmd(),
-        robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
-      )
-    )
-    return F
-  }
-
-  // coral at l4 one on reef G
-  fun reefG(): AutoRoutine {
-    val g: AutoRoutine = autoFactory.newRoutine("L4 reef G")
-    val reefGTrajectory: AutoTrajectory = g.trajectory("middle_G")
-    g.active().onTrue(
-      Commands.sequence(
-        reefGTrajectory.resetOdometry(),
-        reefGTrajectory.cmd(),
-        robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
-      )
-    )
-    return g
-  }
-
-  // coral at l1 one on reef J
-  fun reefJ(): AutoRoutine {
-    val J: AutoRoutine = autoFactory.newRoutine("L1 reef J")
-    val reefJTrajectory: AutoTrajectory = J.trajectory("left_J")
-    J.active().onTrue(
-      Commands.sequence(
-        reefJTrajectory.resetOdometry(),
-        reefJTrajectory.cmd(),
-        robot.drive.driveStop(),
-        Commands.deadline(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-        )
-      )
-    )
-    return J
-  }
-
-  // placing L4 at reef E then l1 at reef D
-  fun reefED(): AutoRoutine {
-    val E_D: AutoRoutine = autoFactory.newRoutine("L1 reef E and L4 reef D")
-    val reefETrajectory: AutoTrajectory = E_D.trajectory("right_E")
-    val reefEtoStationTrajectory: AutoTrajectory = E_D.trajectory("E_rightStation")
-    val stationToDTrajectory: AutoTrajectory = E_D.trajectory("rightStation_D")
-    E_D.active().onTrue(
-      Commands.sequence(
-        reefETrajectory.resetOdometry(),
-        reefETrajectory.cmd(),
-        robot.drive.driveStop(),
-
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-        Commands.sequence(
-          reefEtoStationTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
-        ),
-
-        Commands.sequence(
-          stationToDTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation)
-        )
-      )
-    )
-
-    return E_D
-  }
-
-  // placing L4 at reef E then l1 at reef L
-  fun reefJL(): AutoRoutine {
-    val J_L: AutoRoutine = autoFactory.newRoutine("L4 reef J and L1 reef L")
-    val reefJTrajectory: AutoTrajectory = J_L.trajectory("left_J")
-    val reefJtoStationTrajectory: AutoTrajectory = J_L.trajectory("J_leftStation")
-    val stationToLTrajectory: AutoTrajectory = J_L.trajectory("leftStation_L")
-    J_L.active().onTrue(
-      Commands.sequence(
-        reefJTrajectory.resetOdometry(),
-        Commands.sequence(
-          reefJTrajectory.cmd(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
-          // outtake stuff
-        ),
-        Commands.sequence(
-          reefJtoStationTrajectory.cmd(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
-
-          // intake stuff
-        ),
-        Commands.sequence(
-          stationToLTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation)
-
-          // outtakestuff
-        )
-      )
-    )
-    return J_L
-  }
-
-  fun reefJK(): AutoRoutine {
-    val J_K: AutoRoutine = autoFactory.newRoutine("L4 reef J and L1 reef K")
-    val reefJTrajectory: AutoTrajectory = J_K.trajectory("left_J")
-    val reefJtoStationTrajectory: AutoTrajectory = J_K.trajectory("J_leftStation")
-    val stationToKTrajectory: AutoTrajectory = J_K.trajectory("leftStation_K")
-    J_K.active().onTrue(
-      Commands.sequence(
-        reefJTrajectory.resetOdometry(),
-        reefJTrajectory.cmd(),
-        robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-
-        Commands.sequence(
-          reefJtoStationTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
 
         ),
-        Commands.sequence(
-          stationToKTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation)
-
-        )
       )
-    )
-    return J_K
+
+    l4fTrajectory.done().onTrue(rightStationTrajectory.cmd().
+    beforeStarting(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation).
+    beforeStarting(robot.drive.driveStop())))
+
+    rightStationTrajectory.done().onTrue(l1CTrajectory.cmd().
+    beforeStarting(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+      .beforeStarting(robot.drive.driveStop())))
+
+    l1CTrajectory.done().onTrue(rightStationTrajectory2.cmd().
+    beforeStarting(robot.superstructureManager.requestGoal(SuperstructureGoal.L1).
+    beforeStarting(robot.drive.driveStop())))
+
+    rightStationTrajectory2.done().onTrue(l1bTrajectory.cmd().
+    beforeStarting(robot.drive.driveStop()).
+    andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)))
+
+    l1bTrajectory.done().onTrue(leftStationTrajectory.cmd().beforeStarting(robot.drive.driveStop())
+      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L1_fromStation)))
+
+    leftStationTrajectory.done().onTrue(l4kTrajectory.cmd()
+      .beforeStarting(robot.superstructureManager.requestGoal(SuperstructureGoal.L4)).
+      beforeStarting(robot.drive.driveStop()))
+
+    l4kTrajectory.done().onTrue(robot.drive.driveStop())
+
+
+
+
+    return autoRoutine
   }
+
+
+
 
   // autoChooser that will be displayed on dashboard
   fun addOptions(autoChooser: AutoChooser) {
-    autoChooser.addRoutine("Nothing", this::doNothing)
-    autoChooser.addRoutine("RightTaxi", this::rightTaxi)
-    autoChooser.addRoutine("LeftTaxi", this::leftTaxi)
-    autoChooser.addRoutine("E", this::l1reefE)
-    autoChooser.addRoutine("F", this::l1reefF)
-    autoChooser.addRoutine("G", this::reefG)
-    autoChooser.addRoutine("J", this::reefJ)
-    autoChooser.addRoutine("E & D ", this::reefED)
-    autoChooser.addRoutine("J & L", this::reefJL)
-    autoChooser.addRoutine("J & K", this::reefJK)
+
+    autoChooser.addRoutine("routine",this::americanRoutine)
   }
 }
