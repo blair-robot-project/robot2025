@@ -166,9 +166,9 @@ class AutoScoreCommands(
       )
     }
     if (!isAtTopSource) {
-      poseSubsystem.endPose = AutoScoreCommandConstants.coralIntakePoseRedBottom
+      poseSubsystem.endPose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
       returnCommand = AutoBuilder.pathfindToPose(
-        AutoScoreCommandConstants.coralIntakePoseRedBottom,
+        AutoScoreCommandConstants.coralIntakePoseBlueBottom,
         constraints,
         0.0,
       )
@@ -176,7 +176,7 @@ class AutoScoreCommands(
         returnCommand = MagnetizePIDPoseAlign(
           drive,
           poseSubsystem,
-          AutoScoreCommandConstants.coralIntakePoseRedBottom,
+          AutoScoreCommandConstants.coralIntakePoseBlueBottom,
           controller
         )
       }
@@ -194,10 +194,12 @@ class AutoScoreCommands(
    * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
   fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
+    poseSubsystem.endPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     println("Net Command")
     var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     if (onRedAllianceSide) {
-     netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
+      poseSubsystem.endPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
+      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
    }
 
     if (usingPathfinding) {

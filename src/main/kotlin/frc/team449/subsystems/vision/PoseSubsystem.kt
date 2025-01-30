@@ -63,7 +63,7 @@ class PoseSubsystem(
   private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
 
   private val timer = Timer()
-  var endPose: Pose2d = Pose2d()
+  lateinit var endPose: Pose2d
 
   private val rotCtrl = PIDController(
     RobotConstants.SNAP_KP,
@@ -73,7 +73,7 @@ class PoseSubsystem(
 
   private var skewConstant = SwerveConstants.SKEW_CONSTANT
   private var desiredVel = doubleArrayOf(0.0, 0.0, 0.0)
-  private var magnetizationPower = 5.0
+  private var magnetizationPower = 50.0
   // Time in seconds until magnetization will stop if the driver is opposing magnetization
   private var magnetizationStopTime = 1.2
   private var timeUntilMagnetizationStop = magnetizationStopTime
@@ -239,7 +239,7 @@ class PoseSubsystem(
     // Values need to be adjusted I haven't tested yet
 
     //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
-    drive.set(desVel + controllerDesVel *
+    drive.set(calculate(this.pose, endPose) + controllerDesVel *
       (magnetizationPower * (this.pose.translation.getDistance(endPose.translation) / 10.0)))
     // constant                     pose rn                 distance to     desired pose
   }
