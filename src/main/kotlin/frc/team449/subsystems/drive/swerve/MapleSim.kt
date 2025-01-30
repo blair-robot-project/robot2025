@@ -70,11 +70,11 @@ open class MapleSimSwerve : SwerveDrive {
     simulatedDrive.resetOdometry(pose);
   }
 
-  override fun addVisionMeasurement(visionRobotPose : Pose2d, timeStampSeconds : Double) {
+  fun addVisionMeasurement(visionRobotPose : Pose2d, timeStampSeconds : Double) {
     simulatedDrive.addVisionEstimation(visionRobotPose, timeStampSeconds);
   }
 
-  override fun addVisionMeasurement(
+  fun addVisionMeasurement(
     visionRobotPoseMeters : Pose2d, timeStampSeconds : Double, visionMeasurementStdDevs : Matrix<N3, N1>) {
     simulatedDrive.addVisionEstimation(visionRobotPoseMeters, timeStampSeconds, visionMeasurementStdDevs);
   }
