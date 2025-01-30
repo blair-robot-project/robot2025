@@ -5,7 +5,9 @@ import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -17,6 +19,7 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase.isReal
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -28,7 +31,8 @@ import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKr
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
 import frc.team449.subsystems.vision.PoseSubsystem
 import org.photonvision.EstimatedRobotPose
-import kotlin.math.hypot
+import kotlin.jvm.optionals.getOrNull
+import kotlin.math.*
 
 /**
  * A Swerve Drive chassis.
@@ -109,7 +113,6 @@ open class SwerveDrive(
       desiredSpeeds.vyMetersPerSecond, desiredSpeeds.omegaRadiansPerSecond)
     + controllerDesVel)
   }
-
 
   fun getModuleVel(): Double {
     var totalVel = 0.0

@@ -4,10 +4,8 @@ import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
-import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
@@ -37,7 +35,7 @@ class ControllerBindings(
       robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
       robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose\
       robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.drive::setWithControl, // output - Output function that accepts robot-relative ChassisSpeeds
+      robot.poseSubsystem::pathfindingMagnetize, // output - Output function that accepts robot-relative ChassisSpeeds
       PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
         PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
         PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders

@@ -89,6 +89,7 @@ class AutoScoreCommands(
       }
     }
     if (usingPathfinding) {
+      poseSubsystem.endPose = reefPose
       /*** pathfinding ***/
       return AutoBuilder.pathfindToPose(
         reefPose,
@@ -107,6 +108,7 @@ class AutoScoreCommands(
    * swerve drive.
    */
   fun moveToProcessorCommand(): Command {
+    poseSubsystem.endPose = AutoScoreCommandConstants.processorPoseBlue
     // val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
 
     var returnCommand = AutoBuilder.pathfindToPose(
@@ -123,6 +125,7 @@ class AutoScoreCommands(
       )
     }
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      poseSubsystem.endPose = AutoScoreCommandConstants.processorPoseRed
       if (usingPathfinding) {
         returnCommand = AutoBuilder.pathfindToPose(
           AutoScoreCommandConstants.processorPoseRed,
@@ -148,6 +151,7 @@ class AutoScoreCommands(
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
   fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
+    poseSubsystem.endPose = AutoScoreCommandConstants.coralIntakePoseBlueTop
     var returnCommand = AutoBuilder.pathfindToPose(
       AutoScoreCommandConstants.coralIntakePoseBlueTop,
       constraints,
@@ -162,6 +166,7 @@ class AutoScoreCommands(
       )
     }
     if (!isAtTopSource) {
+      poseSubsystem.endPose = AutoScoreCommandConstants.coralIntakePoseRedBottom
       returnCommand = AutoBuilder.pathfindToPose(
         AutoScoreCommandConstants.coralIntakePoseRedBottom,
         constraints,
