@@ -1,5 +1,9 @@
 package frc.team449.subsystems.drive.swerve.sim
 
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.*
 import frc.team449.subsystems.drive.swerve.SwerveConstants
@@ -7,6 +11,7 @@ import frc.team449.subsystems.drive.swerve.SwerveModule
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 import org.ironmaple.simulation.motorsims.SimulatedMotorController
+
 abstract class SwerveModuleKrakenSim: SwerveModule {
 
 
@@ -19,31 +24,43 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
       SwerveConstants.DRIVE_FRICTION_VOLTAGE,
       SwerveConstants.TURN_FRICTION_VOLTAGE,
       Meters.of(SwerveConstants.WHEEL_RADIUS),
-      KilogramSquareMeters.of(12.0),
+      SwerveConstants.STEER_ROTATIONAL_INERTIA,
       SwerveConstants.WHEEL_COEFFICIENT_OF_FRICTION
     )
   )
 
   val drive = module
     .useGenericMotorControllerForDrive()
-    .withCurrentLimit(Amps.of(60.0));
+    .withCurrentLimit(SwerveConstants.DRIVE_FOC_CURRENT_LIMIT);
+
   val turn = module
     .useGenericControllerForSteer()
-    .withCurrentLimit(Amps.of(20.0));
-  //val location = Translation2d();
+    .withCurrentLimit(SwerveConstants.STEERING_CURRENT_LIM);
 
-  //val desiredState = SwerveModuleState();
+  override val location = Translation2d(
+    0.0,0.0
+  );
+
+  override val desiredState = SwerveModuleState(
+    0.0,
+    Rotation2d()
+  );
 
   /** The module's [SwerveModuleState], containing speed and angle. */
-  //var state = SwerveModuleState();
+  override var state: SwerveModuleState
+    get() = module.currentState
+    set(value) {}
 
   /** The module's [SwerveModulePosition], containing distance and angle. */
-  //val position = SwerveModulePosition();
+  override val position: SwerveModulePosition
+    get() = SwerveModulePosition(
+      // module.currentState.speedMetersPerSecond,
+      // module.currentState.angle
+    )
 
 
   override fun setVoltage(volts: Double) {
     drive.requestVoltage(Volts.of(volts));
-    //SwerveModuleSimulation.driveMotor.requestVoltage(voltage);
   }
 
   /** Set module speed to zero but keep module angle the same. */
