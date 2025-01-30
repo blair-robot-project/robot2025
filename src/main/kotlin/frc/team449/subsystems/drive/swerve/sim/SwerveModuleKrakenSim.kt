@@ -29,22 +29,22 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
     )
   )
 
-  val drive = module
+  val drive: SimulatedMotorController.GenericMotorController = module
     .useGenericMotorControllerForDrive()
-    .withCurrentLimit(SwerveConstants.DRIVE_FOC_CURRENT_LIMIT);
+    .withCurrentLimit(SwerveConstants.DRIVE_FOC_CURRENT_LIMIT)
 
-  val turn = module
+  val turn: SimulatedMotorController.GenericMotorController = module
     .useGenericControllerForSteer()
-    .withCurrentLimit(SwerveConstants.STEERING_CURRENT_LIM);
+    .withCurrentLimit(SwerveConstants.STEERING_CURRENT_LIM)
 
-  override val location = Translation2d(
+  override val location: Translation2d = Translation2d(
     0.0,0.0
-  );
+  )
 
-  override val desiredState = SwerveModuleState(
+  override val desiredState: SwerveModuleState = SwerveModuleState(
     0.0,
     Rotation2d()
-  );
+  )
 
   /** The module's [SwerveModuleState], containing speed and angle. */
   override var state: SwerveModuleState
@@ -54,13 +54,14 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
   /** The module's [SwerveModulePosition], containing distance and angle. */
   override val position: SwerveModulePosition
     get() = SwerveModulePosition(
-      // module.currentState.speedMetersPerSecond,
-      // module.currentState.angle
+      // Calculate distance from drive position
+      Meters.of(module.driveWheelFinalPosition.`in`(Radians) * SwerveConstants.WHEEL_RADIUS),
+      module.steerAbsoluteFacing
     )
 
 
   override fun setVoltage(volts: Double) {
-    drive.requestVoltage(Volts.of(volts));
+    drive.requestVoltage(Volts.of(volts))
   }
 
   /** Set module speed to zero but keep module angle the same. */
