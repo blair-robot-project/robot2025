@@ -74,7 +74,7 @@ object SwerveConstants {
   val TURN_FRICTION_VOLTAGE = Volts.of(0.0) // TODO
 
   val WHEEL_COEFFICIENT_OF_FRICTION = 0.0 // TODO
-  val STEER_ROTATIONAL_INERTIA = KilogramSquareMeters.of(0) // TODO
+  val STEER_ROTATIONAL_INERTIA = KilogramSquareMeters.of(0.0) // TODO
 
   val KRAKEN_UPDATE_RATE = Hertz.of(100.0)
   val VALUE_UPDATE_RATE = Hertz.of(50.0)
