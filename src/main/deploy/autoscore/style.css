@@ -92,3 +92,7 @@ h1 {
     width: 315px;
     text-align: center;
 }
+
+#locationSelect {
+    rotate: 30deg;
+}
