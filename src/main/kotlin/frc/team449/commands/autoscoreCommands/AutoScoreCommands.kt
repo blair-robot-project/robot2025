@@ -45,7 +45,7 @@ class AutoScoreCommands(
   fun moveToReefCommand(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
-    println("reef thing pressed")
+    println("reef command called")
     var reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
     // var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
@@ -82,7 +82,7 @@ class AutoScoreCommands(
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseRed
       }
     }
-    poseSubsystem.endPose = reefPose
+    poseSubsystem.autoscoreCommandPose = reefPose
     if (usingPathfinding) {
       /*** pathfinding ***/
       return AutoBuilder.pathfindToPose(
@@ -102,14 +102,15 @@ class AutoScoreCommands(
    * swerve drive.
    */
   fun moveToProcessorCommand(): Command {
-    var pose = AutoScoreCommandConstants.processorPoseBlue
+    println("processor command called")
+    var processorPose = AutoScoreCommandConstants.processorPoseBlue
 
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      pose = AutoScoreCommandConstants.processorPoseRed
+      processorPose = AutoScoreCommandConstants.processorPoseRed
     }
 
     var returnCommand = AutoBuilder.pathfindToPose(
-      pose,
+      processorPose,
       constraints,
       0.0,
     )
@@ -118,11 +119,13 @@ class AutoScoreCommands(
       returnCommand = MagnetizePIDPoseAlign(
         drive,
         poseSubsystem,
-        pose,
+        processorPose,
         controller
       )
     }
-    poseSubsystem.endPose = pose
+    poseSubsystem.autoscoreCommandPose = processorPose
+    println("pose subsystem end pose: " + poseSubsystem.autoscoreCommandPose)
+
     return returnCommand
   }
 
@@ -133,23 +136,23 @@ class AutoScoreCommands(
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
   fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
-    var pose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
+    println("coral intake called")
+    val coralIntakePose: Pose2d
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       if(isAtTopSource) {
-        pose = AutoScoreCommandConstants.coralIntakePoseRedTop
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseRedTop
       } else {
-        pose = AutoScoreCommandConstants.coralIntakePoseRedBottom
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseRedBottom
       }
     } else {
       if(isAtTopSource) {
-        pose = AutoScoreCommandConstants.coralIntakePoseBlueTop
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseBlueTop
       } else {
-        pose =
-          AutoScoreCommandConstants.coralIntakePoseBlueBottom
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
       }
     }
     var returnCommand = AutoBuilder.pathfindToPose(
-      pose,
+      coralIntakePose,
       constraints,
       0.0,
     )
@@ -157,11 +160,11 @@ class AutoScoreCommands(
       returnCommand = MagnetizePIDPoseAlign(
         drive,
         poseSubsystem,
-        pose,
+        coralIntakePose,
         controller
       )
     }
-    poseSubsystem.endPose = pose
+    poseSubsystem.autoscoreCommandPose = coralIntakePose
     return returnCommand
   }
 
@@ -175,11 +178,12 @@ class AutoScoreCommands(
    * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
   fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
+    println("net command called")
     var pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     if (onRedAllianceSide) {
       pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
     }
-    poseSubsystem.endPose = pose
+    poseSubsystem.autoscoreCommandPose = pose
 
     if (usingPathfinding) {
       /*** pathfinding ***/
@@ -237,5 +241,21 @@ class AutoScoreCommands(
    * */
   fun intakeCoralCommand(): Command {
     return robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+  }
+
+  fun net(): Command {
+    return moveToNetCommand(false).andThen(scoreNetCommand())
+  }
+
+  fun coral(): Command {
+    return moveToCoralIntakeCommand(true).andThen(intakeCoralCommand())
+  }
+
+  fun reef(): Command {
+    return moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+  }
+
+  fun processor(): Command {
+    return moveToProcessorCommand().andThen(scoreProcessorCommand())
   }
 }

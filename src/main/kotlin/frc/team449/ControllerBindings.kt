@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
@@ -48,23 +47,17 @@ class ControllerBindings(
     println("drive configured")
     // reef location passed in alla webappp, this is temp
     robot.driveController.x().onTrue(
-      PrintCommand("moving to reef").andThen(
-        autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-      ).andThen(PrintCommand("reef finished"))
+      autoscore.reef()
     )
     robot.driveController.a().onTrue(
-      PrintCommand("move to processor button pressed").andThen(
-      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
+      autoscore.processor()
     )
     //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
-      PrintCommand("moving to net").andThen(
-        autoscore.moveToNetCommand(false)
-      ).andThen(PrintCommand("net finished"))
+        autoscore.net()
     )
-    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
-      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
-        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
+    robot.driveController.y().onTrue(
+      autoscore.coral()
     )
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(

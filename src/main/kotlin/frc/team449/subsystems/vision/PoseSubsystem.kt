@@ -65,7 +65,8 @@ class PoseSubsystem(
   private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
 
   private val timer = Timer()
-  lateinit var endPose: Pose2d
+//  lateinit var endPose: Pose2d
+  var autoscoreCommandPose = Pose2d(0.0, 0.0,Rotation2d(0.0))
 
   private val rotCtrl = PIDController(
     RobotConstants.SNAP_KP,
@@ -83,12 +84,15 @@ class PoseSubsystem(
   private var resistanceAngle = 100.0
   //placeholder extremely big number
   private var lastDistance = 1000.0
-  private var currentMagPower = 8.0
   private var autoDistance = 0.5
-  private var maxResistanceAngle = 180.0
-  //constants to multiply controller chassisspeeds by
-  private var distanceWeaken = 25;
-  private var controllerAngleWeaken = 1
+
+  //edem mag vars
+  private var currentMagPower = 8.0
+  private var magMultiply = 1.015
+  private val magIncConstant = 0.001
+  private var magDecConstant = 0.0003
+  private var stopControllerInput = false
+
 
   init {
     xController.reset()
@@ -246,54 +250,75 @@ class PoseSubsystem(
     }
 
     // magnetization power is lowered if the robot is closer to the goal, which
-    // makes it so the magnetization gets more powerful as the robot gets closer
-    // Values need to be adjusted I haven't tested yet
-
-    //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
-    drive.set(calculate(this.pose, endPose) + controllerDesVel *
-      (magnetizationPower * (this.pose.translation.getDistance(endPose.translation) / 10.0)))
-    // constant                     pose rn                 distance to     desired pose
+//    // makes it so the magnetization gets more powerful as the robot gets closer
+//    // Values need to be adjusted I haven't tested yet
+//    println("pose: ${pose.translation} endPose: ${endPose.translation}")
+//
+//    //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
+//    drive.set(calculate(this.pose, endPose) + controllerDesVel *
+//      (magnetizationPower * (this.pose.translation.getDistance(endPose.translation) / 10.0)))
+//    // constant                     pose rn                 distance to     desired pose
   }
 
   fun edemPathMag(desVel: ChassisSpeeds) {
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime
-    val distance = this.pose.translation.getDistance(endPose.translation)
-    println(this.endPose)
+    val distance = pose.translation.getDistance(autoscoreCommandPose.translation)
     if(distance <= autoDistance) {
-      lastDistance = 1000.0
+      currentMagPower = 8.0
+      magMultiply = 1.015
+      magDecConstant = 0.0003
       drive.set(desVel)
-      println("auto distance")
     } else {
 
-      if(distance > lastDistance) {
-        currentMagPower *= 1.25
-      } else if(distance < lastDistance) {
-        currentMagPower /= 2
-      }
-
-      val ctrlX = controller.leftX
-      val ctrlY = controller.leftY
+      val ctrlX = if (abs(controller.leftY) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else controller.leftY
+      val ctrlY = if (abs(controller.leftX) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else controller.leftX
 
       val controllerAngle = atan2(ctrlY, ctrlX)
-      val controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
-      val combinedChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
+      var controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
+      controllerSpeeds *= currentMagPower
+      //des vel x and y switched
+      //des vel left is negative x
+      //des vel right is negative y
+      //des vel up is positive x
+      //des vel down is positive y
+      //controller x and y work normally
+      //this means:
+      //if des vel x is negative : des vel moving left
+      //needs to fight against controller x
+      //if des vel x is positive: des vel moving up
+      //needs to fight against controller y
+      //if des vel y is negative : des vel moving right
+      //needs to fight against controller x
+      //if des vel y is positive : des vel moving down
+      //needs to fight against controller y
 
-      val currentControllerStrength = 1.5.pow(distance-7.5)
-
-      //des vel x and y flipped for reason
-      combinedChassisSpeeds.vxMetersPerSecond = controllerSpeeds.vxMetersPerSecond * currentControllerStrength + desVel.vxMetersPerSecond
-      combinedChassisSpeeds.vyMetersPerSecond = controllerSpeeds.vyMetersPerSecond * currentControllerStrength + desVel.vyMetersPerSecond
+      val combinedChassisSpeeds = ChassisSpeeds()
+      if(desVel.vxMetersPerSecond < 0) {
+        combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vxMetersPerSecond
+      } else {
+        combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vyMetersPerSecond
+      }
+      if(desVel.vyMetersPerSecond < 0) {
+        combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vxMetersPerSecond
+      } else {
+        combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vyMetersPerSecond
+      }
       combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
 
-      println("desVel vy: ${desVel.vyMetersPerSecond} controller vx: ${controllerSpeeds.vxMetersPerSecond}")
-      println("distance: $distance")
+      println("controller speeds: $controllerSpeeds")
       drive.set(combinedChassisSpeeds)
-      lastDistance = distance
 
+      if(distance > lastDistance) {
+        magMultiply += magIncConstant
+      } else if(distance < lastDistance) {
+        magMultiply -= magDecConstant
+        magDecConstant += 0.000002
+      }
+      currentMagPower *= magMultiply
     }
-
+    lastDistance = distance
   }
 
   private val isReal = RobotBase.isReal()
