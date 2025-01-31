@@ -35,7 +35,7 @@ class ControllerBindings(
       robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
       robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose\
       robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.poseSubsystem::pathfindingMagnetize, // output - Output function that accepts robot-relative ChassisSpeeds
+      robot.poseSubsystem::edemPathMag, // output - Output function that accepts robot-relative ChassisSpeeds
       PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
         PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
         PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders

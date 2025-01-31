@@ -103,7 +103,6 @@ class AutoScoreCommands(
    */
   fun moveToProcessorCommand(): Command {
     var pose = AutoScoreCommandConstants.processorPoseBlue
-    // val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
 
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       pose = AutoScoreCommandConstants.processorPoseRed
@@ -119,10 +118,11 @@ class AutoScoreCommands(
       returnCommand = MagnetizePIDPoseAlign(
         drive,
         poseSubsystem,
-        AutoScoreCommandConstants.processorPoseBlue,
+        pose,
         controller
       )
     }
+    poseSubsystem.endPose = pose
     return returnCommand
   }
 
@@ -136,15 +136,16 @@ class AutoScoreCommands(
     var pose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       if(isAtTopSource) {
-        AutoScoreCommandConstants.coralIntakePoseRedTop
+        pose = AutoScoreCommandConstants.coralIntakePoseRedTop
       } else {
-        AutoScoreCommandConstants.coralIntakePoseRedBottom
+        pose = AutoScoreCommandConstants.coralIntakePoseRedBottom
       }
     } else {
       if(isAtTopSource) {
-        AutoScoreCommandConstants.coralIntakePoseBlueTop
+        pose = AutoScoreCommandConstants.coralIntakePoseBlueTop
       } else {
-        AutoScoreCommandConstants.coralIntakePoseBlueBottom
+        pose =
+          AutoScoreCommandConstants.coralIntakePoseBlueBottom
       }
     }
     var returnCommand = AutoBuilder.pathfindToPose(

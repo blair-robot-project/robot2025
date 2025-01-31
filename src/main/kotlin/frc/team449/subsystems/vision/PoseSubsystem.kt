@@ -28,6 +28,7 @@ import frc.team449.subsystems.vision.interpolation.InterpolatedVision
 import frc.team449.system.AHRS
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
+import kotlin.time.times
 
 class PoseSubsystem(
   private val ahrs: AHRS,
@@ -80,6 +81,10 @@ class PoseSubsystem(
   private var timeUntilMagnetizationStop = magnetizationStopTime
   private var stopMagnetization = false
   private var resistanceAngle = 100.0
+  //placeholder extremely big number
+  private var lastDistance = 1000.0
+  private var currentMagPower = 8.0
+  private var autoDistance = 0.5
   private var maxResistanceAngle = 180.0
   //constants to multiply controller chassisspeeds by
   private var distanceWeaken = 25;
@@ -254,24 +259,41 @@ class PoseSubsystem(
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime
-
-    val ctrlX = controller.leftY
-    val ctrlY = controller.leftX
-
-    val controllerAngle = atan2(ctrlY, ctrlX)
-    val controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
-    val combinedChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
     val distance = this.pose.translation.getDistance(endPose.translation)
-    val currentControllerStrength = 1.5.pow(distance-7.5)
-    //des vel x and y flipped for reason
-    combinedChassisSpeeds.vxMetersPerSecond = controllerSpeeds.vyMetersPerSecond * currentControllerStrength + desVel.vxMetersPerSecond
-    combinedChassisSpeeds.vyMetersPerSecond = controllerSpeeds.vxMetersPerSecond * currentControllerStrength + desVel.vyMetersPerSecond
-    combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
-    combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond, -drive.maxLinearSpeed, drive.maxLinearSpeed)
-    combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond, -drive.maxLinearSpeed, drive.maxLinearSpeed)
-    println("desVel vy: ${desVel.vyMetersPerSecond} controller vx: ${controllerSpeeds.vxMetersPerSecond}")
-    println("Controller strength: $distance")
-    drive.set(combinedChassisSpeeds)
+    println(this.endPose)
+    if(distance <= autoDistance) {
+      lastDistance = 1000.0
+      drive.set(desVel)
+      println("auto distance")
+    } else {
+
+      if(distance > lastDistance) {
+        currentMagPower *= 1.25
+      } else if(distance < lastDistance) {
+        currentMagPower /= 2
+      }
+
+      val ctrlX = controller.leftX
+      val ctrlY = controller.leftY
+
+      val controllerAngle = atan2(ctrlY, ctrlX)
+      val controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
+      val combinedChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
+
+      val currentControllerStrength = 1.5.pow(distance-7.5)
+
+      //des vel x and y flipped for reason
+      combinedChassisSpeeds.vxMetersPerSecond = controllerSpeeds.vxMetersPerSecond * currentControllerStrength + desVel.vxMetersPerSecond
+      combinedChassisSpeeds.vyMetersPerSecond = controllerSpeeds.vyMetersPerSecond * currentControllerStrength + desVel.vyMetersPerSecond
+      combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
+
+      println("desVel vy: ${desVel.vyMetersPerSecond} controller vx: ${controllerSpeeds.vxMetersPerSecond}")
+      println("distance: $distance")
+      drive.set(combinedChassisSpeeds)
+      lastDistance = distance
+
+    }
+
   }
 
   private val isReal = RobotBase.isReal()
