@@ -81,7 +81,7 @@ class AutoScoreCommandConstants() {
     val netTranslationDistance: Double = 2.152
 
     // BLUE
-    val netRotation2dBlue = Rotation2d(0.9) // in radians
+    val netRotation2dBlue = Rotation2d(0.0) // in radians
 
     // RED
     val netRotation2dRed = Rotation2d(Math.PI) // in radians

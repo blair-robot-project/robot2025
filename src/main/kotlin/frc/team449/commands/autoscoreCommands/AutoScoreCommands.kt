@@ -29,8 +29,8 @@ class AutoScoreCommands(
     Units.degreesToRadians(720.0)
   )
 
-  //we'll use magnetize if not
   val usingPathfinding = true
+
   init {
     if (usingPathfinding) println("pathfinding") else println("magnezite")
   }
@@ -41,12 +41,6 @@ class AutoScoreCommands(
    * clockwise)
    * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
-
-  fun magnetizeToTestCommand(): Command {
-    println("test command pressed")
-    val reefPose = AutoScoreCommandConstants.testPose
-    return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
-  }
 
   fun moveToReefCommand(
     reefLocation: AutoScoreCommandConstants.ReefLocation
@@ -88,8 +82,8 @@ class AutoScoreCommands(
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseRed
       }
     }
+    poseSubsystem.endPose = reefPose
     if (usingPathfinding) {
-      poseSubsystem.endPose = reefPose
       /*** pathfinding ***/
       return AutoBuilder.pathfindToPose(
         reefPose,
@@ -108,38 +102,26 @@ class AutoScoreCommands(
    * swerve drive.
    */
   fun moveToProcessorCommand(): Command {
-    poseSubsystem.endPose = AutoScoreCommandConstants.processorPoseBlue
+    var pose = AutoScoreCommandConstants.processorPoseBlue
     // val pose2d = Pose2d(AutoScoreCommandConstants.processorTranslation2dBlue,AutoScoreCommandConstants.processorRotation2dBlue)
 
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      pose = AutoScoreCommandConstants.processorPoseRed
+    }
+
     var returnCommand = AutoBuilder.pathfindToPose(
-      AutoScoreCommandConstants.processorPoseBlue,
+      pose,
       constraints,
       0.0,
     )
-    if (!usingPathfinding) {
+
+    if(!usingPathfinding) {
       returnCommand = MagnetizePIDPoseAlign(
         drive,
         poseSubsystem,
         AutoScoreCommandConstants.processorPoseBlue,
         controller
       )
-    }
-    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      poseSubsystem.endPose = AutoScoreCommandConstants.processorPoseRed
-      if (usingPathfinding) {
-        returnCommand = AutoBuilder.pathfindToPose(
-          AutoScoreCommandConstants.processorPoseRed,
-          constraints,
-          0.0,  // Goal end velocity in meters/sec
-        )
-      } else {
-        returnCommand = MagnetizePIDPoseAlign(
-          drive,
-          poseSubsystem,
-          AutoScoreCommandConstants.processorPoseBlue,
-          controller
-        )
-      }
     }
     return returnCommand
   }
@@ -151,9 +133,22 @@ class AutoScoreCommands(
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
   fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
-    poseSubsystem.endPose = AutoScoreCommandConstants.coralIntakePoseBlueTop
+    var pose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      if(isAtTopSource) {
+        AutoScoreCommandConstants.coralIntakePoseRedTop
+      } else {
+        AutoScoreCommandConstants.coralIntakePoseRedBottom
+      }
+    } else {
+      if(isAtTopSource) {
+        AutoScoreCommandConstants.coralIntakePoseBlueTop
+      } else {
+        AutoScoreCommandConstants.coralIntakePoseBlueBottom
+      }
+    }
     var returnCommand = AutoBuilder.pathfindToPose(
-      AutoScoreCommandConstants.coralIntakePoseBlueTop,
+      pose,
       constraints,
       0.0,
     )
@@ -161,26 +156,11 @@ class AutoScoreCommands(
       returnCommand = MagnetizePIDPoseAlign(
         drive,
         poseSubsystem,
-        AutoScoreCommandConstants.coralIntakePoseBlueTop,
+        pose,
         controller
       )
     }
-    if (!isAtTopSource) {
-      poseSubsystem.endPose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
-      returnCommand = AutoBuilder.pathfindToPose(
-        AutoScoreCommandConstants.coralIntakePoseBlueBottom,
-        constraints,
-        0.0,
-      )
-      if (!usingPathfinding) {
-        returnCommand = MagnetizePIDPoseAlign(
-          drive,
-          poseSubsystem,
-          AutoScoreCommandConstants.coralIntakePoseBlueBottom,
-          controller
-        )
-      }
-    }
+    poseSubsystem.endPose = pose
     return returnCommand
   }
 
@@ -194,28 +174,24 @@ class AutoScoreCommands(
    * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
   fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
-    poseSubsystem.endPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
-    println("Net Command")
-    var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
+    var pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     if (onRedAllianceSide) {
-      poseSubsystem.endPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
-      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
-   }
+      pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
+    }
+    poseSubsystem.endPose = pose
 
     if (usingPathfinding) {
       /*** pathfinding ***/
       val pathfindingCommand = AutoBuilder.pathfindToPose(
-        netPose,
+        pose,
         constraints,
         10.0,
         // Goal end velocity in meters/sec
       )
       return pathfindingCommand
-    }
-
-    else {
+    } else {
       /*** magnetize ***/
-    return MagnetizePIDPoseAlign(drive, poseSubsystem, netPose, controller)
+    return MagnetizePIDPoseAlign(drive, poseSubsystem, pose, controller)
     }
   }
 

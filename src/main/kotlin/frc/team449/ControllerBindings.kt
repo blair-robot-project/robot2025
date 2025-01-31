@@ -46,16 +46,21 @@ class ControllerBindings(
     )
 
     println("drive configured")
-    // temporary bindings for sim testing
+    // reef location passed in alla webappp, this is temp
     robot.driveController.x().onTrue(
-      autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
+      PrintCommand("moving to reef").andThen(
+        autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
+      ).andThen(PrintCommand("reef finished"))
     )
     robot.driveController.a().onTrue(
       PrintCommand("move to processor button pressed").andThen(
       autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
     )
+    //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
-      autoscore.moveToNetCommand(DriverStation.getAlliance().get() == Alliance.Red)
+      PrintCommand("moving to net").andThen(
+        autoscore.moveToNetCommand(false)
+      ).andThen(PrintCommand("net finished"))
     )
     robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
       autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))

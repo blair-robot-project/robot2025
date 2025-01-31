@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
@@ -78,6 +79,11 @@ class PoseSubsystem(
   private var magnetizationStopTime = 1.2
   private var timeUntilMagnetizationStop = magnetizationStopTime
   private var stopMagnetization = false
+  private var resistanceAngle = 100.0
+  private var maxResistanceAngle = 180.0
+  //constants to multiply controller chassisspeeds by
+  private var distanceWeaken = 25;
+  private var controllerAngleWeaken = 1
 
   init {
     xController.reset()
@@ -215,17 +221,17 @@ class PoseSubsystem(
         )
     }
 
-    var angle = abs(
+    var driverResistance = abs(
       atan2(controllerDesVel.vxMetersPerSecond,
         controllerDesVel.vyMetersPerSecond) -
         atan2(pose.translation.x, pose.translation.y)
     )
-    if (angle > Math.PI) {
-      angle = 2 * Math.PI - angle
+    if (driverResistance > Math.PI) {
+      driverResistance = 2 * Math.PI - driverResistance
     }
 
     // 1.7... is 100 degrees in radians
-    if (angle > 1.74533) {
+    if (driverResistance > Units.degreesToRadians(resistanceAngle)) {
       timeUntilMagnetizationStop -= 0.02
     } else {
       timeUntilMagnetizationStop = magnetizationStopTime
@@ -242,6 +248,30 @@ class PoseSubsystem(
     drive.set(calculate(this.pose, endPose) + controllerDesVel *
       (magnetizationPower * (this.pose.translation.getDistance(endPose.translation) / 10.0)))
     // constant                     pose rn                 distance to     desired pose
+  }
+
+  fun edemPathMag(desVel: ChassisSpeeds) {
+    val currTime = timer.get()
+    dt = currTime - prevTime
+    prevTime = currTime
+
+    val ctrlX = controller.leftY
+    val ctrlY = controller.leftX
+
+    val controllerAngle = atan2(ctrlY, ctrlX)
+    val controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
+    val combinedChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
+    val distance = this.pose.translation.getDistance(endPose.translation)
+    val currentControllerStrength = 1.5.pow(distance-7.5)
+    //des vel x and y flipped for reason
+    combinedChassisSpeeds.vxMetersPerSecond = controllerSpeeds.vyMetersPerSecond * currentControllerStrength + desVel.vxMetersPerSecond
+    combinedChassisSpeeds.vyMetersPerSecond = controllerSpeeds.vxMetersPerSecond * currentControllerStrength + desVel.vyMetersPerSecond
+    combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
+    combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond, -drive.maxLinearSpeed, drive.maxLinearSpeed)
+    combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond, -drive.maxLinearSpeed, drive.maxLinearSpeed)
+    println("desVel vy: ${desVel.vyMetersPerSecond} controller vx: ${controllerSpeeds.vxMetersPerSecond}")
+    println("Controller strength: $distance")
+    drive.set(combinedChassisSpeeds)
   }
 
   private val isReal = RobotBase.isReal()
