@@ -9,13 +9,13 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.auto.AutoConstants
@@ -28,7 +28,6 @@ import frc.team449.subsystems.vision.interpolation.InterpolatedVision
 import frc.team449.system.AHRS
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
-import kotlin.time.times
 
 class PoseSubsystem(
   private val ahrs: AHRS,
@@ -80,18 +79,18 @@ class PoseSubsystem(
   // Time in seconds until magnetization will stop if the driver is opposing magnetization
   private var magnetizationStopTime = 1.2
   private var timeUntilMagnetizationStop = magnetizationStopTime
-  private var stopMagnetization = false
   private var resistanceAngle = 100.0
   //placeholder extremely big number
   private var lastDistance = 1000.0
   private var autoDistance = 0.5
+  lateinit var autoscoreCurrentCommand : Command
 
   //edem mag vars
-  private var currentMagPower = 8.0
+  private var currentMagPower = 10.0
   private var magMultiply = 1.015
   private val magIncConstant = 0.001
   private var magDecConstant = 0.0003
-  private var stopControllerInput = false
+  private var maxMagPower = 15.5
 
 
   init {
@@ -106,8 +105,6 @@ class PoseSubsystem(
     thetaController.setTolerance(poseTol.rotation.radians)
 
     timer.restart()
-
-    stopMagnetization = false
 
     prevX = drive.currentSpeeds.vxMetersPerSecond
     prevY = drive.currentSpeeds.vyMetersPerSecond
@@ -145,119 +142,10 @@ class PoseSubsystem(
     return xController.atSetpoint() && yController.atSetpoint() && thetaController.atSetpoint()
   }
 
-  fun pathfindingMagnetize(desVel: ChassisSpeeds) {
-    val currTime = timer.get()
-    dt = currTime - prevTime
-    prevTime = currTime
-
-    val ctrlX = -controller.leftY
-    val ctrlY = -controller.leftX
-
-    val ctrlRadius = MathUtil.applyDeadband(
-      min(sqrt(ctrlX.pow(2) + ctrlY.pow(2)), 1.0),
-      RobotConstants.DRIVE_RADIUS_DEADBAND,
-      1.0
-    ).pow(SwerveConstants.JOYSTICK_FILTER_ORDER)
-
-    val ctrlTheta = atan2(ctrlY, ctrlX)
-
-    val xScaled = ctrlRadius * cos(ctrlTheta) * drive.maxLinearSpeed
-    val yScaled = ctrlRadius * sin(ctrlTheta) * drive.maxLinearSpeed
-
-    var xClamped = xScaled
-    var yClamped = yScaled
-
-    if (RobotConstants.USE_ACCEL_LIMIT) {
-      dx = xScaled - prevX
-      dy = yScaled - prevY
-      magAcc = hypot(dx / dt, dy / dt)
-      magAccClamped = MathUtil.clamp(magAcc, -RobotConstants.MAX_ACCEL, RobotConstants.MAX_ACCEL)
-
-      val factor = if (magAcc == 0.0) 0.0 else magAccClamped / magAcc
-      val dxClamped = dx * factor
-      val dyClamped = dy * factor
-      xClamped = prevX + dxClamped
-      yClamped = prevY + dyClamped
-    }
-
-    prevX = xClamped
-    prevY = yClamped
-
-    rotScaled = if (!headingLock) {
-      rotRamp.calculate(
-        min(
-          MathUtil.applyDeadband(
-            abs(controller.rightX).pow(SwerveConstants.ROT_FILTER_ORDER),
-            RobotConstants.ROTATION_DEADBAND,
-            1.0
-          ),
-          1.0
-        ) * -sign(controller.rightX) * drive.maxRotSpeed
-      )
-    } else {
-      MathUtil.clamp(
-        rotCtrl.calculate(this.heading.radians),
-        -RobotConstants.ALIGN_ROT_SPEED,
-        RobotConstants.ALIGN_ROT_SPEED
-      )
-    }
-
-    val vel = Translation2d(xClamped, yClamped)
-    val controllerDesVel: ChassisSpeeds
-    if (fieldOriented.invoke()) {
-      /** Quick fix for the velocity skewing towards the direction of rotation
-       * by rotating it with offset proportional to how much we are rotating
-       **/
-      vel.rotateBy(Rotation2d(-rotScaled * dt * skewConstant))
-
-//      val desVel = ChassisSpeeds.fromFieldRelativeSpeeds(
-//        vel.x * directionCompensation.invoke(),
-//        vel.y * directionCompensation.invoke(),
-//        rotScaled,
-//        this.heading
-//      )
-      controllerDesVel = desVel
-
-      desiredVel[0] = desVel.vxMetersPerSecond
-      desiredVel[1] = desVel.vyMetersPerSecond
-      desiredVel[2] = desVel.omegaRadiansPerSecond
-    } else {
-      controllerDesVel =
-        ChassisSpeeds(
-          vel.x,
-          vel.y,
-          rotScaled
-        )
-    }
-
-    var driverResistance = abs(
-      atan2(controllerDesVel.vxMetersPerSecond,
-        controllerDesVel.vyMetersPerSecond) -
-        atan2(pose.translation.x, pose.translation.y)
-    )
-    if (driverResistance > Math.PI) {
-      driverResistance = 2 * Math.PI - driverResistance
-    }
-
-    // 1.7... is 100 degrees in radians
-    if (driverResistance > Units.degreesToRadians(resistanceAngle)) {
-      timeUntilMagnetizationStop -= 0.02
-    } else {
-      timeUntilMagnetizationStop = magnetizationStopTime
-    }
-    if (timeUntilMagnetizationStop <= 0) {
-      stopMagnetization = true
-    }
-
-    // magnetization power is lowered if the robot is closer to the goal, which
-//    // makes it so the magnetization gets more powerful as the robot gets closer
-//    // Values need to be adjusted I haven't tested yet
-//    println("pose: ${pose.translation} endPose: ${endPose.translation}")
-//
-//    //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
-//    drive.set(calculate(this.pose, endPose) + controllerDesVel *
-//      (magnetizationPower * (this.pose.translation.getDistance(endPose.translation) / 10.0)))
-//    // constant                     pose rn                 distance to     desired pose
+  fun resetMagVars() {
+    currentMagPower = 10.0
+    magMultiply = 1.015
+    magDecConstant = 0.0003
   }
 
   fun edemPathMag(desVel: ChassisSpeeds) {
@@ -266,17 +154,20 @@ class PoseSubsystem(
     prevTime = currTime
     val distance = pose.translation.getDistance(autoscoreCommandPose.translation)
     if(distance <= autoDistance) {
-      currentMagPower = 8.0
-      magMultiply = 1.015
-      magDecConstant = 0.0003
+      if(distance <= autoDistance) {
+        resetMagVars()
+      }
       drive.set(desVel)
     } else {
 
-      val ctrlX = if (abs(controller.leftY) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else controller.leftY
-      val ctrlY = if (abs(controller.leftX) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else controller.leftX
+      val ctrlX = if (abs(controller.leftY) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftY
+      val ctrlY = if (abs(controller.leftX) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftX
 
       val controllerAngle = atan2(ctrlY, ctrlX)
       var controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
+
+      val controllerMag = sqrt(ctrlX.pow(2) + ctrlY.pow(2))
+      currentMagPower *= 1 + controllerMag / 10
       controllerSpeeds *= currentMagPower
       //des vel x and y switched
       //des vel left is negative x
@@ -295,19 +186,12 @@ class PoseSubsystem(
       //needs to fight against controller y
 
       val combinedChassisSpeeds = ChassisSpeeds()
-      if(desVel.vxMetersPerSecond < 0) {
-        combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vxMetersPerSecond
-      } else {
-        combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vyMetersPerSecond
-      }
-      if(desVel.vyMetersPerSecond < 0) {
-        combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vxMetersPerSecond
-      } else {
-        combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vyMetersPerSecond
-      }
+      combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vxMetersPerSecond
+      combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vyMetersPerSecond
+      combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
+      combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
       combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
 
-      println("controller speeds: $controllerSpeeds")
       drive.set(combinedChassisSpeeds)
 
       if(distance > lastDistance) {
@@ -317,6 +201,12 @@ class PoseSubsystem(
         magDecConstant += 0.000002
       }
       currentMagPower *= magMultiply
+      println("currentMagPower: $currentMagPower")
+      if (currentMagPower > maxMagPower) {
+        resetMagVars()
+        println("cancelling, currentmagpower cancelled")
+        autoscoreCurrentCommand.cancel()
+      }
     }
     lastDistance = distance
   }

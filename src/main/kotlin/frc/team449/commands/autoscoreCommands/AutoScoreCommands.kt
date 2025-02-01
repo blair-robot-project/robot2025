@@ -8,6 +8,7 @@ import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
 import frc.team449.auto.choreo.MagnetizePIDPoseAlign
@@ -31,6 +32,7 @@ class AutoScoreCommands(
 
   val usingPathfinding = true
 
+  lateinit var currentCommand: Command
   init {
     if (usingPathfinding) println("pathfinding") else println("magnezite")
   }
@@ -244,18 +246,42 @@ class AutoScoreCommands(
   }
 
   fun net(): Command {
-    return moveToNetCommand(false).andThen(scoreNetCommand())
+    val netCommand = moveToNetCommand(false).andThen(scoreNetCommand())
+    return runOnce({
+      currentCommand = netCommand
+      poseSubsystem.autoscoreCurrentCommand = netCommand
+    }).andThen(netCommand)
   }
 
   fun coral(): Command {
-    return moveToCoralIntakeCommand(true).andThen(intakeCoralCommand())
+    val coralCommand = moveToCoralIntakeCommand(true).andThen(intakeCoralCommand())
+    return runOnce({
+      currentCommand = coralCommand
+      poseSubsystem.autoscoreCurrentCommand = currentCommand
+    }).andThen(coralCommand)
   }
 
   fun reef(): Command {
-    return moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+    val reefCommand = moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+    return runOnce({
+      currentCommand = reefCommand
+      poseSubsystem.autoscoreCurrentCommand = currentCommand
+    }).andThen(reefCommand)
   }
 
   fun processor(): Command {
-    return moveToProcessorCommand().andThen(scoreProcessorCommand())
+    val processorCommand = moveToProcessorCommand().andThen(scoreProcessorCommand())
+    return runOnce({
+      currentCommand = processorCommand
+      poseSubsystem.autoscoreCurrentCommand = currentCommand
+    }).andThen(processorCommand)
   }
+
+  fun cancel(): Command {
+    return runOnce({
+      println("cancel called")
+      currentCommand.cancel()
+    })
+  }
+
 }

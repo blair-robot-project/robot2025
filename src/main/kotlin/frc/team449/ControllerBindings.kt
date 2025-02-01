@@ -54,10 +54,10 @@ class ControllerBindings(
     )
     //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
-        autoscore.net()
+      autoscore.net()
     )
     robot.driveController.y().onTrue(
-      autoscore.coral()
+      autoscore.cancel()
     )
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(
