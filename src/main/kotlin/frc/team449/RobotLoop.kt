@@ -57,22 +57,7 @@ class RobotLoop : TimedRobot(), Logged {
   private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
 
   init {
-    println("configuring the drive")
-    AutoBuilder.configure(
-      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
-      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ),
-      RobotConfig.fromGUISettings(),
-      { DriverStation.getAlliance().get() == Alliance.Red },
-      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
-    )
-
-    println("drive configured")
+    println("loop init")
   }
 
   override fun robotInit() {
@@ -111,7 +96,6 @@ class RobotLoop : TimedRobot(), Logged {
     Monologue.setupMonologue(this, "/Monologuing", false, false)
 
     URCL.start()
-    Pathfinding.setPathfinder(robot.pathfinder.adstar)
   }
 
   override fun driverStationConnected() {
@@ -178,7 +162,6 @@ class RobotLoop : TimedRobot(), Logged {
   override fun testPeriodic() {}
 
   override fun simulationInit() {
-    Pathfinding.setPathfinder(robot.pathfinder.adstar)
   }
 
   override fun simulationPeriodic() {
@@ -187,15 +170,6 @@ class RobotLoop : TimedRobot(), Logged {
     VisionConstants.ESTIMATORS.forEach {
       it.simulationPeriodic(robot.drive.odometryPose)
     }
-    //Pathfinding.setPathfinder(robot.pathfinder.adstar)
-    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
-
-    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
-    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
-//
-//    robot.driveController.a().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.processorPoseRed))
-//    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.processorPoseRed))
-//    robot.driveController.x().onTrue(robot.pathfinder.testpath())
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
     webCom?.command = webCom?.commandSubscriber?.get().toString()
