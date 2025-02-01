@@ -30,22 +30,22 @@ class ControllerBindings(
   private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
 
   private fun robotBindings() {
-    println("configuring the drive")
-    AutoBuilder.configure(
-      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
-      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ),
-      RobotConfig.fromGUISettings(),
-      { DriverStation.getAlliance().get() == Alliance.Red },
-      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
-    )
-
-    println("drive configured")
+//    println("configuring the drive")
+//    AutoBuilder.configure(
+//      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
+//      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
+//      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+//      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
+//      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+//        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
+//        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
+//      ),
+//      RobotConfig.fromGUISettings(),
+//      { DriverStation.getAlliance().get() == Alliance.Red },
+//      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
+//    )
+//
+//    println("drive configured")
     // reef location passed in alla webappp, this is temp
 //    robot.driveController.x().onTrue(
 //      PrintCommand("moving to reef").andThen(
@@ -67,9 +67,9 @@ class ControllerBindings(
 //        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
 //    )
 
-    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
-    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
-    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
+//    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
+//    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
+//    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
 
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(

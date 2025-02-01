@@ -11,6 +11,8 @@ import com.pathplanner.lib.pathfinding.LocalADStar
 import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.util.Units
@@ -53,6 +55,25 @@ class RobotLoop : TimedRobot(), Logged {
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
   private var webCom: WebConnection? = null
   private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
+
+  init {
+    println("configuring the drive")
+    AutoBuilder.configure(
+      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
+      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
+      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
+      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
+      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
+        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
+      ),
+      RobotConfig.fromGUISettings(),
+      { DriverStation.getAlliance().get() == Alliance.Red },
+      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
+    )
+
+    println("drive configured")
+  }
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -161,12 +182,20 @@ class RobotLoop : TimedRobot(), Logged {
   }
 
   override fun simulationPeriodic() {
-
     robot.drive as SwerveSim
 
     VisionConstants.ESTIMATORS.forEach {
       it.simulationPeriodic(robot.drive.odometryPose)
     }
+    //Pathfinding.setPathfinder(robot.pathfinder.adstar)
+    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
+
+    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
+    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
+//
+//    robot.driveController.a().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.processorPoseRed))
+//    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.processorPoseRed))
+//    robot.driveController.x().onTrue(robot.pathfinder.testpath())
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
     webCom?.command = webCom?.commandSubscriber?.get().toString()
