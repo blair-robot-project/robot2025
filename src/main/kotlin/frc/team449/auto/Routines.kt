@@ -69,8 +69,6 @@ open class Routines(
         l4fTrajectory.resetOdometry(),
         l4fTrajectory.cmd(),
         PrintCommand("Traveling to l4"),
-
-
         ),
       )
 
@@ -97,7 +95,7 @@ open class Routines(
       .beforeStarting(robot.superstructureManager.requestGoal(SuperstructureGoal.L4)).
       beforeStarting(robot.drive.driveStop()))
 
-    l4kTrajectory.done().onTrue(robot.drive.driveStop())
+    l4kTrajectory.done().onTrue(robot.drive.driveStop().andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L1)))
 
 
 
