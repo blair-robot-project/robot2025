@@ -17,9 +17,6 @@ import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
-import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
-import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
@@ -56,8 +53,7 @@ class RobotLoop : TimedRobot() {
     }
 
     // Custom Feedforwards
-    robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
-    robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
+
 
     // Generate Auto Routines
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
@@ -83,17 +79,11 @@ class RobotLoop : TimedRobot() {
     DogLog.setPdh(robot.powerDistribution)
 
     SmartDashboard.putData("Field", robot.field)
-    SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 
     URCL.start()
 
-    QuadCalibration(robot.pivot, robot.pivot.absoluteEncoder, robot.pivot.quadEncoder, name = "Pivot")
-      .ignoringDisable(true)
-      .schedule()
 
-    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
-      .ignoringDisable(true)
-      .schedule()
+
   }
 
   override fun driverStationConnected() {
@@ -108,13 +98,7 @@ class RobotLoop : TimedRobot() {
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
     // Superstructure Simulation
-    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
-    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
 
-    robot.elevator.elevatorLigament.angle = Units.radiansToDegrees(robot.pivot.positionSupplier.get())
-    robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
-
-    robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
   }
 
   override fun autonomousInit() {
@@ -173,6 +157,5 @@ class RobotLoop : TimedRobot() {
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
 
     // change elevator angle according to pivot position
-    robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
   }
 }

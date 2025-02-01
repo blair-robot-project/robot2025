@@ -1,21 +1,14 @@
 package frc.team449
 
-import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.units.Measure
-import edu.wpi.first.units.Units.*
-import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
-import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -28,20 +21,6 @@ class ControllerBindings(
 
   private fun robotBindings() {
     /** Call robot functions you create below */
-    /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
-     * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
-     */
-//    score_l1()
-    score_l2()
-    score_l3()
-    score_l4()
-
-    premove_l1()
-    premove_l2()
-    premove_l3()
-    premove_l4()
-
-    stow()
   }
 
   private fun nonRobotBindings() {
@@ -50,64 +29,6 @@ class ControllerBindings(
     if (RobotBase.isSimulation()) resetOdometrySim()
 
     resetGyro()
-  }
-
-  private fun stow() {
-    mechanismController.rightBumper().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
-    )
-  }
-
-//  private fun score_l1() {
-//    driveController.a().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-//        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-//    )
-//  }
-
-  private fun score_l2() {
-    driveController.x().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-    )
-  }
-
-  private fun score_l3() {
-    driveController.b().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-    )
-  }
-
-  private fun score_l4() {
-    driveController.y().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-    )
-  }
-
-  private fun premove_l1() {
-    mechanismController.a().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
-    )
-  }
-
-  private fun premove_l2() {
-    mechanismController.x().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PREMOVE)
-    )
-  }
-
-  private fun premove_l3() {
-    mechanismController.b().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)
-    )
-  }
-
-  private fun premove_l4() {
-    mechanismController.y().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
-    )
   }
 
   private fun slowDrive() {
@@ -192,74 +113,6 @@ class ControllerBindings(
      exampleSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
      )
      */
-  }
-
-  private fun elevatorCharacterizaton() {
-    val elevatorSubsystemRoutine = SysIdRoutine(
-      SysIdRoutine.Config(
-        Volts.of(0.5).per(Second),
-        Volts.of(3.0),
-        Seconds.of(10.0)
-      ) { state -> SignalLogger.writeString("state", state.toString()) },
-      SysIdRoutine.Mechanism(
-        { voltage: Voltage ->
-          run { robot.elevator.setVoltage(voltage.`in`(Volts)) }
-        },
-        null,
-        robot.elevator,
-        "elevator"
-      )
-    )
-
-    driveController.povUp().onTrue(
-      elevatorSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
-    )
-
-    driveController.povDown().onTrue(
-      elevatorSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
-    )
-
-    driveController.povRight().onTrue(
-      elevatorSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
-    )
-
-    driveController.povLeft().onTrue(
-      elevatorSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
-    )
-  }
-
-  fun pivotCharacterizaton() {
-    val pivotSubsystemRoutine = SysIdRoutine(
-      SysIdRoutine.Config(
-        Volts.of(0.5).per(Second),
-        Volts.of(3.0),
-        Seconds.of(10.0)
-      ) { state -> SignalLogger.writeString("state", state.toString()) },
-      SysIdRoutine.Mechanism(
-        { voltage: Voltage ->
-          run { robot.pivot.setVoltage(voltage.`in`(Volts)) }
-        },
-        null,
-        robot.pivot,
-        "elevator"
-      )
-    )
-
-    driveController.povUp().onTrue(
-      pivotSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
-    )
-
-    driveController.povDown().onTrue(
-      pivotSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
-    )
-
-    driveController.povRight().onTrue(
-      pivotSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
-    )
-
-    driveController.povLeft().onTrue(
-      pivotSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
-    )
   }
 
   /** Try not to touch, just add things to the robot or nonrobot bindings */
