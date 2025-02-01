@@ -190,7 +190,6 @@ class PoseSubsystem(
     )
   }
   fun turnToDesiredDisplacement(desiredDisplacementDeg: Double): Command {
-
     val pidController = PIDController(TURN_KP, TURN_KI, TURN_KD).apply {
       setTolerance(Math.toRadians(2.0))
     }
@@ -202,7 +201,7 @@ class PoseSubsystem(
       run {
         val currentAngle = MathUtil.angleModulus(this.pose.rotation.radians)
         val omegaRadPerSec = pidController.calculate(currentAngle, desiredDisplacementRad)
-        drive.set(ChassisSpeeds(0.0, 0.0, omegaRadPerSec))
+        drive.set(ChassisSpeeds.fromRobotRelativeSpeeds(drive.desiredSpeeds.vxMetersPerSecond, drive.desiredSpeeds.vyMetersPerSecond, omegaRadPerSec, ahrs.heading))
         //need to make sure max rot speed isnt exceeded
       }
     }.until {

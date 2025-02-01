@@ -42,7 +42,6 @@ open class SwerveDrive(
 
   /** The current speed of the robot's drive. */
   var currentSpeeds = ChassisSpeeds()
-
   var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
   protected var speedMagnitude: Double = 0.0
