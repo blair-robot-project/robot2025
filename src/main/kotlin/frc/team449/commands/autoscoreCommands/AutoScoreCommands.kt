@@ -82,7 +82,6 @@ class AutoScoreCommands(
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseRed
       }
     }
-    poseSubsystem.endPose = reefPose
     if (usingPathfinding) {
       /*** pathfinding ***/
       return AutoBuilder.pathfindToPose(
@@ -122,7 +121,6 @@ class AutoScoreCommands(
         controller
       )
     }
-    poseSubsystem.endPose = pose
     return returnCommand
   }
 
@@ -161,7 +159,6 @@ class AutoScoreCommands(
         controller
       )
     }
-    poseSubsystem.endPose = pose
     return returnCommand
   }
 
@@ -179,7 +176,6 @@ class AutoScoreCommands(
     if (onRedAllianceSide) {
       pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
     }
-    poseSubsystem.endPose = pose
 
     if (usingPathfinding) {
       /*** pathfinding ***/

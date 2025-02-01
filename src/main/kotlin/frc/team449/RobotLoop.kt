@@ -7,6 +7,8 @@ import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import com.pathplanner.lib.path.PathConstraints
+import com.pathplanner.lib.pathfinding.LocalADStar
+import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.geometry.Translation2d
@@ -21,6 +23,7 @@ import frc.team449.auto.RoutineChooser
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.commands.autoscoreCommands.WebConnection
+import frc.team449.commands.autoscoreCommands.pathfinder
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
@@ -87,6 +90,7 @@ class RobotLoop : TimedRobot(), Logged {
     Monologue.setupMonologue(this, "/Monologuing", false, false)
 
     URCL.start()
+    Pathfinding.setPathfinder(robot.pathfinder.adstar)
   }
 
   override fun driverStationConnected() {
@@ -152,9 +156,12 @@ class RobotLoop : TimedRobot(), Logged {
 
   override fun testPeriodic() {}
 
-  override fun simulationInit() {}
+  override fun simulationInit() {
+    Pathfinding.setPathfinder(robot.pathfinder.adstar)
+  }
 
   override fun simulationPeriodic() {
+
     robot.drive as SwerveSim
 
     VisionConstants.ESTIMATORS.forEach {

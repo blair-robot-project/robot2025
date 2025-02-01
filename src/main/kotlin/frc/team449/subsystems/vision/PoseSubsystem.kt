@@ -35,266 +35,7 @@ class PoseSubsystem(
   private val cameras: List<ApriltagCamera> = mutableListOf(),
   private val drive: SwerveDrive,
   private val field: Field2d,
-  val controller: CommandXboxController,
-  private val xController: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
-  private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
-  private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
-  poseTol: Pose2d = Pose2d(0.035, 0.035, Rotation2d(0.035)),
-  private val timeout: Double = 4.2,
-  private val fieldOriented: () -> Boolean = { true },
 ) : SubsystemBase() {
-
-  /** magnetize stuff */
-  private var prevX = 0.0
-  private var prevY = 0.0
-
-  private var prevTime = 0.0
-
-  private var dx = 0.0
-  private var dy = 0.0
-  private var magAcc = 0.0
-  private var dt = 0.0
-  private var magAccClamped = 0.0
-
-  private var rotScaled = 0.0
-  private val allianceCompensation = { if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) PI else 0.0 }
-  private val directionCompensation = { if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) -1.0 else 1.0 }
-
-  var headingLock = false
-
-  private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
-
-  private val timer = Timer()
-  lateinit var endPose: Pose2d
-
-  private val rotCtrl = PIDController(
-    RobotConstants.SNAP_KP,
-    RobotConstants.SNAP_KI,
-    RobotConstants.SNAP_KD
-  )
-
-  private var skewConstant = SwerveConstants.SKEW_CONSTANT
-  private var desiredVel = doubleArrayOf(0.0, 0.0, 0.0)
-  private var magnetizationPower = 50.0
-  // Time in seconds until magnetization will stop if the driver is opposing magnetization
-  private var magnetizationStopTime = 1.2
-  private var timeUntilMagnetizationStop = magnetizationStopTime
-  private var stopMagnetization = false
-  private var resistanceAngle = 100.0
-  //placeholder extremely big number
-  private var lastDistance = 1000.0
-  private var currentMagPower = 8.0
-  private var autoDistance = 0.5
-  private var maxResistanceAngle = 180.0
-  //constants to multiply controller chassisspeeds by
-  private var distanceWeaken = 25;
-  private var controllerAngleWeaken = 1
-
-  init {
-    xController.reset()
-    xController.setTolerance(poseTol.x)
-
-    yController.reset()
-    yController.setTolerance(poseTol.y)
-
-    thetaController.reset()
-    thetaController.enableContinuousInput(-PI, PI)
-    thetaController.setTolerance(poseTol.rotation.radians)
-
-    timer.restart()
-
-    stopMagnetization = false
-
-    prevX = drive.currentSpeeds.vxMetersPerSecond
-    prevY = drive.currentSpeeds.vyMetersPerSecond
-    prevTime = 0.0
-    dx = 0.0
-    dy = 0.0
-    magAcc = 0.0
-    dt = 0.0
-    magAccClamped = 0.0
-
-    rotRamp = SlewRateLimiter(
-      RobotConstants.ROT_RATE_LIMIT,
-      RobotConstants.NEG_ROT_RATE_LIM,
-      drive.currentSpeeds.omegaRadiansPerSecond
-    )
-
-    headingLock = false
-
-    xController.reset()
-    yController.reset()
-    thetaController.reset()
-
-    timer.restart()
-  }
-
-  private fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
-    val xPID = xController.calculate(currPose.x, desState.x)
-    val yPID = yController.calculate(currPose.y, desState.y)
-    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)
-
-    return ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, currPose.rotation)
-  }
-
-  private fun allControllersAtReference(): Boolean {
-    return xController.atSetpoint() && yController.atSetpoint() && thetaController.atSetpoint()
-  }
-
-  fun pathfindingMagnetize(desVel: ChassisSpeeds) {
-    val currTime = timer.get()
-    dt = currTime - prevTime
-    prevTime = currTime
-
-    val ctrlX = -controller.leftY
-    val ctrlY = -controller.leftX
-
-    val ctrlRadius = MathUtil.applyDeadband(
-      min(sqrt(ctrlX.pow(2) + ctrlY.pow(2)), 1.0),
-      RobotConstants.DRIVE_RADIUS_DEADBAND,
-      1.0
-    ).pow(SwerveConstants.JOYSTICK_FILTER_ORDER)
-
-    val ctrlTheta = atan2(ctrlY, ctrlX)
-
-    val xScaled = ctrlRadius * cos(ctrlTheta) * drive.maxLinearSpeed
-    val yScaled = ctrlRadius * sin(ctrlTheta) * drive.maxLinearSpeed
-
-    var xClamped = xScaled
-    var yClamped = yScaled
-
-    if (RobotConstants.USE_ACCEL_LIMIT) {
-      dx = xScaled - prevX
-      dy = yScaled - prevY
-      magAcc = hypot(dx / dt, dy / dt)
-      magAccClamped = MathUtil.clamp(magAcc, -RobotConstants.MAX_ACCEL, RobotConstants.MAX_ACCEL)
-
-      val factor = if (magAcc == 0.0) 0.0 else magAccClamped / magAcc
-      val dxClamped = dx * factor
-      val dyClamped = dy * factor
-      xClamped = prevX + dxClamped
-      yClamped = prevY + dyClamped
-    }
-
-    prevX = xClamped
-    prevY = yClamped
-
-    rotScaled = if (!headingLock) {
-      rotRamp.calculate(
-        min(
-          MathUtil.applyDeadband(
-            abs(controller.rightX).pow(SwerveConstants.ROT_FILTER_ORDER),
-            RobotConstants.ROTATION_DEADBAND,
-            1.0
-          ),
-          1.0
-        ) * -sign(controller.rightX) * drive.maxRotSpeed
-      )
-    } else {
-      MathUtil.clamp(
-        rotCtrl.calculate(this.heading.radians),
-        -RobotConstants.ALIGN_ROT_SPEED,
-        RobotConstants.ALIGN_ROT_SPEED
-      )
-    }
-
-    val vel = Translation2d(xClamped, yClamped)
-    val controllerDesVel: ChassisSpeeds
-    if (fieldOriented.invoke()) {
-      /** Quick fix for the velocity skewing towards the direction of rotation
-       * by rotating it with offset proportional to how much we are rotating
-       **/
-      vel.rotateBy(Rotation2d(-rotScaled * dt * skewConstant))
-
-//      val desVel = ChassisSpeeds.fromFieldRelativeSpeeds(
-//        vel.x * directionCompensation.invoke(),
-//        vel.y * directionCompensation.invoke(),
-//        rotScaled,
-//        this.heading
-//      )
-      controllerDesVel = desVel
-
-      desiredVel[0] = desVel.vxMetersPerSecond
-      desiredVel[1] = desVel.vyMetersPerSecond
-      desiredVel[2] = desVel.omegaRadiansPerSecond
-    } else {
-      controllerDesVel =
-        ChassisSpeeds(
-          vel.x,
-          vel.y,
-          rotScaled
-        )
-    }
-
-    var driverResistance = abs(
-      atan2(controllerDesVel.vxMetersPerSecond,
-        controllerDesVel.vyMetersPerSecond) -
-        atan2(pose.translation.x, pose.translation.y)
-    )
-    if (driverResistance > Math.PI) {
-      driverResistance = 2 * Math.PI - driverResistance
-    }
-
-    // 1.7... is 100 degrees in radians
-    if (driverResistance > Units.degreesToRadians(resistanceAngle)) {
-      timeUntilMagnetizationStop -= 0.02
-    } else {
-      timeUntilMagnetizationStop = magnetizationStopTime
-    }
-    if (timeUntilMagnetizationStop <= 0) {
-      stopMagnetization = true
-    }
-
-    // magnetization power is lowered if the robot is closer to the goal, which
-    // makes it so the magnetization gets more powerful as the robot gets closer
-    // Values need to be adjusted I haven't tested yet
-
-    //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
-    drive.set(calculate(this.pose, endPose) + controllerDesVel *
-      (magnetizationPower * (this.pose.translation.getDistance(endPose.translation) / 10.0)))
-    // constant                     pose rn                 distance to     desired pose
-  }
-
-  fun edemPathMag(desVel: ChassisSpeeds) {
-    val currTime = timer.get()
-    dt = currTime - prevTime
-    prevTime = currTime
-    val distance = this.pose.translation.getDistance(endPose.translation)
-    println(this.endPose)
-    if(distance <= autoDistance) {
-      lastDistance = 1000.0
-      drive.set(desVel)
-      println("auto distance")
-    } else {
-
-      if(distance > lastDistance) {
-        currentMagPower *= 1.25
-      } else if(distance < lastDistance) {
-        currentMagPower /= 2
-      }
-
-      val ctrlX = controller.leftX
-      val ctrlY = controller.leftY
-
-      val controllerAngle = atan2(ctrlY, ctrlX)
-      val controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
-      val combinedChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
-
-      val currentControllerStrength = 1.5.pow(distance-7.5)
-
-      //des vel x and y flipped for reason
-      combinedChassisSpeeds.vxMetersPerSecond = controllerSpeeds.vxMetersPerSecond * currentControllerStrength + desVel.vxMetersPerSecond
-      combinedChassisSpeeds.vyMetersPerSecond = controllerSpeeds.vyMetersPerSecond * currentControllerStrength + desVel.vyMetersPerSecond
-      combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
-
-      println("desVel vy: ${desVel.vyMetersPerSecond} controller vx: ${controllerSpeeds.vxMetersPerSecond}")
-      println("distance: $distance")
-      drive.set(combinedChassisSpeeds)
-      lastDistance = distance
-
-    }
-
-  }
 
   private val isReal = RobotBase.isReal()
 
@@ -335,8 +76,6 @@ class PoseSubsystem(
   val roll: Rotation2d
     get() = Rotation2d(MathUtil.angleModulus(ahrs.roll.radians))
 
-  var oldPose: Pose2d = Pose2d()
-
   /** The (x, y, theta) position of the robot on the field. */
   var pose: Pose2d
     get() = this.poseEstimator.estimatedPosition
@@ -373,25 +112,7 @@ class PoseSubsystem(
     this.poseEstimator.resetPose(newPose)
   }
 
-  /**
-   * pathfinds to a pose while allowing driver control through magnetization
-   * @param desState pose to travel to
-   */
-  fun setMagnetizePathplanning(desState: Pose2d) {
-
-    val xController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
-    val yController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
-    val thetaController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
-
-    val xPID = xController.calculate(pose.x, desState.x)
-    val yPID = yController.calculate(pose.y, desState.y)
-    val angPID = thetaController.calculate(pose.rotation.radians, desState.rotation.radians)
-
-    ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, desState.rotation)
-  }
-
   override fun periodic() {
-    oldPose = pose
     if (isReal) {
       this.poseEstimator.update(
         ahrs.heading,
@@ -503,6 +224,7 @@ class PoseSubsystem(
 
   fun getPosea(): Pose2d {
     return pose
+    println(pose)
   }
 
   private fun setRobotPose() {
@@ -569,8 +291,7 @@ class PoseSubsystem(
         ahrs,
         VisionConstants.ESTIMATORS,
         drive,
-        field,
-        controller
+        field
       )
     }
   }
