@@ -47,14 +47,14 @@ class ControllerBindings(
     println("drive configured")
     // reef location passed in alla webappp, this is temp
     robot.driveController.x().onTrue(
-      autoscore.reef()
+      autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
     )
     robot.driveController.a().onTrue(
       autoscore.processor()
     )
     //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
-      autoscore.net()
+      autoscore.net(true)
     )
     robot.driveController.y().onTrue(
       autoscore.cancel()

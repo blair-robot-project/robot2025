@@ -168,51 +168,44 @@ class RobotLoop : TimedRobot(), Logged {
       println("command received")
       webCom?.isDonePublish?.set(false)
 
-      var command = autoscore.moveToProcessorCommand().andThen(autoscore.scoreProcessorCommand())
-      var reef = false
+      var command = autoscore.processor()
       //get the value
       when (webCom?.command) {
-        "processor" -> command = autoscore.moveToProcessorCommand().andThen(autoscore.scoreProcessorCommand())
-        "intakeCoralTop" -> command = autoscore.moveToCoralIntakeCommand(true).andThen(autoscore.intakeCoralCommand())
-        "intakeCoralBottom" -> command = autoscore.moveToCoralIntakeCommand(false).andThen(autoscore.intakeCoralCommand())
-        "netRed" -> command = autoscore.moveToNetCommand(true).andThen(autoscore.scoreNetCommand())
-        "netBlue" -> command = autoscore.moveToNetCommand(false).andThen(autoscore.scoreNetCommand())
+        "processor" -> command = autoscore.processor()
+        "intakeCoralTop" -> command = autoscore.coral(true)
+        "intakeCoralBottom" -> command = autoscore.coral(false)
+        "netRed" -> command = autoscore.net(true)
+        "netBlue" -> command = autoscore.net(false)
         else -> {
-          reef = true
           //format will be l_ location__
           val level = webCom?.command?.slice(0..1)
           val location = webCom?.command?.slice(3..<webCom?.command!!.length)
-          var firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
+          var reefLocation = AutoScoreCommandConstants.ReefLocation.Location1
+          var reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
           when(location) {
-            "location1" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-            "location2" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location2)
-            "location3" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location3)
-            "location4" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location4)
-            "location5" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location5)
-            "location6" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location6)
-            "location7" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location7)
-            "location8" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location8)
-            "location9" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location9)
-            "location10" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location10)
-            "location11" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location11)
-            "location12" -> firstCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location12)
+            "location1" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location1)
+            "location2" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location2)
+            "location3" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location3)
+            "location4" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location4)
+            "location5" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location5)
+            "location6" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location6)
+            "location7" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location7)
+            "location8" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location8)
+            "location9" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location9)
+            "location10" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location10)
+            "location11" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location11)
+            "location12" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location12)
           }
-          var secondCommand = autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
           when(level) {
-            "l1" -> secondCommand = autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1)
-            "l2" -> secondCommand = autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L2)
-            "l3" -> secondCommand = autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L3)
-            "l4" -> secondCommand = autoscore.putCoralInReef(AutoScoreCommandConstants.ReefLevel.L4)
+            "l1" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
+            "l2" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L2)
+            "l3" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L3)
+            "l4" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L4)
           }
-          println("running reef jaunt")
-          firstCommand.andThen(secondCommand).schedule()
-          //
+          command = autoscore.reef(reefLocation, reefLevel)
         }
       }
-      if(!reef) {
-        println("running non reef jaunt")
-        command.schedule()
-      }
+      command.schedule()
       webCom?.isDonePublish?.set(true)
       webCom?.commandPublisher?.set("none")
     }

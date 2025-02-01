@@ -245,24 +245,24 @@ class AutoScoreCommands(
     return robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
   }
 
-  fun net(): Command {
-    val netCommand = moveToNetCommand(false).andThen(scoreNetCommand())
+  fun net(onRedAllianceSide: Boolean): Command {
+    val netCommand = moveToNetCommand(onRedAllianceSide).andThen(scoreNetCommand())
     return runOnce({
       currentCommand = netCommand
       poseSubsystem.autoscoreCurrentCommand = netCommand
     }).andThen(netCommand)
   }
 
-  fun coral(): Command {
-    val coralCommand = moveToCoralIntakeCommand(true).andThen(intakeCoralCommand())
+  fun coral(atTopSource: Boolean): Command {
+    val coralCommand = moveToCoralIntakeCommand(atTopSource).andThen(intakeCoralCommand())
     return runOnce({
       currentCommand = coralCommand
       poseSubsystem.autoscoreCurrentCommand = currentCommand
     }).andThen(coralCommand)
   }
 
-  fun reef(): Command {
-    val reefCommand = moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1).andThen(putCoralInReef(AutoScoreCommandConstants.ReefLevel.L1))
+  fun reef(reefLocation: AutoScoreCommandConstants.ReefLocation, reefLevel: AutoScoreCommandConstants.ReefLevel ): Command {
+    val reefCommand = moveToReefCommand(reefLocation).andThen(putCoralInReef(reefLevel))
     return runOnce({
       currentCommand = reefCommand
       poseSubsystem.autoscoreCurrentCommand = currentCommand

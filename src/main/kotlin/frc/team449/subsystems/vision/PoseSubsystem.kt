@@ -84,13 +84,14 @@ class PoseSubsystem(
   private var lastDistance = 1000.0
   private var autoDistance = 0.5
   lateinit var autoscoreCurrentCommand : Command
+  private var controllerTime = 0.0
 
   //edem mag vars
   private var currentMagPower = 10.0
   private var magMultiply = 1.015
   private val magIncConstant = 0.001
   private var magDecConstant = 0.0003
-  private var maxMagPower = 15.5
+  private var maxMagPower = 20.0
 
 
   init {
@@ -160,53 +161,62 @@ class PoseSubsystem(
       drive.set(desVel)
     } else {
 
+      // controller stuff
       val ctrlX = if (abs(controller.leftY) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftY
       val ctrlY = if (abs(controller.leftX) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftX
 
-      val controllerAngle = atan2(ctrlY, ctrlX)
-      var controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, controllerAngle)
+      rotScaled = if (!headingLock) {
+        rotRamp.calculate(
+          min(
+            MathUtil.applyDeadband(
+              abs(controller.rightX).pow(SwerveConstants.ROT_FILTER_ORDER),
+              RobotConstants.ROTATION_DEADBAND,
+              1.0
+            ),
+            1.0
+          ) * -sign(controller.rightX) * drive.maxRotSpeed
+        )
+      } else {
+        MathUtil.clamp(
+          rotCtrl.calculate(heading.radians),
+          -RobotConstants.ALIGN_ROT_SPEED,
+          RobotConstants.ALIGN_ROT_SPEED
+        )
+      }
+      var controllerSpeeds = ChassisSpeeds(ctrlX, ctrlY, rotScaled)
+      var combinedChassisSpeeds = ChassisSpeeds()
 
-      val controllerMag = sqrt(ctrlX.pow(2) + ctrlY.pow(2))
-      currentMagPower *= 1 + controllerMag / 10
-      controllerSpeeds *= currentMagPower
-      //des vel x and y switched
-      //des vel left is negative x
-      //des vel right is negative y
-      //des vel up is positive x
-      //des vel down is positive y
-      //controller x and y work normally
-      //this means:
-      //if des vel x is negative : des vel moving left
-      //needs to fight against controller x
-      //if des vel x is positive: des vel moving up
-      //needs to fight against controller y
-      //if des vel y is negative : des vel moving right
-      //needs to fight against controller x
-      //if des vel y is positive : des vel moving down
-      //needs to fight against controller y
+      if (controllerTime > 0) {
+        controllerTime -= 0.5
+        combinedChassisSpeeds = controllerSpeeds
+      } else {
+        val controllerMag = sqrt(ctrlX.pow(2) + ctrlY.pow(2))
 
-      val combinedChassisSpeeds = ChassisSpeeds()
-      combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vxMetersPerSecond
-      combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vyMetersPerSecond
-      combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
-      combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
-      combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
+        currentMagPower *= 1 + controllerMag / 5
+        controllerSpeeds *= currentMagPower
+
+        combinedChassisSpeeds.vxMetersPerSecond = desVel.vxMetersPerSecond + controllerSpeeds.vxMetersPerSecond
+        combinedChassisSpeeds.vyMetersPerSecond = desVel.vyMetersPerSecond + controllerSpeeds.vyMetersPerSecond
+        combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond + controllerSpeeds.omegaRadiansPerSecond
+        combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
+        combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
+
+        if(distance > lastDistance) {
+          magMultiply += magIncConstant
+        } else if(distance < lastDistance) {
+          magMultiply -= magDecConstant
+          magDecConstant += 0.000002
+        }
+        currentMagPower *= magMultiply
+        if (currentMagPower > maxMagPower) {
+          controllerTime = maxMagPower
+          resetMagVars()
+          currentMagPower = 15.0
+        }
+      }
 
       drive.set(combinedChassisSpeeds)
-
-      if(distance > lastDistance) {
-        magMultiply += magIncConstant
-      } else if(distance < lastDistance) {
-        magMultiply -= magDecConstant
-        magDecConstant += 0.000002
-      }
-      currentMagPower *= magMultiply
-      println("currentMagPower: $currentMagPower")
-      if (currentMagPower > maxMagPower) {
-        resetMagVars()
-        println("cancelling, currentmagpower cancelled")
-        autoscoreCurrentCommand.cancel()
-      }
+      println("mag power $currentMagPower ")
     }
     lastDistance = distance
   }
