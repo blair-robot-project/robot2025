@@ -77,7 +77,7 @@ class PoseSubsystem(
   private var desiredVel = doubleArrayOf(0.0, 0.0, 0.0)
 
   //edem mag vars
-  private var currentMagPower = 15.0
+  private var currentControllerPower = 15.0
   private var magMultiply = 1.00
   private val magIncConstant = 0.001
   private var magDecConstant = 0.0004
@@ -142,7 +142,7 @@ class PoseSubsystem(
   }
 
   fun resetMagVars() {
-    currentMagPower = 15.0
+    currentControllerPower = 15.0
     magMultiply = 1.00
     magDecConstant = 0.0004
   }
@@ -225,15 +225,15 @@ class PoseSubsystem(
       )
 
       //this increases the users power if they are moving a lot
-      currentMagPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
+      currentControllerPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
       //this increases the users power based on how much it is going against pathmag
       if(controllerSpeeds.vxMetersPerSecond < 0 != desVel.vxMetersPerSecond < 0) {
-        currentMagPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
+        currentControllerPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
       } else if(controllerSpeeds.vyMetersPerSecond < 0 != desVel.vyMetersPerSecond < 0) {
-        currentMagPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
+        currentControllerPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
       }
-      controllerSpeeds *= currentMagPower
-      val desVelAdjustedSpeeds = desVel / (16 / ( 1 + exp(-(currentMagPower-15)/2) ) )
+      controllerSpeeds *= currentControllerPower
+      val desVelAdjustedSpeeds = desVel / (16 / ( 1 + exp(-(currentControllerPower-15)/2) ) )
 
 
       val combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
@@ -252,10 +252,10 @@ class PoseSubsystem(
       magDecConstant += 0.00001
     }
 
-    currentMagPower = MathUtil.clamp(currentMagPower, 0.0, maxMagPower)
+    currentControllerPower = MathUtil.clamp(currentControllerPower, 0.0, maxMagPower)
     magMultiply = MathUtil.clamp(magMultiply, 0.0, 2.0)
 
-    currentMagPower *= magMultiply
+    currentControllerPower *= magMultiply
 
     lastDistance = distance
   }

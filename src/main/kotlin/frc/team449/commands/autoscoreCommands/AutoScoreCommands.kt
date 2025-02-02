@@ -40,9 +40,8 @@ class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command
   }
 
   override fun isFinished(): Boolean {
-    println("timeout $timeoutTimer auto $autodistanceTimer")
     if(timeoutTimer < 0 || autodistanceTimer < 0) {
-      println("finished")
+      println("autoscore command finished")
       resetAndEndCommand()
       return true
     }
