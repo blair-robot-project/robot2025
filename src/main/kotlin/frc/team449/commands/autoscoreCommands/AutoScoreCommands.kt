@@ -16,6 +16,58 @@ import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.vision.PoseSubsystem
 
+class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command) : Command() {
+
+  private val actualCommand = command
+  private val timeoutTime = 10.0
+  private var timeoutTimer = timeoutTime
+  private val autodistanceTime = 1.0
+  private var autodistanceTimer = autodistanceTime
+
+  override fun initialize() {
+    actualCommand.initialize()
+  }
+
+  override fun execute() {
+    actualCommand.execute()
+  }
+
+  private fun resetTimers() {
+    timeoutTimer = timeoutTime
+    autodistanceTimer = autodistanceTime
+    actualCommand.end(true)
+  }
+
+  override fun isFinished(): Boolean {
+    println(autodistanceTimer)
+    if(timeoutTimer < 0 || autodistanceTimer < 0) {
+      if(timeoutTimer < 0) {
+        println("timeout command finish")
+      }
+      if(autodistanceTimer < 0) {
+        println("autodistance command finish")
+      }
+      resetTimers()
+      return true
+    }
+    if (poseSubsystem.pose.translation.getDistance(poseSubsystem.autoscoreCommandPose.translation) < poseSubsystem.autoDistance) {
+      autodistanceTimer -= 0.05
+      timeoutTimer = timeoutTime
+    }
+    if (actualCommand.isFinished) {
+      actualCommand.end(true)
+      actualCommand.schedule()
+      timeoutTimer -= 0.05
+    }
+    return false
+  }
+
+  override fun end(interrupted: Boolean) {
+    actualCommand.end(interrupted)
+  }
+
+}
+
 class AutoScoreCommands(
   private val drive: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
@@ -23,14 +75,14 @@ class AutoScoreCommands(
   private val robot: Robot
 ) {
 
-  val constraints = PathConstraints(
+  private val constraints = PathConstraints(
     30.0,
     40.0,
     Units.degreesToRadians(540.0),
     Units.degreesToRadians(720.0)
   )
 
-  val usingPathfinding = true
+  private val usingPathfinding = true
 
   lateinit var currentCommand: Command
   init {
@@ -85,18 +137,17 @@ class AutoScoreCommands(
       }
     }
     poseSubsystem.autoscoreCommandPose = reefPose
+    var returnCommand : Command = MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
     if (usingPathfinding) {
       /*** pathfinding ***/
-      return AutoBuilder.pathfindToPose(
+      returnCommand = AutoBuilder.pathfindToPose(
         reefPose,
         constraints,
         0.0,
         // Goal end velocity in meters/sec
       )
-    } else {
-      /*** magnetize ***/
-      return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
     }
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
@@ -111,6 +162,8 @@ class AutoScoreCommands(
       processorPose = AutoScoreCommandConstants.processorPoseRed
     }
 
+    poseSubsystem.autoscoreCommandPose = processorPose
+
     var returnCommand = AutoBuilder.pathfindToPose(
       processorPose,
       constraints,
@@ -124,10 +177,9 @@ class AutoScoreCommands(
         controller
       )
     }
-    poseSubsystem.autoscoreCommandPose = processorPose
     println("pose subsystem end pose: " + poseSubsystem.autoscoreCommandPose)
 
-    return returnCommand
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
@@ -152,6 +204,8 @@ class AutoScoreCommands(
         coralIntakePose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
       }
     }
+    poseSubsystem.autoscoreCommandPose = coralIntakePose
+
     var returnCommand = AutoBuilder.pathfindToPose(
       coralIntakePose,
       constraints,
@@ -165,8 +219,7 @@ class AutoScoreCommands(
         controller
       )
     }
-    poseSubsystem.autoscoreCommandPose = coralIntakePose
-    return returnCommand
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
@@ -180,25 +233,25 @@ class AutoScoreCommands(
    */
   fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
     println("net command called")
-    var pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
+    var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     if (onRedAllianceSide) {
-      pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
+      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
     }
-    poseSubsystem.autoscoreCommandPose = pose
+    poseSubsystem.autoscoreCommandPose = netPose
 
-    if (usingPathfinding) {
-      /*** pathfinding ***/
-      val pathfindingCommand = AutoBuilder.pathfindToPose(
-        pose,
-        constraints,
-        10.0,
-        // Goal end velocity in meters/sec
-      )
-      return pathfindingCommand
-    } else {
+    var returnCommand = AutoBuilder.pathfindToPose(
+      netPose,
+      constraints,
+      0.0,
+      // Goal end velocity in meters/sec
+    )
+    if (!usingPathfinding) {
       /*** magnetize ***/
-    return MagnetizePIDPoseAlign(drive, poseSubsystem, pose, controller)
+      returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, netPose, controller)
     }
+
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
+
   }
 
   /**

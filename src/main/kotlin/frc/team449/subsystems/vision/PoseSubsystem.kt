@@ -75,16 +75,6 @@ class PoseSubsystem(
 
   private var skewConstant = SwerveConstants.SKEW_CONSTANT
   private var desiredVel = doubleArrayOf(0.0, 0.0, 0.0)
-  private var magnetizationPower = 50.0
-  // Time in seconds until magnetization will stop if the driver is opposing magnetization
-  private var magnetizationStopTime = 1.2
-  private var timeUntilMagnetizationStop = magnetizationStopTime
-  private var resistanceAngle = 100.0
-  //placeholder extremely big number
-  private var lastDistance = 1000.0
-  private var autoDistance = 0.5
-  lateinit var autoscoreCurrentCommand : Command
-  private var controllerTime = 0.0
 
   //edem mag vars
   private var currentMagPower = 15.0
@@ -92,6 +82,13 @@ class PoseSubsystem(
   private val magIncConstant = 0.001
   private var magDecConstant = 0.0003
   private val maxMagPower = 20.0
+  //placeholder extremely big number
+  private var lastDistance = 1000.0
+  val autoDistance = 0.5
+  lateinit var autoscoreCurrentCommand : Command
+  private var controllerTime = 0.0
+
+
 
 
   init {
@@ -157,14 +154,10 @@ class PoseSubsystem(
     dt = currTime - prevTime
     prevTime = currTime
     val distance = pose.translation.getDistance(autoscoreCommandPose.translation)
-    val desVelAdjustedSpeeds = desVel / (12 / ( 1 + exp(-(currentMagPower-15)/2) ) )
     val ctrlX = -controller.leftY
     val ctrlY = -controller.leftX
     val controllerMag = sqrt(ctrlX.pow(2) + ctrlY.pow(2))
 
-    if(dt > 0.03) {
-      resetMagVars()
-    }
     if(distance <= autoDistance || controllerMag < 0.1) {
       if(distance <= autoDistance) {
         println("auto distance")
@@ -232,8 +225,17 @@ class PoseSubsystem(
         heading
       )
 
-      currentMagPower += 1/( 1 + exp(-5 * (controllerMag-0.5) ) ) - 0.3
+      //this increases the users power if they are moving a lot
+      currentMagPower += 1.2/( 1 + exp(-6 * (controllerMag-0.5) ) ) - 0.5
+      //this increases the users power based on how much it is going against pathmag
+      if(controllerSpeeds.vxMetersPerSecond < 0 != desVel.vxMetersPerSecond < 0) {
+        currentMagPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
+      } else if(controllerSpeeds.vyMetersPerSecond < 0 != desVel.vyMetersPerSecond < 0) {
+        currentMagPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
+      }
       controllerSpeeds *= currentMagPower
+      val desVelAdjustedSpeeds = desVel / (12 / ( 1 + exp(-(currentMagPower-15)/2) ) )
+
 
       val combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
