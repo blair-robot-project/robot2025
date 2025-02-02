@@ -205,6 +205,8 @@ class RobotLoop : TimedRobot(), Logged {
           command = autoscore.reef(reefLocation, reefLevel)
         }
       }
+      autoscore.currentCommand = command
+      autoscore.poseSubsystem.autoscoreCurrentCommand = command
       command.schedule()
       webCom?.isDonePublish?.set(true)
       webCom?.commandPublisher?.set("none")
