@@ -40,12 +40,15 @@ class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command
   }
 
   override fun isFinished(): Boolean {
+    println("timeout $timeoutTimer auto $autodistanceTimer")
     if(timeoutTimer < 0 || autodistanceTimer < 0) {
+      println("finished")
       resetAndEndCommand()
       return true
     }
     if (poseSubsystem.pose.translation.getDistance(poseSubsystem.autoscoreCommandPose.translation) < poseSubsystem.autoDistance) {
       autodistanceTimer -= 0.05
+      //prevent command from timing out if we're close
       timeoutTimer = timeoutTime
     }
     if (currentCommand.isFinished) {
@@ -229,8 +232,9 @@ class AutoScoreCommands(
     if (onRedAllianceSide) {
       netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
     }
-    poseSubsystem.autoscoreCommandPose = netPose
 
+    poseSubsystem.autoscoreCommandPose = netPose
+    println(poseSubsystem.autoscoreCommandPose.translation)
     var returnCommand = AutoBuilder.pathfindToPose(
       netPose,
       constraints,
@@ -307,13 +311,6 @@ class AutoScoreCommands(
   fun processor(): Command {
     val processorCommand = moveToProcessorCommand().andThen(scoreProcessorCommand())
     return processorCommand
-  }
-
-  fun cancel(): Command {
-    return runOnce({
-      println("cancel called")
-      currentCommand.cancel()
-    })
   }
 
 }

@@ -46,29 +46,38 @@ class ControllerBindings(
     )
 
     println("drive configured")
+    //temp
+
     // reef location passed in alla webappp, this is temp
     robot.driveController.x().onTrue(
       runOnce({
         autoscore.currentCommand = autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
         autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
-      }).andThen(autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1))
-
+        autoscore.currentCommand.schedule()
+      })
     )
     robot.driveController.a().onTrue(
       runOnce({
         autoscore.currentCommand = autoscore.processor()
         autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
-      }).andThen(autoscore.processor())
+        autoscore.currentCommand.schedule()
+      })
     )
     //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
       runOnce({
         autoscore.currentCommand = autoscore.net(true)
         autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
-      }).andThen(autoscore.net(true))
+        autoscore.currentCommand.schedule()
+      })
     )
     robot.driveController.y().onTrue(
-      autoscore.cancel()
+      runOnce({
+        println("cancel called")
+        println(autoscore.currentCommand)
+        autoscore.currentCommand.cancel()
+        autoscore.currentCommand.end(false)
+      })
     )
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(

@@ -158,7 +158,6 @@ class PoseSubsystem(
 
     if(distance <= autoDistance || controllerMag < 0.1) {
       if(distance <= autoDistance) {
-        println("auto distance")
         resetMagVars()
       } else {
         magMultiply -= 0.00001
@@ -257,7 +256,6 @@ class PoseSubsystem(
     magMultiply = MathUtil.clamp(magMultiply, 0.0, 2.0)
 
     currentMagPower *= magMultiply
-    println("mgpower: $currentMagPower mult: $magMultiply")
 
     lastDistance = distance
   }
