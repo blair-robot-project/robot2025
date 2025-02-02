@@ -8,7 +8,6 @@ import choreo.trajectory.SwerveSample
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -17,8 +16,7 @@ import kotlin.jvm.optionals.getOrDefault
 import kotlin.math.PI
 
 open class Routines(
-  val robot: Robot
-) {
+  val robot: Robot) {
   private val xController: PIDController
     get() = PIDController(10.0, 0.0, 0.0)
   private val yController: PIDController
@@ -61,7 +59,7 @@ open class Routines(
   // right taxi
   fun rightTaxi(): AutoRoutine {
     val rTaxi: AutoRoutine = autoFactory.newRoutine("Right Taxi")
-    val rTaxiTrajectory: AutoTrajectory = rTaxi.trajectory("rightTaxi")
+    val rTaxiTrajectory: AutoTrajectory = rTaxi.trajectory("taxiRight")
     rTaxi.active().onTrue(
       Commands.sequence(
         rTaxiTrajectory.resetOdometry(),
@@ -74,7 +72,7 @@ open class Routines(
   // left taxi
   fun leftTaxi(): AutoRoutine {
     val lTaxi: AutoRoutine = autoFactory.newRoutine("Left Taxi")
-    val lTaxiTrajectory: AutoTrajectory = lTaxi.trajectory("leftTaxi")
+    val lTaxiTrajectory: AutoTrajectory = lTaxi.trajectory("taxiLeft")
     lTaxi.active().onTrue(
       Commands.sequence(
         lTaxiTrajectory.resetOdometry(),
@@ -95,8 +93,9 @@ open class Routines(
         reefETrajectory.cmd(),
         robot.drive.driveStop(),
         robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-    //    robot.intake.outtakeCoral()
-      )
+        robot.intake.outtakeCoral()
+
+        )
     )
     return l1E
   }
@@ -108,12 +107,11 @@ open class Routines(
     F.active().onTrue(
       Commands.sequence(
         reefFTrajectory.resetOdometry(),
-        Commands.parallel(
           reefFTrajectory.cmd(),
+          robot.drive.driveStop(),
           robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
-        ),
-        robot.drive.driveStop(),
-        //robot.intake.outtakeCoral()
+          robot.intake.outtakeCoral()
+
       )
     )
     return F
@@ -128,12 +126,10 @@ open class Routines(
     g.active().onTrue(
       Commands.sequence(
         reefGTrajectory.resetOdometry(),
-        Commands.parallel(
-          reefGTrajectory.cmd(),
+        reefGTrajectory.cmd(),
+          robot.drive.driveStop(),
           robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
-        ),
-        robot.drive.driveStop(),
-        //robot.intake.outtakeCoral()
+          robot.intake.outtakeCoral()
       )
     )
     return g
@@ -146,13 +142,12 @@ open class Routines(
     J.active().onTrue(
       Commands.sequence(
         reefJTrajectory.resetOdometry(),
-        Commands.parallel(
           reefJTrajectory.cmd(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
-        ),
         robot.drive.driveStop(),
-       // robot.intake.outtakeCoral()
-      )
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+        robot.intake.intakeCoral()
+
+        )
     )
     return J
   }
@@ -168,38 +163,27 @@ open class Routines(
       // go to reef e and score l1
       Commands.sequence(
         reefETrajectory.resetOdometry(),
-        Commands.parallel(
           reefETrajectory.cmd(),
+          robot.drive.driveStop(),
           robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-        ),
-        robot.drive.driveStop(),
-        Commands.waitSeconds(1.1),
-
-        //  robot.intake.outtakeCoral(),
+          robot.intake.outtakeCoral(),
 
         //go to the coral station and intake coral
-        Commands.sequence(
-          Commands.parallel(
-            reefEtoStationTrajectory.cmd(),
-            robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
-          ),
-          robot.drive.driveStop(),
-          Commands.waitSeconds(1.1),
 
-          //   robot.intake.intakeCoral()
-        ),
+            reefEtoStationTrajectory.cmd(),
+          robot.drive.driveStop(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral(),
 
         //go to reef d from station and score l4
-        Commands.sequence(
-          Commands.parallel(
+
             stationToDTrajectory.cmd(),
-            robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation)
-          ),
-          robot.drive.driveStop(),
-        //  robot.intake.outtakeCoral()
+            robot.drive.driveStop(),
+            robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
+            robot.intake.outtakeCoral(),
+
         )
       )
-    )
 
     return E_D
   }
@@ -213,29 +197,26 @@ open class Routines(
     J_L.active().onTrue(
       Commands.sequence(
         reefJTrajectory.resetOdometry(),
-        Commands.sequence(
+
           reefJTrajectory.cmd(),
-          Commands.waitSeconds(1.1),
-          //robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
-          // outtake stuff
-        ),
-        Commands.sequence(
+          robot.drive.driveStop(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+          robot.intake.outtakeCoral(),
+
           reefJtoStationTrajectory.cmd(),
-          Commands.waitSeconds(1.1),
-          //robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+          robot.drive.driveStop(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeAlgae(),
 
-          // intake stuff
-        ),
-        Commands.sequence(
           stationToLTrajectory.cmd(),
-          robot.drive.driveStop()
+          robot.drive.driveStop(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
+          robot.intake.outtakeCoral()
 
-          //robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation)
 
-          // outtakestuff
         )
       )
-    )
+
     return J_L
   }
 
@@ -249,24 +230,23 @@ open class Routines(
         reefJTrajectory.resetOdometry(),
         reefJTrajectory.cmd(),
         robot.drive.driveStop(),
-        Commands.waitSeconds(1.1),
-        //robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+        robot.intake.outtakeCoral(),
 
-        Commands.sequence(
           reefJtoStationTrajectory.cmd(),
           robot.drive.driveStop(),
-          Commands.waitSeconds(1.1),
-          //robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+         robot.intake.intakeCoral(),
 
-        ),
-        Commands.sequence(
+
           stationToKTrajectory.cmd(),
           robot.drive.driveStop(),
-         // robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation)
+         robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
+        robot.intake.outtakeCoral()
 
         )
       )
-    )
+
     return J_K
   }
 
@@ -275,13 +255,13 @@ open class Routines(
     autoChooser.addRoutine("Nothing", this::doNothing)
     autoChooser.addRoutine("RightTaxi", this::rightTaxi)
     autoChooser.addRoutine("LeftTaxi", this::leftTaxi)
-    autoChooser.addRoutine("E", this::l1reefE)
-    autoChooser.addRoutine("F", this::l1reefF)
-    autoChooser.addRoutine("G", this::reefG)
-    autoChooser.addRoutine("J", this::reefJ)
-    autoChooser.addRoutine("E & D ", this::reefED)
-    autoChooser.addRoutine("J & L", this::reefJL)
-    autoChooser.addRoutine("J & K", this::reefJK)
+    autoChooser.addRoutine("l1 E", this::l1reefE)
+    autoChooser.addRoutine("l4 F", this::l1reefF)
+    autoChooser.addRoutine("l4 G", this::reefG)
+    autoChooser.addRoutine("l1 J", this::reefJ)
+    autoChooser.addRoutine("l1 E & l4 D ", this::reefED)
+    autoChooser.addRoutine("l1 J & l4 L", this::reefJL)
+    autoChooser.addRoutine("l1 J & l4 K", this::reefJK)
   }
 }
 

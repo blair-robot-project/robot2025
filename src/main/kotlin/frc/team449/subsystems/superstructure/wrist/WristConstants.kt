@@ -1,4 +1,4 @@
-package frc.team449.subsystems.wrist
+package frc.team449.subsystems.superstructure.wrist
 
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue

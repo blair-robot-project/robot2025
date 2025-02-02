@@ -1,4 +1,4 @@
-package frc.team449.subsystems.pivot
+package frc.team449.subsystems.superstructure.pivot
 
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.Matrix

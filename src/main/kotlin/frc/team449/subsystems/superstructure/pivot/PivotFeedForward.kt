@@ -1,8 +1,8 @@
-package frc.team449.subsystems.pivot
+package frc.team449.subsystems.superstructure.pivot
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
-import frc.team449.subsystems.elevator.Elevator
-import frc.team449.subsystems.elevator.ElevatorConstants
+import frc.team449.subsystems.superstructure.elevator.Elevator
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import kotlin.math.cos
 import kotlin.math.sign
 

@@ -1,4 +1,4 @@
-package frc.team449.subsystems.wrist
+package frc.team449.subsystems.superstructure.wrist
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration

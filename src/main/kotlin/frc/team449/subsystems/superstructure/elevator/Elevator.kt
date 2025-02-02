@@ -1,4 +1,4 @@
-package frc.team449.subsystems.elevator
+package frc.team449.subsystems.superstructure.elevator
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.wrist.WristConstants
+import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.function.Supplier
 import kotlin.math.abs
 

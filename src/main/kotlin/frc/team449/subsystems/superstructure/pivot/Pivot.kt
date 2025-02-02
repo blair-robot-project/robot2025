@@ -1,4 +1,4 @@
-package frc.team449.subsystems.pivot
+package frc.team449.subsystems.superstructure.pivot
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration

@@ -5,7 +5,6 @@ import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -14,9 +13,9 @@ import frc.team449.auto.Routines
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.Rainbow
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.elevator.ElevatorConstants
-import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
-import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
+import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import monologue.Annotations.Log
 import monologue.Logged
