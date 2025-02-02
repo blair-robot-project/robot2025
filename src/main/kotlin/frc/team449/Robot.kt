@@ -28,7 +28,7 @@ class Robot : RobotBase() {
     PowerDistribution.ModuleType.kRev
   )
 
-  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
+  override val drive: SwerveDrive = SwerveDrive.createSwerveNEO(field)
 
   override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
 
