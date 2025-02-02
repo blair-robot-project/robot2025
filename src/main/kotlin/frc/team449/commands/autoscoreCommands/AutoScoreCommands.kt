@@ -116,7 +116,6 @@ class AutoScoreCommands(
       constraints,
       0.0,
     )
-
     if(!usingPathfinding) {
       returnCommand = MagnetizePIDPoseAlign(
         drive,
