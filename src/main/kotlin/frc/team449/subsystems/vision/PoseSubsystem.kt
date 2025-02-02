@@ -80,13 +80,12 @@ class PoseSubsystem(
   private var currentMagPower = 15.0
   private var magMultiply = 1.00
   private val magIncConstant = 0.001
-  private var magDecConstant = 0.0003
+  private var magDecConstant = 0.0004
   private val maxMagPower = 20.0
   //placeholder extremely big number
   private var lastDistance = 1000.0
   val autoDistance = 0.5
   lateinit var autoscoreCurrentCommand : Command
-  private var controllerTime = 0.0
 
 
 
@@ -145,8 +144,7 @@ class PoseSubsystem(
   fun resetMagVars() {
     currentMagPower = 15.0
     magMultiply = 1.00
-    magDecConstant = 0.0003
-    controllerTime = 0.0
+    magDecConstant = 0.0004
   }
 
   fun edemPathMag(desVel: ChassisSpeeds) {
@@ -162,6 +160,8 @@ class PoseSubsystem(
       if(distance <= autoDistance) {
         println("auto distance")
         resetMagVars()
+      } else {
+        magMultiply -= 0.00001
       }
       drive.set(desVel)
     } else {
@@ -226,7 +226,7 @@ class PoseSubsystem(
       )
 
       //this increases the users power if they are moving a lot
-      currentMagPower += 1.2/( 1 + exp(-6 * (controllerMag-0.5) ) ) - 0.5
+      currentMagPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
       //this increases the users power based on how much it is going against pathmag
       if(controllerSpeeds.vxMetersPerSecond < 0 != desVel.vxMetersPerSecond < 0) {
         currentMagPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
@@ -234,32 +234,31 @@ class PoseSubsystem(
         currentMagPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
       }
       controllerSpeeds *= currentMagPower
-      val desVelAdjustedSpeeds = desVel / (12 / ( 1 + exp(-(currentMagPower-15)/2) ) )
+      val desVelAdjustedSpeeds = desVel / (16 / ( 1 + exp(-(currentMagPower-15)/2) ) )
 
 
       val combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
       combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
       combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -drive.maxRotSpeed, drive.maxRotSpeed)
-      if(distance > lastDistance) {
-        magMultiply += magIncConstant
-      } else if(distance < lastDistance) {
-        magMultiply -= magDecConstant
-        magDecConstant += 0.000004
-      }
-      currentMagPower *= magMultiply
-      if (currentMagPower > maxMagPower) {
-        println("mag power strong")
-        resetMagVars()
-        controllerTime = maxMagPower
-        currentMagPower = 15.0
-      }
+
 
       drive.set(combinedChassisSpeeds)
-//      println("des vel speeds: $desVelAdjustedSpeeds")
-      println("mgpower: $currentMagPower mult: $magMultiply")
 
     }
+    if(distance > lastDistance) {
+      magMultiply += magIncConstant
+    } else if(distance < lastDistance) {
+      magMultiply -= magDecConstant
+      magDecConstant += 0.00001
+    }
+
+    currentMagPower = MathUtil.clamp(currentMagPower, 0.0, maxMagPower)
+    magMultiply = MathUtil.clamp(magMultiply, 0.0, 2.0)
+
+    currentMagPower *= magMultiply
+    println("mgpower: $currentMagPower mult: $magMultiply")
+
     lastDistance = distance
   }
 

@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -47,14 +48,24 @@ class ControllerBindings(
     println("drive configured")
     // reef location passed in alla webappp, this is temp
     robot.driveController.x().onTrue(
-      autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
+      runOnce({
+        autoscore.currentCommand = autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
+        autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
+      }).andThen(autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1))
+
     )
     robot.driveController.a().onTrue(
-      autoscore.processor()
+      runOnce({
+        autoscore.currentCommand = autoscore.processor()
+        autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
+      }).andThen(autoscore.processor())
     )
     //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
-      autoscore.net(true)
+      runOnce({
+        autoscore.currentCommand = autoscore.net(true)
+        autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
+      }).andThen(autoscore.net(true))
     )
     robot.driveController.y().onTrue(
       autoscore.cancel()

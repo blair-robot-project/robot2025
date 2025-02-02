@@ -18,59 +18,51 @@ import frc.team449.subsystems.vision.PoseSubsystem
 
 class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command) : Command() {
 
-  private val actualCommand = command
+  private val currentCommand = command
   private val timeoutTime = 10.0
   private var timeoutTimer = timeoutTime
   private val autodistanceTime = 1.0
   private var autodistanceTimer = autodistanceTime
 
   override fun initialize() {
-    actualCommand.initialize()
+    currentCommand.initialize()
   }
 
   override fun execute() {
-    actualCommand.execute()
+    currentCommand.execute()
   }
 
-  private fun resetTimers() {
+  private fun resetAndEndCommand() {
     timeoutTimer = timeoutTime
     autodistanceTimer = autodistanceTime
-    actualCommand.end(true)
+    currentCommand.end(true)
+    currentCommand.cancel()
   }
 
   override fun isFinished(): Boolean {
-    println(autodistanceTimer)
     if(timeoutTimer < 0 || autodistanceTimer < 0) {
-      if(timeoutTimer < 0) {
-        println("timeout command finish")
-      }
-      if(autodistanceTimer < 0) {
-        println("autodistance command finish")
-      }
-      resetTimers()
+      resetAndEndCommand()
       return true
     }
     if (poseSubsystem.pose.translation.getDistance(poseSubsystem.autoscoreCommandPose.translation) < poseSubsystem.autoDistance) {
       autodistanceTimer -= 0.05
       timeoutTimer = timeoutTime
     }
-    if (actualCommand.isFinished) {
-      actualCommand.end(true)
-      actualCommand.schedule()
+    if (currentCommand.isFinished) {
       timeoutTimer -= 0.05
     }
     return false
   }
 
   override fun end(interrupted: Boolean) {
-    actualCommand.end(interrupted)
+    currentCommand.end(interrupted)
   }
 
 }
 
 class AutoScoreCommands(
   private val drive: SwerveDrive,
-  private val poseSubsystem: PoseSubsystem,
+  val poseSubsystem: PoseSubsystem,
   private val controller: XboxController,
   private val robot: Robot
 ) {
@@ -299,34 +291,22 @@ class AutoScoreCommands(
 
   fun net(onRedAllianceSide: Boolean): Command {
     val netCommand = moveToNetCommand(onRedAllianceSide).andThen(scoreNetCommand())
-    return runOnce({
-      currentCommand = netCommand
-      poseSubsystem.autoscoreCurrentCommand = netCommand
-    }).andThen(netCommand)
+    return netCommand
   }
 
   fun coral(atTopSource: Boolean): Command {
     val coralCommand = moveToCoralIntakeCommand(atTopSource).andThen(intakeCoralCommand())
-    return runOnce({
-      currentCommand = coralCommand
-      poseSubsystem.autoscoreCurrentCommand = currentCommand
-    }).andThen(coralCommand)
+    return coralCommand
   }
 
   fun reef(reefLocation: AutoScoreCommandConstants.ReefLocation, reefLevel: AutoScoreCommandConstants.ReefLevel ): Command {
     val reefCommand = moveToReefCommand(reefLocation).andThen(putCoralInReef(reefLevel))
-    return runOnce({
-      currentCommand = reefCommand
-      poseSubsystem.autoscoreCurrentCommand = currentCommand
-    }).andThen(reefCommand)
+    return reefCommand
   }
 
   fun processor(): Command {
     val processorCommand = moveToProcessorCommand().andThen(scoreProcessorCommand())
-    return runOnce({
-      currentCommand = processorCommand
-      poseSubsystem.autoscoreCurrentCommand = currentCommand
-    }).andThen(processorCommand)
+    return processorCommand
   }
 
   fun cancel(): Command {
