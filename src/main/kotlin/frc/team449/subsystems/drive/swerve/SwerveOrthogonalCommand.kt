@@ -155,12 +155,12 @@ class SwerveOrthogonalCommand(
       rotRamp.calculate(
         min(
           MathUtil.applyDeadband(
-            abs(controller.rightX).pow(SwerveConstants.ROT_FILTER_ORDER),
+            abs(controller.getRawAxis(2)).pow(SwerveConstants.ROT_FILTER_ORDER),
             RobotConstants.ROTATION_DEADBAND,
             1.0
           ),
           1.0
-        ) * -sign(controller.rightX) * drive.maxRotSpeed
+        ) * -sign(controller.getRawAxis(2)) * drive.maxRotSpeed
       )
     } else {
       if (checkSnapToAngleTolerance()) headingLock = false

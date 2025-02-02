@@ -1,54 +1,45 @@
 package frc.team449.commands.autoscoreCommands
 
-import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
-import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import com.pathplanner.lib.path.GoalEndState
 import com.pathplanner.lib.path.PathConstraints
 import com.pathplanner.lib.path.PathPlannerPath
 import com.pathplanner.lib.pathfinding.LocalADStar
-import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.DriverStation.Alliance
-import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.networktables.PubSubOption
+import edu.wpi.first.networktables.StructArrayPublisher
+import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
+import frc.team449.subsystems.RobotConstants
 
 class pathfinder(val robot: Robot) : SubsystemBase(){
   var adstar = LocalADStar()
-  val constraints = PathConstraints(
-    3.0,
-    4.0,
-    Units.degreesToRadians(540.0),
-    Units.degreesToRadians(720.0)
-  )
+  var pathPub: StructArrayPublisher<Pose2d>? = null
+  var path: PathPlannerPath? = null
 
   init {
-    Pathfinding.setPathfinder(adstar)
-    AutoBuilder.configure(
-      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
-      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ),
-      RobotConfig.fromGUISettings(),
-      { DriverStation.getAlliance().get() == Alliance.Red },
-      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
-    )
+    pathPub = NetworkTableInstance.getDefault().getStructArrayTopic("/activePath", Pose2d.struct).publish(*arrayOf<PubSubOption>())
   }
 
   override fun periodic() {
-    adstar.setStartPosition(robot.poseSubsystem.pose.translation)
+    if (adstar.isNewPathAvailable) {
+      path = adstar.getCurrentPath(
+        PathConstraints(RobotConstants.MAX_LINEAR_SPEED,
+          RobotConstants.MAX_ACCEL,
+          RobotConstants.MAX_ROT_SPEED,
+          RobotConstants.ROT_RATE_LIMIT), GoalEndState(0.0, robot.poseSubsystem.pose.rotation))
+      if (path != null) {
+        pathPub?.set(path!!.pathPoses.toTypedArray<Pose2d>())
+      }
+    }
   }
 
   fun path (goalPosition: Pose2d): Command {
-    return run({
+    return runOnce({
+      println(robot.poseSubsystem.pose.translation)
+      adstar.setStartPosition(robot.poseSubsystem.pose.translation)
       adstar.setGoalPosition(goalPosition.translation)
     }).andThen(PrintCommand("goal updated"))
   }

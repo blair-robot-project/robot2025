@@ -1,13 +1,8 @@
 package frc.team449
 
-import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
-import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -30,75 +25,10 @@ class ControllerBindings(
   private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
 
   private fun robotBindings() {
-    println("configuring the drive")
-    AutoBuilder.configure(
-      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
-      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-      ),
-      RobotConfig.fromGUISettings(),
-      { DriverStation.getAlliance().get() == Alliance.Red },
-      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
-    )
 
-    println("drive configured")
-    // reef location passed in alla webappp, this is temp
-//    robot.driveController.x().onTrue(
-//      PrintCommand("moving to reef").andThen(
-//        autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-//      ).andThen(PrintCommand("reef finished"))
-//    )
-//    robot.driveController.a().onTrue(
-//      PrintCommand("move to processor button pressed").andThen(
-//      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
-//    )
-//    //on red alliance side passed in by webapp, this is temp
-//    robot.driveController.b().onTrue(
-//      PrintCommand("moving to net").andThen(
-//        autoscore.moveToNetCommand(false)
-//      ).andThen(PrintCommand("net finished"))
-//    )
-//    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
-//      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
-//        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
-//    )
+    robot.driveController.button(1).onTrue(PrintCommand("invoke path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
+    robot.driveController.button(2).onTrue(PrintCommand("invoke other path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
 
-//    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
-//    robot.driveController.y().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed))
-
-
-//    var reefPose = AutoScoreCommandConstants.testPose
-//    val constraints = PathConstraints(
-//      3.0,
-//      4.0,
-//      Units.degreesToRadians(540.0),
-//      Units.degreesToRadians(720.0)
-//    )
-//    robot.driveController.x().onTrue(
-//      AutoBuilder.pathfindToPose(
-//        reefPose,
-//        constraints,
-//        0.0,
-//        // Goal end velocity in meters/sec
-//      )
-//    )
-
-//    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
-
-//    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
-
-    /** Call robot functions you create below */
-//    driveController.a().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-//    )
-//
-//    driveController.b().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
-//    )
   }
 
   private fun nonRobotBindings() {

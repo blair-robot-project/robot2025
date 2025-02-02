@@ -58,5 +58,6 @@ class Robot : RobotBase(), Logged {
 
   val light = createLight()
 
-//  val pathfinder = pathfinder(this)
+  val pathfinder = pathfinder(this)
+
 }
