@@ -44,7 +44,7 @@ fun createSparkMax(
 
   config.encoder
     .positionConversionFactor(upr * gearing)
-    .velocityConversionFactor(upr * gearing)
+    .velocityConversionFactor(upr * gearing * 1 / 60)
 
   motor.configure(
     config,

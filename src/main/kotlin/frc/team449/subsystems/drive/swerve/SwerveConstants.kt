@@ -27,10 +27,10 @@ object SwerveConstants {
   const val TURN_ENC_CHAN_BR = 1
 
   /** Offsets for the absolute encoders in rotations. */
-  const val TURN_ENC_OFFSET_FL = 0.0
-  const val TURN_ENC_OFFSET_FR = 0.5
-  const val TURN_ENC_OFFSET_BL = 0.0
-  const val TURN_ENC_OFFSET_BR = 0.5
+  const val TURN_ENC_OFFSET_FL = -0.048002
+  const val TURN_ENC_OFFSET_FR = -0.388454
+  const val TURN_ENC_OFFSET_BL = -0.354592
+  const val TURN_ENC_OFFSET_BR = -0.030209
 
   /** Inverted */
   const val DRIVE_INVERTED = true
@@ -60,7 +60,7 @@ object SwerveConstants {
   const val DRIVE_GEARING = (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0)
   val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
   const val TURN_UPR = 2 * PI
-  val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.85) // (12 - DRIVE_KS) / DRIVE_KV
+  val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(10.85) // (12 - DRIVE_KS) / DRIVE_KV
 
   val DRIVE_SUPPLY_LIMIT = Amps.of(0.0)
   val DRIVE_FOC_CURRENT_LIMIT = Amps.of(80.0)

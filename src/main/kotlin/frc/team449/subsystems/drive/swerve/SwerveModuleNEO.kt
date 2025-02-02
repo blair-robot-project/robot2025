@@ -104,7 +104,7 @@ open class SwerveModuleNEO(
       desiredState.speedMetersPerSecond
     )
 
-    drivingMotor.setVoltage( driveFF)
+    drivingMotor.setVoltage(drivePid + driveFF)
 
     /** CONTROL direction of module */
     val turnPid = turnController.calculate(
