@@ -1,118 +1,142 @@
 package frc.team449.commands.driveAlign
 
-import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj2.command.Command
-import frc.team449.auto.AutoConstants
+import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
 import kotlin.math.PI
-import kotlin.math.hypot
+import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * @param drive The holonomic drive you want to align with
- * @param targetPose The pose you want to drive up to
- * @param xPID The profiled PID controller with constraints you want to use for fixing X error
- * @param yPID The profiled PID controller with constraints you want to use for fixing Y error
- * @param headingPID The non-Profiled PID controller you want to use for fixing rotational error
- * @param tolerance The allowed tolerance from the targetPose
  */
 class ProfiledPoseAlign(
   private val drive: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
   private val targetPose: Pose2d,
-  private val xSpeed: Double,
-  private val ySpeed: Double,
-  private val xPID: PIDController = PIDController(
-    AutoConstants.DEFAULT_X_KP,
-    0.0,
-    0.0
-  ),
-  private val yPID: PIDController = PIDController(
-    AutoConstants.DEFAULT_Y_KP,
-    0.0,
-    0.0
-  ),
-  private val headingPID: PIDController = PIDController(
-    AutoConstants.DEFAULT_ROTATION_KP,
-    0.0,
-    0.0
-  ),
-  private val xProfile: TrapezoidProfile = TrapezoidProfile(TrapezoidProfile.Constraints(RobotConstants.MAX_LINEAR_SPEED - 1.25, 2.25)),
-  private val yProfile: TrapezoidProfile = TrapezoidProfile(TrapezoidProfile.Constraints(RobotConstants.MAX_LINEAR_SPEED - 1.25, 2.25)),
-  private val tolerance: Pose2d = Pose2d(0.05, 0.05, Rotation2d(0.05)),
-  private val speedTol: Double = 0.05,
-  private val speedTolRot: Double = 0.05
+  translationSpeedLim: Double = 0.825 * RobotConstants.MAX_LINEAR_SPEED,
+  translationAccelLim: Double = 5.75,
+  headingSpeedLim: Double = PI,
+  headingAccelLim: Double = 6 * PI,
+  translationPID: Triple<Double, Double, Double> = Triple(7.5, 0.0, 0.0),
+  headingPID: Triple<Double, Double, Double> = Triple(7.5, 0.0, 0.0),
+  private val translationTolerance: Double = Units.inchesToMeters(0.75),
+  private val headingTolerance: Double = Units.degreesToRadians(1.25),
+  private val speedTol: Double = 0.10,
+  private val speedTolRot: Double = PI / 16,
+  private val ffMinRadius: Double = 0.2,
+  private val ffMaxRadius: Double = 0.8
 ) : Command() {
   init {
     addRequirements(drive)
   }
 
-  val timer = Timer()
+  private val translationController = ProfiledPIDController(
+    translationPID.first,
+    translationPID.second,
+    translationPID.third,
+    TrapezoidProfile.Constraints(translationSpeedLim, translationAccelLim)
+  )
+
+  private val headingController = ProfiledPIDController(
+    headingPID.first,
+    headingPID.second,
+    headingPID.third,
+    TrapezoidProfile.Constraints(headingSpeedLim, headingAccelLim)
+  )
 
   override fun initialize() {
-    headingPID.enableContinuousInput(-PI, PI)
+    headingController.enableContinuousInput(-PI, PI)
 
     // Set tolerances from the given pose tolerance
-    xPID.setTolerance(tolerance.x)
-    yPID.setTolerance(tolerance.y)
-    headingPID.setTolerance(tolerance.rotation.radians)
+    translationController.setTolerance(translationTolerance, speedTol)
+    headingController.setTolerance(headingTolerance, speedTolRot)
 
-    headingPID.setpoint = targetPose.rotation.radians
+    val currentPose = poseSubsystem.pose
+    val fieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(
+      drive.currentSpeeds.vxMetersPerSecond,
+      drive.currentSpeeds.vyMetersPerSecond,
+      drive.currentSpeeds.omegaRadiansPerSecond,
+      currentPose.rotation
+    )
 
-    timer.restart()
-  }
+    translationController.reset(
+      currentPose.translation.getDistance(targetPose.translation),
+      min(
+        0.0,
+        -Translation2d(fieldRelative.vxMetersPerSecond, fieldRelative.vyMetersPerSecond)
+          .rotateBy(
+            targetPose
+              .translation
+              .minus(currentPose.translation)
+              .angle
+              .unaryMinus()
+          )
+          .x
+      )
+    )
 
-  fun getTime(): Double {
-    return maxOf(xProfile.totalTime(), yProfile.totalTime(), 0.5)
+    headingController.reset(
+      currentPose.rotation.radians,
+      fieldRelative.omegaRadiansPerSecond
+    )
   }
 
   override fun execute() {
-    val currTime = timer.get()
+    val currentPose: Pose2d = poseSubsystem.pose
 
-    // Calculate the feedback for X, Y, and theta using their respective controllers
-
-    val xProfCalc = xProfile.calculate(
-      currTime,
-      TrapezoidProfile.State(targetPose.x, 0.0),
-      TrapezoidProfile.State(poseSubsystem.pose.x, xSpeed)
+    val currentDistance = currentPose.translation.getDistance(targetPose.translation)
+    val ffScaler = MathUtil.clamp(
+      (currentDistance - ffMinRadius) / (ffMaxRadius - ffMinRadius),
+      0.0,
+      1.0
     )
 
-    val yProfCalc = yProfile.calculate(
-      currTime,
-      TrapezoidProfile.State(targetPose.y, 0.0),
-      TrapezoidProfile.State(poseSubsystem.pose.y, ySpeed)
-    )
+    var driveVelocityScalar: Double = (translationController.setpoint.velocity * ffScaler + translationController.calculate(currentDistance, 0.0))
+    if (currentDistance < translationController.positionTolerance) {
+      driveVelocityScalar = 0.0
+    }
 
-    val xFeedback = xPID.calculate(poseSubsystem.pose.x, xProfCalc.position)
-    val yFeedback = yPID.calculate(poseSubsystem.pose.y, yProfCalc.position)
-    val headingFeedback = headingPID.calculate(poseSubsystem.heading.radians)
-
-    drive.set(
-      ChassisSpeeds.fromFieldRelativeSpeeds(
-        xFeedback + xProfCalc.velocity,
-        yFeedback + yProfCalc.velocity,
-        headingFeedback,
-        poseSubsystem.heading
+    val headingError = currentPose.rotation.minus(targetPose.rotation).radians
+    var headingVelocity: Double = (
+      headingController.setpoint.velocity * ffScaler + headingController.calculate(
+        currentPose.rotation.radians,
+        targetPose.rotation.radians
       )
+      )
+
+    if (abs(headingError) < headingController.positionTolerance) {
+      headingVelocity = 0.0
+    }
+
+    // 254 math
+    val driveVelocity = Pose2d(
+      0.0,
+      0.0,
+      currentPose.translation.minus(targetPose.translation).angle
+    ).transformBy(Transform2d(driveVelocityScalar, 0.0, Rotation2d())).translation
+    val speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      driveVelocity.x,
+      driveVelocity.y,
+      headingVelocity,
+      currentPose.rotation
     )
+    drive.set(speeds)
   }
 
   override fun isFinished(): Boolean {
-    val currTime = timer.get()
-
-    return xPID.atSetpoint() && yPID.atSetpoint() && headingPID.atSetpoint() &&
-      xProfile.isFinished(currTime) && yProfile.isFinished(currTime) &&
-      hypot(
-        drive.currentSpeeds.vxMetersPerSecond,
-        drive.currentSpeeds.vyMetersPerSecond
-      ) < speedTol &&
-      drive.currentSpeeds.omegaRadiansPerSecond < speedTolRot
+    return translationController.atGoal() && headingController.atGoal()
   }
 
   override fun end(interrupted: Boolean) {

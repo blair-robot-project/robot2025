@@ -1,6 +1,8 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import com.revrobotics.spark.SparkLowLevel
+import com.revrobotics.spark.SparkMax
 import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
@@ -71,9 +73,9 @@ class RobotLoop : TimedRobot() {
 
     DogLog.setOptions(
       DogLogOptions()
-        .withCaptureDs(true)
-        .withCaptureNt(true)
-        .withLogExtras(true)
+        .withCaptureDs(false)
+        .withCaptureNt(false)
+        .withLogExtras(false)
     )
 
     DogLog.setPdh(robot.powerDistribution)
@@ -82,8 +84,11 @@ class RobotLoop : TimedRobot() {
 
     URCL.start()
 
+    val motor1 = SparkMax(2, SparkLowLevel.MotorType.kBrushless)
+    val motor2 = SparkMax(62, SparkLowLevel.MotorType.kBrushless)
 
-
+    motor1.setVoltage(6.0)
+    motor2.setVoltage(6.0)
   }
 
   override fun driverStationConnected() {

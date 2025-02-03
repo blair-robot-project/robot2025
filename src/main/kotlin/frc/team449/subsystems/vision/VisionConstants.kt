@@ -23,21 +23,23 @@ object VisionConstants {
   /** How the tags are laid out on the field (their locations and ids) */
   private val TEST_TAG_LAYOUT = AprilTagFieldLayout(
     listOf(
-      AprilTag(3, Pose3d())
+      AprilTag(11, Pose3d(
+        0.0, 0.0, 1.0, Rotation3d()
+      ))
     ),
     16.4846,
     8.1026
   )
 
-//  val TAG_LAYOUT: AprilTagFieldLayout = TEST_TAG_LAYOUT
+  val TAG_LAYOUT: AprilTagFieldLayout = TEST_TAG_LAYOUT
 
   /** WPILib's AprilTagFieldLayout for the 2025 Reefscape Game */
-  val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout(Filesystem.getDeployDirectory().absolutePath + "/reef_only_2025.json")
+//  val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout(Filesystem.getDeployDirectory().absolutePath + "/reef_only_2025.json")
 
   /** Robot to Camera distance */
   val front = Transform3d(
-    Translation3d(Units.inchesToMeters(-2.0), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.0)),
-    Rotation3d(0.0, Units.degreesToRadians(-20.5), Units.degreesToRadians(20.0))
+    Translation3d(Units.inchesToMeters(0.0), Units.inchesToMeters(-13.25), Units.inchesToMeters(6.9)),
+    Rotation3d(Units.degreesToRadians(0.0), Units.degreesToRadians(-10.0), Units.degreesToRadians(-45.0))
   )
 
   val TAG_MODEL = TargetModel(
@@ -75,7 +77,7 @@ object VisionConstants {
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
     ApriltagCamera(
-      "reefCam",
+      "Spinel_02",
       TAG_LAYOUT,
       front,
       VISION_SIM

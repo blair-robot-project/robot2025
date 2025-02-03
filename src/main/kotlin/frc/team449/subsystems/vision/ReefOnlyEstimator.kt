@@ -111,15 +111,14 @@ class ReefOnlyEstimator(
     for (target: PhotonTrackedTarget in result.targets) {
       val targetPoseAmbiguity = target.poseAmbiguity
       // Make sure the target is a Fiducial target.
-      if (targetPoseAmbiguity != -1.0 && targetPoseAmbiguity < lowestAmbiguityScore &&
-        (
-          (listOf(6, 7, 8, 9, 10, 11).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
-            (listOf(17, 18, 19, 20, 21, 22).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue)
-          )
+      if (targetPoseAmbiguity != -1.0 && targetPoseAmbiguity < lowestAmbiguityScore// &&
+//        (
+//          (listOf(6, 7, 8, 9, 10, 11).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
+//            (listOf(17, 18, 19, 20, 21, 22).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue)
+//          )
       ) {
         lowestAmbiguityScore = targetPoseAmbiguity
         lowestAmbiguityTarget = target
-        print("getting here")
       }
     }
 
