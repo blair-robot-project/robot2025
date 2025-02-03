@@ -1,4 +1,5 @@
-package frc.team449.auto.choreo
+
+package frc.team449.commands
 
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
@@ -24,10 +25,10 @@ import kotlin.math.PI
  * @param resetPose Whether to reset the pose to the first pose in the trajectory
  * @param debug Whether to run on trajectory expected velocities only (no feedback control)
  */
-class ChoreoFollower(
+class PIDPoseAlign(
   private val drivetrain: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
-  private val trajectory: ChoreoTrajectory,
+  private val pose: Pose2d,
   private val xController: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
   private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
   private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
@@ -54,20 +55,12 @@ class ChoreoFollower(
     thetaController.setTolerance(poseTol.rotation.radians)
   }
 
-  private fun calculate(currPose: Pose2d, desState: ChoreoTrajectory.ChoreoState): ChassisSpeeds {
-    val xFF = desState.xVel
-    val yFF = desState.yVel
-    val angFF = desState.thetaVel
+  private fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
+    val xPID = xController.calculate(currPose.x, desState.x)
+    val yPID = yController.calculate(currPose.y, desState.y)
+    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)
 
-    val xPID = xController.calculate(currPose.x, desState.xPos)
-    val yPID = yController.calculate(currPose.y, desState.yPos)
-    val angPID = thetaController.calculate(currPose.rotation.radians, desState.theta)
-
-    return if (debug) {
-      ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, angFF, currPose.rotation)
-    } else {
-      ChassisSpeeds.fromFieldRelativeSpeeds(xFF + xPID, yFF + yPID, angFF + angPID, currPose.rotation)
-    }
+    return ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, currPose.rotation)
   }
 
   private fun allControllersAtReference(): Boolean {
