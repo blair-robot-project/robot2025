@@ -34,7 +34,6 @@ class RobotLoop : TimedRobot(), Logged {
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
   @Log.NT
-  private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
@@ -158,7 +157,7 @@ class RobotLoop : TimedRobot(), Logged {
       println("command received")
       webCom?.isDonePublish?.set(false)
 
-      var command = autoscore.processor()
+      val command : Command
       //get the value
       when (webCom?.command) {
         "processor" -> command = autoscore.processor()
