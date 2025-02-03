@@ -14,6 +14,7 @@ import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.vision.PoseSubsystem
+import java.util.Optional
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.min
@@ -27,15 +28,16 @@ class SimpleReefAlign(
   translationSpeedLim: Double = 0.825 * RobotConstants.MAX_LINEAR_SPEED,
   translationAccelLim: Double = 5.75,
   headingSpeedLim: Double = PI,
-  headingAccelLim: Double = 6 * PI,
-  translationPID: Triple<Double, Double, Double> = Triple(7.5, 0.0, 0.0),
+  headingAccelLim: Double = 16 * PI,
+  translationPID: Triple<Double, Double, Double> = Triple(8.0, 0.0, 0.0),
   headingPID: Triple<Double, Double, Double> = Triple(7.5, 0.0, 0.0),
-  private val translationTolerance: Double = Units.inchesToMeters(0.75),
-  private val headingTolerance: Double = Units.degreesToRadians(1.25),
+  private val translationTolerance: Double = Units.inchesToMeters(1.0),
+  private val headingTolerance: Double = Units.degreesToRadians(1.5),
   private val speedTol: Double = 0.10,
   private val speedTolRot: Double = PI / 16,
   private val ffMinRadius: Double = 0.2,
-  private val ffMaxRadius: Double = 0.8
+  private val ffMaxRadius: Double = 0.65,
+  private val leftOrRight: Optional<FieldConstants.ReefSide> = Optional.empty()
 ) : Command() {
   init {
     addRequirements(drive)
@@ -64,8 +66,17 @@ class SimpleReefAlign(
     translationController.setTolerance(translationTolerance, speedTol)
     headingController.setTolerance(headingTolerance, speedTolRot)
 
-    targetPose = if (FieldConstants.REEF_LOCATIONS.isNotEmpty()) poseSubsystem.pose.nearest(FieldConstants.REEF_LOCATIONS) else Pose2d()
     val currentPose = poseSubsystem.pose
+
+    if (leftOrRight.isEmpty) {
+      targetPose = if (FieldConstants.REEF_LOCATIONS.isNotEmpty()) currentPose.nearest(FieldConstants.REEF_LOCATIONS) else Pose2d()
+    } else {
+      val closestReef = if (FieldConstants.REEF_LOCATIONS.isNotEmpty()) currentPose.nearest(FieldConstants.REEF_CENTER_LOCATIONS) else Pose2d()
+      val index = FieldConstants.REEF_CENTER_LOCATIONS.indexOf(closestReef)
+
+      targetPose = FieldConstants.REEF_LOCATIONS[2 * index + if (leftOrRight.get() == FieldConstants.ReefSide.LEFT) 0 else 1]
+    }
+
     val fieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(
       drive.currentSpeeds.vxMetersPerSecond,
       drive.currentSpeeds.vyMetersPerSecond,

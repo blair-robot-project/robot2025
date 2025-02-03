@@ -38,9 +38,9 @@ object SuperstructureGoal {
   )
 
   val SUBSTATION_INTAKE = SuperstructureState(
-    Degrees.of(40.0),
-    Meters.of(0.10),
     Degrees.of(60.0),
+    Meters.of(0.0),
+    Degrees.of(180.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

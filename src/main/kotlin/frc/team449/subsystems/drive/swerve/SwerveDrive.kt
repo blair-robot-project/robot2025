@@ -1,7 +1,6 @@
 package frc.team449.subsystems.drive.swerve
 
 import dev.doglog.DogLog
-import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -23,7 +22,6 @@ import kotlin.math.hypot
  * @param maxRotSpeed The maximum rotation speed of the chassis.
  * @param field The SmartDashboard [Field2d] widget that shows the robot's pose.
  */
-@Logged
 open class SwerveDrive(
   val modules: List<SwerveModule>,
   var maxLinearSpeed: Double,

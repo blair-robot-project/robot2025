@@ -3,16 +3,14 @@ package frc.team449
 import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
-import frc.team449.commands.driveAlign.SimpleReefAlign
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -47,7 +45,10 @@ class ControllerBindings(
   private fun nonRobotBindings() {
     // slowDrive()
 
-    if (RobotBase.isSimulation()) resetOdometrySim()
+    /** NOTE: If you want to see simulated vision convergence times with this function, go to simulationPeriodic in
+     * RobotBase and change the passed in pose to it.simulationPeriodic to robot.drive.odometryPose
+     */
+//    if (RobotBase.isSimulation()) resetOdometrySim()
 
     resetGyro()
   }
@@ -58,31 +59,27 @@ class ControllerBindings(
     )
   }
 
-//  private fun score_l1() {
-//    driveController.a().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-//        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-//    )
-//  }
+  private fun score_l1() {
+    driveController.a().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+    )
+  }
 
   private fun score_l2() {
     driveController.x().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
   private fun score_l3() {
     driveController.b().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
   private fun score_l4() {
     driveController.y().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
@@ -153,58 +150,46 @@ class ControllerBindings(
   }
 
   /** Characterization functions */
-  private fun characterizationExample() {
-    /** Example
-     *
-     val exampleSubsystemRoutine = SysIdRoutine(
-     SysIdRoutine.Config(
-     Volts.of(0.5).per(Seconds.of(1.0)),
-     Volts.of(3.0),
-     Seconds.of(10.0)
-     ) { state -> SignalLogger.writeString("state", state.toString()) },
-     Mechanism(
-     { voltage: Measure<Voltage> ->
-     run { robot.shooter.setVoltage(voltage.`in`(Volts)) }
-     },
-     null,
-     robot.shooter,
-     "shooter"
-     )
-     )
+  private fun driveCharacterization() {
+    val driveRoutine = SysIdRoutine(
+      SysIdRoutine.Config(),
+      Mechanism(
+        { voltage: Voltage -> robot.drive.setVoltage(voltage.`in`(Volts)) },
+        null,
+        robot.drive
+      )
+    )
 
-     // Quasistatic Forwards
-     driveController.povUp().onTrue(
-     exampleSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
-     )
+    // Quasistatic Forwards
+    driveController.povUp().onTrue(
+      driveRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+    )
 
-     // Quasistatic Reverse
-     driveController.povDown().onTrue(
-     exampleSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
-     )
+    // Quasistatic Reverse
+    driveController.povDown().onTrue(
+      driveRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+    )
 
-     // Dynamic Forwards
-     driveController.povRight().onTrue(
-     exampleSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
-     )
+    // Dynamic Forwards
+    driveController.povRight().onTrue(
+      driveRoutine.dynamic(SysIdRoutine.Direction.kForward)
+    )
 
-     // Dynamic Reverse
-     driveController.povLeft().onTrue(
-     exampleSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
-     )
-     */
+    // Dynamic Reverse
+    driveController.povLeft().onTrue(
+      driveRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+    )
   }
 
   private fun elevatorCharacterizaton() {
-    val elevatorSubsystemRoutine = SysIdRoutine(
+    val elevatorRoutine = SysIdRoutine(
       SysIdRoutine.Config(
         Volts.of(0.5).per(Second),
-        Volts.of(3.0),
+        Volts.of(2.0),
         Seconds.of(10.0)
       ) { state -> SignalLogger.writeString("state", state.toString()) },
-      SysIdRoutine.Mechanism(
-        { voltage: Voltage ->
-          run { robot.elevator.setVoltage(voltage.`in`(Volts)) }
-        },
+      Mechanism(
+        { voltage: Voltage -> robot.elevator.setVoltage(voltage.`in`(Volts)) },
         null,
         robot.elevator,
         "elevator"
@@ -212,33 +197,31 @@ class ControllerBindings(
     )
 
     driveController.povUp().onTrue(
-      elevatorSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+      elevatorRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
     driveController.povDown().onTrue(
-      elevatorSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+      elevatorRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
     driveController.povRight().onTrue(
-      elevatorSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
+      elevatorRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
     driveController.povLeft().onTrue(
-      elevatorSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+      elevatorRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
 
   fun pivotCharacterizaton() {
-    val pivotSubsystemRoutine = SysIdRoutine(
+    val pivotRoutine = SysIdRoutine(
       SysIdRoutine.Config(
         Volts.of(0.5).per(Second),
         Volts.of(3.0),
         Seconds.of(10.0)
       ) { state -> SignalLogger.writeString("state", state.toString()) },
-      SysIdRoutine.Mechanism(
-        { voltage: Voltage ->
-          run { robot.pivot.setVoltage(voltage.`in`(Volts)) }
-        },
+      Mechanism(
+        { voltage: Voltage -> robot.pivot.setVoltage(voltage.`in`(Volts)) },
         null,
         robot.pivot,
         "elevator"
@@ -246,19 +229,19 @@ class ControllerBindings(
     )
 
     driveController.povUp().onTrue(
-      pivotSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+      pivotRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
     driveController.povDown().onTrue(
-      pivotSubsystemRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+      pivotRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
     driveController.povRight().onTrue(
-      pivotSubsystemRoutine.dynamic(SysIdRoutine.Direction.kForward)
+      pivotRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
     driveController.povLeft().onTrue(
-      pivotSubsystemRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+      pivotRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
 

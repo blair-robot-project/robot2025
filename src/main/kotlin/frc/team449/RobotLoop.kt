@@ -167,7 +167,7 @@ class RobotLoop : TimedRobot() {
     robot.drive as SwerveSim
 
     VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
+      it.simulationPeriodic(robot.poseSubsystem.pose)
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose

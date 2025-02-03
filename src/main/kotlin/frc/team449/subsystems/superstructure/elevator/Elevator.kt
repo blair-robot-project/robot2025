@@ -6,7 +6,6 @@ import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
-import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
@@ -21,7 +20,6 @@ import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
-@Logged
 open class Elevator(
   private val motor: TalonFX
 ) : SubsystemBase() {

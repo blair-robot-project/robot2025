@@ -18,8 +18,11 @@ class SuperstructureManager(
   private val drive: SwerveDrive
 ) {
 
+  var lastRequestedGoal = SuperstructureGoal.STOW
+
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
+      .andThen(InstantCommand({ lastRequestedGoal = goal }))
       .andThen(
         ConditionalCommand(
           // if extending
