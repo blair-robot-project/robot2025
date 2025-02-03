@@ -74,12 +74,12 @@ object VisionConstants {
 
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
-    ApriltagCamera(
-      "reefCam",
-      TAG_LAYOUT,
-      front,
-      VISION_SIM
-    )
+//    ApriltagCamera(
+//      "reefCam",
+//      TAG_LAYOUT,
+//      front,
+//      VISION_SIM
+//    )
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(

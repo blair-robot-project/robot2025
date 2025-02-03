@@ -10,13 +10,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Commands
 import frc.team449.Robot
-import frc.team449.subsystems.superstructure.SuperstructureGoal
-//import frc.team449.subsystems.superstructure.intake.Intake
+// import frc.team449.subsystems.superstructure.SuperstructureGoal
+// import frc.team449.subsystems.superstructure.intake.Intake
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.math.PI
 
 open class Routines(
-  val robot: Robot) {
+  val robot: Robot
+) {
   private val xController: PIDController
     get() = PIDController(10.0, 0.0, 0.0)
   private val yController: PIDController
@@ -39,7 +40,7 @@ open class Routines(
     )
     val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, robot.poseSubsystem.heading)
     // Apply the generated speeds
-    robot.drive.driveRobotRelative(newSpeeds)
+    robot.drive.set(newSpeeds)
   }
 
   val autoFactory = AutoFactory(
@@ -64,7 +65,8 @@ open class Routines(
       Commands.sequence(
         rTaxiTrajectory.resetOdometry(),
         rTaxiTrajectory.cmd(),
-        robot.drive.driveStop())
+        robot.drive.driveStop()
+      )
     )
     return rTaxi
   }
@@ -92,10 +94,10 @@ open class Routines(
         reefETrajectory.resetOdometry(),
         reefETrajectory.cmd(),
         robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-        robot.intake.outtakeCoral()
+      /*  robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+        robot.intake.outtakeCoral()*/
 
-        )
+      )
     )
     return l1E
   }
@@ -107,17 +109,15 @@ open class Routines(
     F.active().onTrue(
       Commands.sequence(
         reefFTrajectory.resetOdometry(),
-          reefFTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
-          robot.intake.outtakeCoral()
+        reefFTrajectory.cmd(),
+        robot.drive.driveStop(),
+         /* robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
+          robot.intake.outtakeCoral()*/
 
       )
     )
     return F
   }
-
-
 
   // coral at l4 one on reef G
   fun reefG(): AutoRoutine {
@@ -127,9 +127,9 @@ open class Routines(
       Commands.sequence(
         reefGTrajectory.resetOdometry(),
         reefGTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
-          robot.intake.outtakeCoral()
+        robot.drive.driveStop(),
+        /*  robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
+          robot.intake.outtakeCoral()*/
       )
     )
     return g
@@ -142,12 +142,12 @@ open class Routines(
     J.active().onTrue(
       Commands.sequence(
         reefJTrajectory.resetOdometry(),
-          reefJTrajectory.cmd(),
+        reefJTrajectory.cmd(),
         robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-        robot.intake.intakeCoral()
+       /* robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+        robot.intake.intakeCoral()*/
 
-        )
+      )
     )
     return J
   }
@@ -163,27 +163,30 @@ open class Routines(
       // go to reef e and score l1
       Commands.sequence(
         reefETrajectory.resetOdometry(),
-          reefETrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-          robot.intake.outtakeCoral(),
+        reefETrajectory.cmd(),
+        robot.drive.driveStop(),
+        Commands.waitSeconds(1.2),
+        /*  robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+          robot.intake.outtakeCoral()*/
 
-        //go to the coral station and intake coral
+        // go to the coral station and intake coral
 
-            reefEtoStationTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
-          robot.intake.intakeCoral(),
+        reefEtoStationTrajectory.cmd(),
+        robot.drive.driveStop(),
+        Commands.waitSeconds(1.2),
 
-        //go to reef d from station and score l4
+          /* robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+           robot.intake.intakeCoral(),*/
 
-            stationToDTrajectory.cmd(),
-            robot.drive.driveStop(),
-            robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
-            robot.intake.outtakeCoral(),
+        // go to reef d from station and score l4
 
-        )
+        stationToDTrajectory.cmd(),
+        robot.drive.driveStop(),
+         /*   robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
+            robot.intake.outtakeCoral(),*/
+
       )
+    )
 
     return E_D
   }
@@ -198,24 +201,27 @@ open class Routines(
       Commands.sequence(
         reefJTrajectory.resetOdometry(),
 
-          reefJTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-          robot.intake.outtakeCoral(),
+        reefJTrajectory.cmd(),
+        robot.drive.driveStop(),
+        Commands.waitSeconds(1.2),
 
-          reefJtoStationTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
-          robot.intake.intakeAlgae(),
+          /*robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+          robot.intake.outtakeCoral(),*/
 
-          stationToLTrajectory.cmd(),
-          robot.drive.driveStop(),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
-          robot.intake.outtakeCoral()
+        reefJtoStationTrajectory.cmd(),
+        robot.drive.driveStop(),
+        Commands.waitSeconds(1.2),
 
+          /* robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+           robot.intake.intakeAlgae(),*/
 
-        )
+        stationToLTrajectory.cmd(),
+        robot.drive.driveStop(),
+         /* robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
+          robot.intake.outtakeCoral()*/
+
       )
+    )
 
     return J_L
   }
@@ -230,22 +236,27 @@ open class Routines(
         reefJTrajectory.resetOdometry(),
         reefJTrajectory.cmd(),
         robot.drive.driveStop(),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
-        robot.intake.outtakeCoral(),
+        Commands.waitSeconds(1.2),
 
-          reefJtoStationTrajectory.cmd(),
-          robot.drive.driveStop(),
-         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
-         robot.intake.intakeCoral(),
+          /* robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE),
+           robot.intake.outtakeCoral(),*/
 
+        reefJtoStationTrajectory.cmd(),
+        robot.drive.driveStop(),
+        Commands.waitSeconds(1.2),
 
-          stationToKTrajectory.cmd(),
-          robot.drive.driveStop(),
-         robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
-        robot.intake.outtakeCoral()
+          /*   robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+             robot.intake.intakeCoral(),*/
 
-        )
+        stationToKTrajectory.cmd(),
+        robot.drive.driveStop(),
+        Commands.waitSeconds(1.2),
+
+        /*robot.superstructureManager.requestGoal(SuperstructureGoal.L4_fromStation),
+       robot.intake.outtakeCoral()*/
+
       )
+    )
 
     return J_K
   }
@@ -264,4 +275,3 @@ open class Routines(
     autoChooser.addRoutine("l1 J & l4 K", this::reefJK)
   }
 }
-

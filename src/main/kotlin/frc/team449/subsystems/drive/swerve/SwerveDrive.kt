@@ -1,5 +1,7 @@
 package frc.team449.subsystems.drive.swerve
 
+import choreo.trajectory.SwerveSample
+import dev.doglog.DogLog
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -24,7 +26,7 @@ import kotlin.math.hypot
  * @param maxRotSpeed The maximum rotation speed of the chassis.
  * @param field The SmartDashboard [Field2d] widget that shows the robot's pose.
  */
-@Logged
+
 open class SwerveDrive(
   val modules: List<SwerveModule>,
   var maxLinearSpeed: Double,
@@ -36,7 +38,6 @@ open class SwerveDrive(
 
   var pose: Pose2d = Pose2d()
 
-  var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
@@ -70,21 +71,6 @@ open class SwerveDrive(
       module.update()
   }
 
-  fun followTrajectory(sample: SwerveSample) {
-    // Get the current pose of the robot
-
-    // Generate the next speeds for the robot
-    val speeds = ChassisSpeeds(
-      sample.vx,
-      sample.vy,
-      sample.omega
-    )
-
-    val newspeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading)
-
-    // Apply the generated speeds
-    driveFieldRelative(newspeeds)
-  }
 
   fun setVoltage(volts: Double) {
     modules.forEach {
