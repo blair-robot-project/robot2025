@@ -46,7 +46,7 @@ class ControllerBindings(
     )
 
     println("drive configured")
-    // temp
+    //temp
 
     // reef location passed in alla webappp, this is temp
     robot.driveController.x().onTrue(
@@ -63,7 +63,7 @@ class ControllerBindings(
         autoscore.currentCommand.schedule()
       })
     )
-    // on red alliance side passed in by webapp, this is temp
+    //on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
       runOnce({
         autoscore.currentCommand = autoscore.net(true)

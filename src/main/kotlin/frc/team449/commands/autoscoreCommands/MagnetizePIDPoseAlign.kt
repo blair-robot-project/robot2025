@@ -73,7 +73,6 @@ class MagnetizePIDPoseAlign(
   private var desiredVel = doubleArrayOf(0.0, 0.0, 0.0)
 
   private var magnetizationPower = 5.0
-
   // Time in seconds until magnetization will stop if the driver is opposing magnetization
   private var magnetizationStopTime = 1.2
   private var timeUntilMagnetizationStop = magnetizationStopTime
@@ -219,13 +218,9 @@ class MagnetizePIDPoseAlign(
         )
     }
 
-    var angle = abs(
-      atan2(
-        controllerDesVel.vxMetersPerSecond,
-        controllerDesVel.vyMetersPerSecond
-      ) -
-        atan2(pose.translation.x, pose.translation.y)
-    )
+    var angle = abs(atan2(controllerDesVel.vxMetersPerSecond,
+      controllerDesVel.vyMetersPerSecond) -
+      atan2(pose.translation.x, pose.translation.y))
     if (angle > Math.PI) {
       angle = 2 * Math.PI - angle
     }
@@ -245,10 +240,8 @@ class MagnetizePIDPoseAlign(
     // Values need to be adjusted I haven't tested yet
 
     //    pid controller from     pose rn    to  pose     controller given speeds for chassis speeds
-    drivetrain.set(
-      calculate(poseSubsystem.pose, pose) + controllerDesVel *
-        (magnetizationPower * (poseSubsystem.pose.translation.getDistance(pose.translation) / 10.0))
-    )
+    drivetrain.set(calculate(poseSubsystem.pose, pose) + controllerDesVel *
+      (magnetizationPower * (poseSubsystem.pose.translation.getDistance(pose.translation) / 10.0)))
     // constant                     pose rn                 distance to     desired pose
   }
 
