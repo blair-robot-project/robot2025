@@ -39,6 +39,7 @@ class PoseSubsystem(
   private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
   private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
   poseTol: Pose2d = Pose2d(0.035, 0.035, Rotation2d(0.035)),
+  private val timeout: Double = 4.2,
   private val fieldOriented: () -> Boolean = { true },
 ) : SubsystemBase() {
 

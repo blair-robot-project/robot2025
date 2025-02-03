@@ -8,6 +8,7 @@ import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
 import frc.team449.auto.choreo.MagnetizePIDPoseAlign
@@ -86,7 +87,7 @@ class AutoScoreCommands(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
     println("reef command called")
-    val reefNumericalLocation = reefLocation.ordinal + 1
+    var reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
     // var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
     var reefPose = AutoScoreCommandConstants.reef1PoseRed
