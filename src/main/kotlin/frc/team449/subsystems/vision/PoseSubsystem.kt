@@ -83,7 +83,7 @@ class PoseSubsystem(
   private var magDecConstant = 0.0004
   private val maxMagPower = 20.0
   //placeholder extremely big number
-  private var lastDistance = 1000.0
+  private var lastDistance = 0.0
   val autoDistance = 0.5
   lateinit var autoscoreCurrentCommand : Command
 
@@ -145,6 +145,7 @@ class PoseSubsystem(
     currentControllerPower = 15.0
     magMultiply = 1.00
     magDecConstant = 0.0004
+    lastDistance = 0.0
   }
 
   fun edemPathMag(desVel: ChassisSpeeds) {
@@ -155,12 +156,32 @@ class PoseSubsystem(
     val ctrlX = -controller.leftY
     val ctrlY = -controller.leftX
     val controllerMag = sqrt(ctrlX.pow(2) + ctrlY.pow(2))
+    if(distance > lastDistance) {
+      magMultiply += magIncConstant
+    } else if(distance < lastDistance) {
+      magMultiply -= magDecConstant
+      magDecConstant += 0.01
+    }
 
-    if(distance <= autoDistance || controllerMag < 0.1) {
+    currentControllerPower = MathUtil.clamp(currentControllerPower, 0.0, maxMagPower)
+    magMultiply = MathUtil.clamp(magMultiply, 0.0, 2.0)
+
+    currentControllerPower *= magMultiply
+
+    if(controllerMag > 0.75) {
+      currentControllerPower = MathUtil.clamp(currentControllerPower, 15.0, maxMagPower)
+      magMultiply += 0.1
+    }
+
+    //this increases the users power if they are moving a lot
+    currentControllerPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
+
+    if(distance <= autoDistance || controllerMag < 0.1 || currentControllerPower < 3) {
       if(distance <= autoDistance) {
         resetMagVars()
       } else {
-        magMultiply -= 0.00001
+        currentControllerPower -= 0.1
+        magMultiply -= 0.05
       }
       drive.set(desVel)
     } else {
@@ -223,39 +244,25 @@ class PoseSubsystem(
         rotScaled,
         heading
       )
-
-      //this increases the users power if they are moving a lot
-      currentControllerPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
       //this increases the users power based on how much it is going against pathmag
       if(controllerSpeeds.vxMetersPerSecond < 0 != desVel.vxMetersPerSecond < 0) {
         currentControllerPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
       } else if(controllerSpeeds.vyMetersPerSecond < 0 != desVel.vyMetersPerSecond < 0) {
         currentControllerPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
       }
+
       controllerSpeeds *= currentControllerPower
       val desVelAdjustedSpeeds = desVel / (16 / ( 1 + exp(-(currentControllerPower-15)/2) ) )
-
 
       val combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
       combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
       combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -drive.maxRotSpeed, drive.maxRotSpeed)
 
-
       drive.set(combinedChassisSpeeds)
 
     }
-    if(distance > lastDistance) {
-      magMultiply += magIncConstant
-    } else if(distance < lastDistance) {
-      magMultiply -= magDecConstant
-      magDecConstant += 0.00001
-    }
 
-    currentControllerPower = MathUtil.clamp(currentControllerPower, 0.0, maxMagPower)
-    magMultiply = MathUtil.clamp(magMultiply, 0.0, 2.0)
-
-    currentControllerPower *= magMultiply
 
     lastDistance = distance
   }

@@ -19,8 +19,6 @@ import frc.team449.subsystems.vision.PoseSubsystem
 class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command) : Command() {
 
   private val currentCommand = command
-  private val timeoutTime = 10.0
-  private var timeoutTimer = timeoutTime
   private val autodistanceTime = 1.0
   private var autodistanceTimer = autodistanceTime
 
@@ -33,14 +31,13 @@ class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command
   }
 
   private fun resetAndEndCommand() {
-    timeoutTimer = timeoutTime
     autodistanceTimer = autodistanceTime
     currentCommand.end(true)
     currentCommand.cancel()
   }
 
   override fun isFinished(): Boolean {
-    if(timeoutTimer < 0 || autodistanceTimer < 0) {
+    if(autodistanceTimer < 0) {
       println("autoscore command finished")
       resetAndEndCommand()
       return true
@@ -48,10 +45,6 @@ class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command
     if (poseSubsystem.pose.translation.getDistance(poseSubsystem.autoscoreCommandPose.translation) < poseSubsystem.autoDistance) {
       autodistanceTimer -= 0.05
       //prevent command from timing out if we're close
-      timeoutTimer = timeoutTime
-    }
-    if (currentCommand.isFinished) {
-      timeoutTimer -= 0.05
     }
     return false
   }
