@@ -200,9 +200,9 @@ class PoseSubsystem(
 
       run {
         val currentAngle = MathUtil.angleModulus(this.pose.rotation.radians)
-        val omegaRadPerSec = pidController.calculate(currentAngle, desiredDisplacementRad)
+        var omegaRadPerSec = pidController.calculate(currentAngle, desiredDisplacementRad)
+        omegaRadPerSec = MathUtil.clamp(omegaRadPerSec, -drive.maxRotSpeed, drive.maxRotSpeed)
         drive.set(ChassisSpeeds.fromRobotRelativeSpeeds(drive.desiredSpeeds.vxMetersPerSecond, drive.desiredSpeeds.vyMetersPerSecond, omegaRadPerSec, ahrs.heading))
-        //need to make sure max rot speed isnt exceeded
       }
     }.until {
       pidController.atSetpoint()
