@@ -1,14 +1,17 @@
 package frc.team449.subsystems.drive.swerve
 
+import choreo.trajectory.SwerveSample
 import dev.doglog.DogLog
-import edu.wpi.first.epilogue.Logged
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
@@ -23,7 +26,7 @@ import kotlin.math.hypot
  * @param maxRotSpeed The maximum rotation speed of the chassis.
  * @param field The SmartDashboard [Field2d] widget that shows the robot's pose.
  */
-@Logged
+
 open class SwerveDrive(
   val modules: List<SwerveModule>,
   var maxLinearSpeed: Double,
@@ -32,6 +35,9 @@ open class SwerveDrive(
   protected val field: Field2d,
   val maxModuleSpeed: Double
 ) : SubsystemBase() {
+
+  var pose: Pose2d = Pose2d()
+
 
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
@@ -65,16 +71,22 @@ open class SwerveDrive(
       module.update()
   }
 
+
   fun setVoltage(volts: Double) {
     modules.forEach {
       it.setVoltage(volts)
     }
   }
 
-  fun getModuleVel(): Double {
-    var totalVel = 0.0
-    modules.forEach { totalVel += it.state.speedMetersPerSecond }
-    return totalVel / modules.size
+  /** Stops the robot's drive. */
+  fun stop() {
+    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
+  }
+
+  fun driveStop(): Command {
+    return runOnce {
+      set(ChassisSpeeds(0.0, 0.0, 0.0))
+    }
   }
 
   override fun periodic() {
@@ -89,11 +101,6 @@ open class SwerveDrive(
     )
 
     logData()
-  }
-
-  /** Stops the robot's drive. */
-  fun stop() {
-    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 
   /** @return An array of [SwerveModulePosition] for each module, containing distance and angle. */
