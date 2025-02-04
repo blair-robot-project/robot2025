@@ -78,7 +78,7 @@ class PoseSubsystem(
 
   //edem mag vars
   private var currentControllerPower = 15.0
-  private var magMultiply = 1.00
+  private var controllerMult = 1.00
   private val magIncConstant = 0.001
   private var magDecConstant = 0.0004
   private val maxMagPower = 20.0
@@ -143,7 +143,7 @@ class PoseSubsystem(
 
   fun resetMagVars() {
     currentControllerPower = 15.0
-    magMultiply = 1.00
+    controllerMult = 1.00
     magDecConstant = 0.0004
     lastDistance = 0.0
   }
@@ -156,32 +156,34 @@ class PoseSubsystem(
     val ctrlX = -controller.leftY
     val ctrlY = -controller.leftX
     val controllerMag = sqrt(ctrlX.pow(2) + ctrlY.pow(2))
+
     if(distance > lastDistance) {
-      magMultiply += magIncConstant
+      controllerMult += magIncConstant
     } else if(distance < lastDistance) {
-      magMultiply -= magDecConstant
+      controllerMult -= magDecConstant
       magDecConstant += 0.01
     }
 
-    currentControllerPower = MathUtil.clamp(currentControllerPower, 0.0, maxMagPower)
-    magMultiply = MathUtil.clamp(magMultiply, 0.0, 2.0)
+    controllerMult = MathUtil.clamp(controllerMult, 0.5, 2.0)
 
-    currentControllerPower *= magMultiply
+    currentControllerPower *= controllerMult
 
     if(controllerMag > 0.75) {
       currentControllerPower = MathUtil.clamp(currentControllerPower, 15.0, maxMagPower)
-      magMultiply += 0.1
+      controllerMult += 0.1
     }
 
     //this increases the users power if they are moving a lot
     currentControllerPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
+
+    currentControllerPower = MathUtil.clamp(currentControllerPower, 1.0, maxMagPower)
 
     if(distance <= autoDistance || controllerMag < 0.1 || currentControllerPower < 3) {
       if(distance <= autoDistance) {
         resetMagVars()
       } else {
         currentControllerPower -= 0.1
-        magMultiply -= 0.05
+        controllerMult -= 0.05
       }
       drive.set(desVel)
     } else {
@@ -263,7 +265,7 @@ class PoseSubsystem(
 
     }
 
-
+    println(controllerMult)
     lastDistance = distance
   }
 

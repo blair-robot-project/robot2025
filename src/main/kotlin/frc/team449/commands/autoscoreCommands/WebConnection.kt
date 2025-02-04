@@ -1,21 +1,17 @@
 package frc.team449.commands.autoscoreCommands
 
 import edu.wpi.first.networktables.NetworkTableInstance
-import edu.wpi.first.networktables.Publisher
 import edu.wpi.first.networktables.StringPublisher
 import edu.wpi.first.networktables.StringSubscriber
-import edu.wpi.first.networktables.TimestampedString
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.InstantCommand
 
 class WebConnection : Runnable {
   private val instance = NetworkTableInstance.getDefault()
   private val webComTable = instance.getTable("webcom")
   private val allianceTopic = webComTable.getStringTopic("Alliance")
   private val isDoneTopic = webComTable.getBooleanTopic("isDone")
-  val commandSubscriber : StringSubscriber
-  val commandPublisher : StringPublisher
+  val commandSubscriber: StringSubscriber
+  val commandPublisher: StringPublisher
   val isDonePublish = isDoneTopic.publish()
   private val alliancePublish = allianceTopic.publish()
   var command = "none"
@@ -26,13 +22,13 @@ class WebConnection : Runnable {
     val alliance = if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) "Red" else "Blue"
     alliancePublish.set(alliance)
     isDonePublish.set(true)
-    //have to set command here because topics will not be created yet.
+    // have to set command here because topics will not be created yet.
     commandSubscriber = webComTable.getStringTopic("Command").subscribe("none")
     commandPublisher = webComTable.getStringTopic("Command").publish()
     commandPublisher.set("none")
   }
 
-  fun closeServer () {
+  fun closeServer() {
     instance.stopServer()
     instance.close()
   }
@@ -41,5 +37,4 @@ class WebConnection : Runnable {
     commandPublisher.set("none")
     isDonePublish.set(true)
   }
-
 }
