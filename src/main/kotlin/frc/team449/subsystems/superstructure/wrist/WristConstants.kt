@@ -1,9 +1,10 @@
-package frc.team449.subsystems.wrist
+package frc.team449.subsystems.superstructure.wrist
 
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
+import edu.wpi.first.wpilibj.Encoder
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj.util.Color8Bit
 import kotlin.math.PI
@@ -35,6 +36,18 @@ object WristConstants {
   const val KI = 0.0
   const val KD = 0.0
 
-  const val CRUISE_VEL = 1.0
-  const val MAX_ACCEL = 1.0
+  val CRUISE_VEL = RadiansPerSecond.of(2 * PI)
+  val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
+
+  val RESET_ENC_LIMIT = Degrees.of(0.5)
+
+  /** Encoder Values */
+  const val ABS_ENC_DIO_PORT = 1
+  const val ABS_OFFSET = 0.0
+  const val ENC_INVERTED = false
+  val ABS_RANGE = Pair(-0.25, 0.75)
+  const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
+  val QUAD_ENCODER = Encoder(2, 3)
+  const val ENC_CPR = 2048
+  const val SAMPLES_TO_AVERAGE = 127
 }

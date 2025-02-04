@@ -34,7 +34,8 @@ class ChoreoFollower(
   poseTol: Pose2d = Pose2d(0.035, 0.035, Rotation2d(0.035)),
   private val timeout: Double = 0.65,
   private val resetPose: Boolean = false,
-  private val debug: Boolean = false
+  private val debug: Boolean = false,
+  private val stopDriveAfterTraj: Boolean = true
 ) : Command() {
 
   private val timer = Timer()
@@ -101,6 +102,9 @@ class ChoreoFollower(
   override fun end(interrupted: Boolean) {
     timer.stop()
     timer.reset()
-    drivetrain.stop()
+
+    if (stopDriveAfterTraj) {
+      drivetrain.stop()
+    }
   }
 }

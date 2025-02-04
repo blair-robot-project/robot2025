@@ -1,8 +1,8 @@
-package frc.team449.subsystems.pivot
+package frc.team449.subsystems.superstructure.pivot
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
-import frc.team449.subsystems.elevator.Elevator
-import frc.team449.subsystems.elevator.ElevatorConstants
+import frc.team449.subsystems.superstructure.elevator.Elevator
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import kotlin.math.cos
 import kotlin.math.sign
 
@@ -12,7 +12,6 @@ class PivotFeedForward(
   private val elevator: Elevator,
   private val ks: Double,
   private val kv: Double,
-  private val ka: Double,
   kgRetracted: Double,
   kgExtended: Double
 ) {
@@ -37,7 +36,6 @@ class PivotFeedForward(
         elevator,
         PivotConstants.KS,
         PivotConstants.KV,
-        PivotConstants.KA,
         PivotConstants.KG_MIN,
         PivotConstants.KG_MAX,
       )

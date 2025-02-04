@@ -1,20 +1,26 @@
-package frc.team449.subsystems.pivot
+package frc.team449.subsystems.superstructure.pivot
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import edu.wpi.first.units.Units.Radians
-import edu.wpi.first.util.sendable.SendableBuilder
+import dev.doglog.DogLog
+import edu.wpi.first.units.Units.*
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.system.encoder.AbsoluteEncoder
+import frc.team449.system.encoder.QuadEncoder
+import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
 class Pivot(
-  private val motor: TalonFX
+  private val motor: TalonFX,
+  val absoluteEncoder: AbsoluteEncoder,
+  val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
 
   val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -40,6 +46,8 @@ class Pivot(
     SuperstructureGoal.STOW.pivot.`in`(Radians)
   )
 
+  private val isReal = RobotBase.isReal()
+
   // last request is sticky
   fun setPosition(position: Double): Command {
     return this.run {
@@ -60,6 +68,10 @@ class Pivot(
     return runOnce { motor.setVoltage(3.0) }
   }
 
+  fun setVoltage(voltage: Double): Command {
+    return runOnce { motor.setVoltage(voltage) }
+  }
+
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
@@ -68,22 +80,29 @@ class Pivot(
     return (abs(positionSupplier.get() - request.Position) < PivotConstants.TOLERANCE)
   }
 
-  override fun periodic() {}
+  override fun periodic() {
+    logData()
+
+    if (abs(motor.position.valueAsDouble - quadEncoder.position) > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
+      motor.setPosition(quadEncoder.position)
+    }
+  }
 
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
 
-    motorSimState.setRawRotorPosition(request.Position / (PivotConstants.GEARING * PivotConstants.UPR))
+    motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (PivotConstants.GEARING * PivotConstants.UPR))
   }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("1.0", "Pivot Info")
-    builder.addDoubleProperty("1.1 Voltage", { motor.motorVoltage.valueAsDouble }, null)
-    builder.addDoubleProperty("1.2 Position", { positionSupplier.get() }, null)
-    builder.addDoubleProperty("1.3 Velocity", { velocitySupplier.get() }, null)
-    builder.addDoubleProperty("1.4 Desired Position", { request.Position }, null)
-    builder.addBooleanProperty("1.5 At Tolerance", { atSetpoint() }, null)
-    // builder.addStringProperty("1.7 Command", {this.currentCommand.name}, null)
+  private fun logData() {
+    DogLog.log("Pivot/Desired Target", request.Position)
+    DogLog.log("Pivot/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
+    DogLog.log("Pivot/In Tolerance", atSetpoint())
+    DogLog.log("Pivot/Abs/Pos", absoluteEncoder.position)
+    DogLog.log("Pivot/Abs/Vel", absoluteEncoder.velocity)
+    DogLog.log("Pivot/Quad/Pos", quadEncoder.position)
+    DogLog.log("Pivot/Quad/Vel", quadEncoder.velocity)
+    KrakenDogLog.log("Pivot/Motor", motor)
   }
 
   companion object {
@@ -112,8 +131,8 @@ class Pivot(
       config.Slot0.kI = PivotConstants.KI
       config.Slot0.kD = PivotConstants.KD
 
-      config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL
-      config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL
+      config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond)
+      config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL.`in`(RadiansPerSecondPerSecond)
 
       val status1 = leadMotor.configurator.apply(config)
       if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")
@@ -149,7 +168,27 @@ class Pivot(
         Follower(PivotConstants.LEAD_MOTOR_ID, PivotConstants.FOLLOWER_INVERTED_TO_MASTER)
       )
 
-      return Pivot(leadMotor)
+      val absEnc = AbsoluteEncoder.createAbsoluteEncoder(
+        "Pivot Absolute Enc",
+        PivotConstants.ABS_ENC_DIO_PORT,
+        PivotConstants.ABS_OFFSET,
+        PivotConstants.ENC_RATIO,
+        PivotConstants.ENC_INVERTED,
+        min = PivotConstants.ABS_RANGE.first,
+        max = PivotConstants.ABS_RANGE.second
+      )
+
+      val quadEnc = QuadEncoder.createQuadEncoder(
+        "Pivot Quad Enc",
+        PivotConstants.QUAD_ENCODER,
+        PivotConstants.ENC_CPR,
+        PivotConstants.ENC_RATIO,
+        1.0,
+        PivotConstants.ENC_INVERTED,
+        PivotConstants.SAMPLES_TO_AVERAGE
+      )
+
+      return Pivot(leadMotor, absEnc, quadEnc)
     }
   }
 }
