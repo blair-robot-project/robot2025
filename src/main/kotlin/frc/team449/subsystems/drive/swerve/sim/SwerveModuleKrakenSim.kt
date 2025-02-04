@@ -12,10 +12,9 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 import org.ironmaple.simulation.motorsims.SimulatedMotorController
 
-abstract class SwerveModuleKrakenSim: SwerveModule {
-
-
-  val module: SwerveModuleSimulation = SwerveModuleSimulation(
+class SwerveModuleKrakenSim(name: String, moduleIn: SwerveModuleSimulation, locationIn: Translation2d) : SwerveModule {
+  override val location: Translation2d = locationIn
+  public val module: SwerveModuleSimulation = moduleIn/* = SwerveModuleSimulation(
     SwerveModuleSimulationConfig(
       DCMotor.getKrakenX60(1),
       DCMotor.getKrakenX60(1),
@@ -27,29 +26,37 @@ abstract class SwerveModuleKrakenSim: SwerveModule {
       SwerveConstants.STEER_ROTATIONAL_INERTIA,
       SwerveConstants.WHEEL_COEFFICIENT_OF_FRICTION
     )
-  )
+  )*/
 
-  val drive: SimulatedMotorController.GenericMotorController = module
-    .useGenericMotorControllerForDrive()
-    .withCurrentLimit(SwerveConstants.DRIVE_FOC_CURRENT_LIMIT)
+  val drive: SimulatedMotorController.GenericMotorController
+  val turn: SimulatedMotorController.GenericMotorController
 
-  val turn: SimulatedMotorController.GenericMotorController = module
-    .useGenericControllerForSteer()
-    .withCurrentLimit(SwerveConstants.STEERING_CURRENT_LIM)
+  init {
+    drive = module
+      .useGenericMotorControllerForDrive()
+      .withCurrentLimit(SwerveConstants.DRIVE_FOC_CURRENT_LIMIT)
+    turn = module
+      .useGenericControllerForSteer()
+      .withCurrentLimit(SwerveConstants.STEERING_CURRENT_LIM)
+  }
 
-  override val location: Translation2d = Translation2d(
+  /*override val location: Translation2d = Translation2d(
     0.0,0.0
-  )
+  );*/
 
   override val desiredState: SwerveModuleState = SwerveModuleState(
     0.0,
     Rotation2d()
-  )
+  );
 
   /** The module's [SwerveModuleState], containing speed and angle. */
   override var state: SwerveModuleState
     get() = module.currentState
-    set(value) {}
+    set(value) {
+      module.currentState.angle = value.angle;
+      module.currentState.speedMetersPerSecond = value.speedMetersPerSecond;
+    }
+
 
   /** The module's [SwerveModulePosition], containing distance and angle. */
   override val position: SwerveModulePosition
