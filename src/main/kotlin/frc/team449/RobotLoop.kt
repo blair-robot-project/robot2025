@@ -187,11 +187,9 @@ class RobotLoop : TimedRobot(), Logged {
     VisionConstants.ESTIMATORS.forEach {
       it.simulationPeriodic(robot.drive.odometryPose)
     }
-    //Pathfinding.setPathfinder(robot.pathfinder.adstar)
-    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
 
-    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
-    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
+//    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
+//    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
 //
 //    robot.driveController.a().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.processorPoseRed))
 //    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.processorPoseRed))

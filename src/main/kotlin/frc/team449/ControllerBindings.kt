@@ -71,6 +71,8 @@ class ControllerBindings(
 //    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
 //    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
 
+    robot.driveController.x().onTrue(PrintCommand("invoke path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
+    robot.driveController.a().onTrue(PrintCommand("invoke other path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(
 //      3.0,
@@ -145,9 +147,9 @@ class ControllerBindings(
   }
 
   private fun pointToRight() {
-    driveController.a().onTrue(
-      robot.driveCommand.pointAtAngleCommand(Rotation2d.fromDegrees(90.0))
-    )
+//    driveController.a().onTrue(
+//      robot.driveCommand.pointAtAngleCommand(Rotation2d.fromDegrees(90.0))
+//    )
   }
 
   /** Characterization functions */
