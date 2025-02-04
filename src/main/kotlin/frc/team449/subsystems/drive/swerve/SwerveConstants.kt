@@ -27,10 +27,10 @@ object SwerveConstants {
   const val TURN_ENC_CHAN_BR = 1
 
   /** Offsets for the absolute encoders in rotations. */
-  const val TURN_ENC_OFFSET_FL = -0.048002
-  const val TURN_ENC_OFFSET_FR = -0.388454
-  const val TURN_ENC_OFFSET_BL = -0.354592 + 0.5
-  const val TURN_ENC_OFFSET_BR = -0.030209 + 0.5
+  const val TURN_ENC_OFFSET_FL = 0.0 + 0.354379
+  const val TURN_ENC_OFFSET_FR = 0.0 + 0.048082
+  const val TURN_ENC_OFFSET_BL = 0.5 - 0.450049
+  const val TURN_ENC_OFFSET_BR = 0.5 + 0.377951
 
   /** Inverted */
   const val DRIVE_INVERTED = true
@@ -38,20 +38,20 @@ object SwerveConstants {
   const val TURN_ENC_INVERTED = false
 
   /** PID gains for turning each module */
-  const val TURN_KP = 0.5
+  const val TURN_KP = 1.0
   const val TURN_KI = 0.0
   const val TURN_KD = 0.0
 
   /** Feed forward values for driving each module */
   const val DRIVE_KS = 0.20285 + 0.02
-  const val DRIVE_KV = 2.3887 + 0.2 + 0.0935
+  const val DRIVE_KV = 3.3887 + 0.2 + 0.0935
   const val DRIVE_KA = 0.43365 + 0.035 + 0.0185
 
   // TODO: Figure out this value
   const val STEER_KS = 0.05 / 12.0
 
   /** PID gains for driving each module*/
-  const val DRIVE_KP = 0.1
+  const val DRIVE_KP = 0.475
   const val DRIVE_KI = 0.0
   const val DRIVE_KD = 0.0
 
@@ -78,7 +78,7 @@ object SwerveConstants {
 
   /** Wheelbase = wheel-to-wheel distance from front to back of the robot */
   /** Trackwidth = wheel-to-wheel distance from side to side of the robot */
-  val WHEELBASE = Units.inchesToMeters(27.0 - 5.25) // ex. FL to BL, aka 5.25in less than robot length
-  val TRACKWIDTH = Units.inchesToMeters(27.0 - 5.25) // ex. BL to BR, aka 5.25in less than robot width
+  val WHEELBASE = Units.inchesToMeters(20.0) // ex. FL to BL, aka 5.25in less than robot length
+  val TRACKWIDTH = Units.inchesToMeters(22.5) // ex. BL to BR, aka 5.25in less than robot width
   val X_SHIFT = 0.0 // ex. if your modules aren't centered and have a shifted wheelbase
 }

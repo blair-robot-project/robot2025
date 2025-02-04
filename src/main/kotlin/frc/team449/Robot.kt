@@ -30,7 +30,7 @@ class Robot : RobotBase(), Logged {
   )
 
   @Log.NT
-  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
+  override val drive: SwerveDrive = SwerveDrive.createSwerveNEO(field)
 
   val autoChooser = AutoChooser()
 
