@@ -1,55 +1,57 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
-import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.ModuleConfig
-import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
-import com.pathplanner.lib.controllers.PPHolonomicDriveController
-import com.pathplanner.lib.path.PathConstraints
+import dev.doglog.DogLog
+import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
-import edu.wpi.first.wpilibj.DriverStation.Alliance
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.CommandScheduler
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.RoutineChooser
-import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
-import frc.team449.commands.autoscoreCommands.AutoScoreCommands
-import frc.team449.commands.autoscoreCommands.WebConnection
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
-import frc.team449.subsystems.drive.swerve.SwerveConstants
+import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
-import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
+import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
+import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
 import frc.team449.subsystems.vision.VisionConstants
-import monologue.Annotations.Log
+import frc.team449.system.encoder.QuadCalibration
+import org.littletonrobotics.urcl.URCL
+import kotlin.jvm.optionals.getOrDefault
+import kotlin.jvm.optionals.getOrNull
+import frc.team449.commands.autoscoreCommands.AutoScoreCommands
+import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
+import frc.team449.commands.autoscoreCommands.WebConnection
+import monologue.Annotations
 import monologue.Logged
 import monologue.Monologue
-import org.littletonrobotics.urcl.URCL
-import kotlin.jvm.optionals.getOrNull
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
 class RobotLoop : TimedRobot(), Logged {
-  @Log.NT
+  @Annotations.Log.NT
   val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
-  @Log.NT
+  @Annotations.Log.NT
   private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
-  private var webCom: WebConnection? = null
-  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
+
+  private val autoscore = AutoScoreCommands(
+    robot.drive,
+    robot.poseSubsystem,
+    robot
+  )
+  private var webCom : WebConnection? = null
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -60,18 +62,19 @@ class RobotLoop : TimedRobot(), Logged {
 
     HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
 
-    if (RobotBase.isSimulation()) {
+    if (isSimulation()) {
       // Don't complain about joysticks if there aren't going to be any
       DriverStation.silenceJoystickConnectionWarning(true)
+//      val instance = NetworkTableInstance.getDefault()
+//      instance.stopServer()
+//      instance.startClient4("localhost")
     }
 
+    // Custom Feedforwards
     robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
     robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
 
-    /** Example Quad Calibration
-     QuadCalibration(robot.pivot).ignoringDisable(true).schedule()
-     */
-
+    // Generate Auto Routines
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
     routineMap = routineChooser.routineMap()
     println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
@@ -86,33 +89,60 @@ class RobotLoop : TimedRobot(), Logged {
     DriverStation.startDataLog(DataLogManager.getLog())
     Monologue.setupMonologue(this, "/Monologuing", false, false)
 
+    controllerBinder.bindButtons()
+
+    DogLog.setOptions(
+      DogLogOptions()
+        .withCaptureDs(true)
+        .withCaptureNt(true)
+        .withLogExtras(true)
+    )
+
+    DogLog.setPdh(robot.powerDistribution)
+
+    SmartDashboard.putData("Field", robot.field)
+    SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+
     URCL.start()
+
+    QuadCalibration(robot.pivot, robot.pivot.absoluteEncoder, robot.pivot.quadEncoder, name = "Pivot")
+      .ignoringDisable(true)
+      .schedule()
+
+    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
+      .ignoringDisable(true)
+      .schedule()
   }
 
   override fun driverStationConnected() {
-    controllerBinder.bindButtons()
-
-    Monologue.setFileOnly(DriverStation.isFMSAttached())
-
+    FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
     webCom = WebConnection()
   }
 
   override fun robotPeriodic() {
     CommandScheduler.getInstance().run()
 
+    // Robot Drive Logging
     robot.field.robotPose = robot.poseSubsystem.pose
-
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
+    // Superstructure Simulation
+    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
+    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
+
+    robot.elevator.elevatorLigament.angle = Units.radiansToDegrees(robot.pivot.positionSupplier.get())
+    robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
+
+    robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
     Monologue.updateAll()
   }
 
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
-    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
+    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
     CommandScheduler.getInstance().schedule(this.autoCommand)
 
-    if (DriverStation.getAlliance().getOrNull() == Alliance.Red) {
+    if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
       BreatheHue(robot.light, 0).schedule()
     } else {
       BreatheHue(robot.light, 95).schedule()
@@ -139,7 +169,6 @@ class RobotLoop : TimedRobot(), Logged {
 
     (robot.light.currentCommand ?: InstantCommand()).cancel()
     Rainbow(robot.light).schedule()
-    webCom?.closeServer()
   }
 
   override fun disabledPeriodic() {}
@@ -158,17 +187,21 @@ class RobotLoop : TimedRobot(), Logged {
     robot.drive as SwerveSim
 
     VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
+      it.simulationPeriodic(robot.poseSubsystem.pose)
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
+
+    // change elevator angle according to pivot position
+    robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
+
     webCom?.command = webCom?.commandSubscriber?.get().toString()
 
-    if(webCom?.command != "none" && DriverStation.isDSAttached()) {
+    if (webCom?.command != "none" && DriverStation.isDSAttached()) {
       println("command received")
       webCom?.isDonePublish?.set(false)
 
-      var command = autoscore.processor()
+      val command : Command
       //get the value
       when (webCom?.command) {
         "processor" -> command = autoscore.processor()
@@ -182,7 +215,7 @@ class RobotLoop : TimedRobot(), Logged {
           val location = webCom?.command?.slice(3..<webCom?.command!!.length)
           var reefLocation = AutoScoreCommandConstants.ReefLocation.Location1
           var reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
-          when(location) {
+          when (location) {
             "location1" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location1)
             "location2" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location2)
             "location3" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location3)
@@ -196,7 +229,7 @@ class RobotLoop : TimedRobot(), Logged {
             "location11" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location11)
             "location12" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location12)
           }
-          when(level) {
+          when (level) {
             "l1" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
             "l2" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L2)
             "l3" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L3)

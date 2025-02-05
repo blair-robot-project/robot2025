@@ -6,9 +6,9 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.Robot
 import frc.team449.auto.choreo.MagnetizePIDPoseAlign
 import frc.team449.subsystems.drive.swerve.SwerveDrive
@@ -56,7 +56,6 @@ class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command
 class AutoScoreCommands(
   private val drive: SwerveDrive,
   val poseSubsystem: PoseSubsystem,
-  private val controller: XboxController,
   private val robot: Robot
 ) {
 
@@ -67,12 +66,8 @@ class AutoScoreCommands(
     Units.degreesToRadians(720.0)
   )
 
-  private val usingPathfinding = true
 
   lateinit var currentCommand: Command
-  init {
-    if (usingPathfinding) println("pathfinding") else println("magnezite")
-  }
 
   /**
    * This command moves the robot to one of the twelve reef locations
@@ -85,7 +80,7 @@ class AutoScoreCommands(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
     println("reef command called")
-    var reefNumericalLocation = reefLocation.ordinal + 1
+    val reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
     // var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
     var reefPose = AutoScoreCommandConstants.reef1PoseRed
@@ -122,16 +117,13 @@ class AutoScoreCommands(
       }
     }
     poseSubsystem.autoscoreCommandPose = reefPose
-    var returnCommand: Command = MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
-    if (usingPathfinding) {
       /*** pathfinding ***/
-      returnCommand = AutoBuilder.pathfindToPose(
-        reefPose,
-        constraints,
-        0.0,
-        // Goal end velocity in meters/sec
-      )
-    }
+    val returnCommand = AutoBuilder.pathfindToPose(
+      reefPose,
+      constraints,
+      0.0,
+      // Goal end velocity in meters/sec
+    )
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
@@ -149,19 +141,12 @@ class AutoScoreCommands(
 
     poseSubsystem.autoscoreCommandPose = processorPose
 
-    var returnCommand = AutoBuilder.pathfindToPose(
+    val returnCommand = AutoBuilder.pathfindToPose(
       processorPose,
       constraints,
       0.0,
     )
-    if (!usingPathfinding) {
-      returnCommand = MagnetizePIDPoseAlign(
-        drive,
-        poseSubsystem,
-        processorPose,
-        controller
-      )
-    }
+
     println("pose subsystem end pose: " + poseSubsystem.autoscoreCommandPose)
 
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
@@ -191,19 +176,12 @@ class AutoScoreCommands(
     }
     poseSubsystem.autoscoreCommandPose = coralIntakePose
 
-    var returnCommand = AutoBuilder.pathfindToPose(
+    val returnCommand = AutoBuilder.pathfindToPose(
       coralIntakePose,
       constraints,
       0.0,
     )
-    if (!usingPathfinding) {
-      returnCommand = MagnetizePIDPoseAlign(
-        drive,
-        poseSubsystem,
-        coralIntakePose,
-        controller
-      )
-    }
+
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
@@ -225,16 +203,12 @@ class AutoScoreCommands(
 
     poseSubsystem.autoscoreCommandPose = netPose
     println(poseSubsystem.autoscoreCommandPose.translation)
-    var returnCommand = AutoBuilder.pathfindToPose(
+    val returnCommand = AutoBuilder.pathfindToPose(
       netPose,
       constraints,
       0.0,
       // Goal end velocity in meters/sec
     )
-    if (!usingPathfinding) {
-      /*** magnetize ***/
-      returnCommand = MagnetizePIDPoseAlign(drive, poseSubsystem, netPose, controller)
-    }
 
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }

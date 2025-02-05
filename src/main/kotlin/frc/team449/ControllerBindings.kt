@@ -27,22 +27,23 @@ class ControllerBindings(
   private val robot: Robot
 ) {
 
-  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
+  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot)
 
   private fun robotBindings() {
     println("configuring the drive")
+
     AutoBuilder.configure(
-      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
-      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose\
-      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-      robot.poseSubsystem::edemPathMag, // output - Output function that accepts robot-relative ChassisSpeeds
-      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
+      robot.poseSubsystem::getPosea,
+      robot.poseSubsystem::resetOdometry,
+      robot.drive::currentSpeeds,
+      robot.poseSubsystem::edemPathMag,
+      PPHolonomicDriveController(
+        PIDConstants(5.0, 0.0, 0.0),
+        PIDConstants(5.0, 0.0, 0.0)
       ),
       RobotConfig.fromGUISettings(),
       { DriverStation.getAlliance().get() == Alliance.Red },
-      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
+      robot.drive
     )
 
     println("drive configured")

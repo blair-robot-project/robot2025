@@ -22,10 +22,9 @@ import frc.team449.subsystems.superstructure.wrist.Wrist.Companion.createWrist
 import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
 import frc.team449.system.AHRS
+import monologue.Annotations
 
-@Logged
-class Robot : RobotBase() {
-
+class Robot : RobotBase(), monologue.Logged {
   // Driver/Operator Controllers
   val driveController: CommandXboxController = CommandXboxController(0)
   val mechController: CommandXboxController = CommandXboxController(1)
@@ -39,9 +38,11 @@ class Robot : RobotBase() {
     PowerDistribution.ModuleType.kRev
   )
 
+  @Annotations.Log.NT
   override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
 
-  override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
+  @Annotations.Log.NT
+  override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field, driveController)
 
   override val driveCommand: SwerveOrthogonalCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
 
