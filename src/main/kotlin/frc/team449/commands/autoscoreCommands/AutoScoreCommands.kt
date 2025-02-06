@@ -168,9 +168,9 @@ class AutoScoreCommands(
       0.0
     )
 
-    val plist = mutableListOf(PathPoint(
-      processorPose.translation, RotationTarget(0.0, processorPose.rotation), constraints
-    ))
+//    val plist = mutableListOf(PathPoint(
+//      processorPose.translation, RotationTarget(0.0, processorPose.rotation), constraints
+//    ))
 //    val returnCommand = AutoBuilder.pathfindThenFollowPath(
 //      PathPlannerPath.fromPathPoints
 //        (
@@ -213,9 +213,9 @@ class AutoScoreCommands(
       0.0
     )
 
-    val plist = mutableListOf(PathPoint(
-      coralIntakePose.translation, RotationTarget(0.0, coralIntakePose.rotation), constraints
-    ))
+//    val plist = mutableListOf(PathPoint(
+//      coralIntakePose.translation, RotationTarget(0.0, coralIntakePose.rotation), constraints
+//    ))
 //    val returnCommand = AutoBuilder.pathfindThenFollowPath(
 //      PathPlannerPath.fromPathPoints
 //        (
