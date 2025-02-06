@@ -46,8 +46,7 @@ class RobotLoop : TimedRobot(), Logged {
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
 
-  private val autoscore = AutoScoreCommands(
-    robot.drive,
+  private val autoScore = AutoScoreCommands(
     robot.poseSubsystem,
     robot
   )
@@ -204,11 +203,11 @@ class RobotLoop : TimedRobot(), Logged {
       val command : Command
       //get the value
       when (webCom?.command) {
-        "processor" -> command = autoscore.processor()
-        "intakeCoralTop" -> command = autoscore.coral(true)
-        "intakeCoralBottom" -> command = autoscore.coral(false)
-        "netRed" -> command = autoscore.net(true)
-        "netBlue" -> command = autoscore.net(false)
+        "processor" -> command = autoScore.processor()
+        "intakeCoralTop" -> command = autoScore.coral(true)
+        "intakeCoralBottom" -> command = autoScore.coral(false)
+        "netRed" -> command = autoScore.net(true)
+        "netBlue" -> command = autoScore.net(false)
         else -> {
           //format will be l_ location__
           val level = webCom?.command?.slice(0..1)
@@ -235,11 +234,11 @@ class RobotLoop : TimedRobot(), Logged {
             "l3" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L3)
             "l4" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L4)
           }
-          command = autoscore.reef(reefLocation, reefLevel)
+          command = autoScore.reef(reefLocation, reefLevel)
         }
       }
-      autoscore.currentCommand = command
-      autoscore.poseSubsystem.autoscoreCurrentCommand = command
+      autoScore.currentCommand = command
+      autoScore.poseSubsystem.autoscoreCurrentCommand = command
       command.schedule()
       webCom?.isDonePublish?.set(true)
       webCom?.commandPublisher?.set("none")

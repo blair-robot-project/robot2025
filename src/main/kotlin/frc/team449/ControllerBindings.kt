@@ -27,10 +27,9 @@ class ControllerBindings(
   private val robot: Robot
 ) {
 
-  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot)
+  private val autoScore = AutoScoreCommands(robot.poseSubsystem, robot)
 
   private fun robotBindings() {
-    println("configuring the drive")
 
     AutoBuilder.configure(
       robot.poseSubsystem::getPosea,
@@ -46,38 +45,32 @@ class ControllerBindings(
       robot.drive
     )
 
-    println("drive configured")
-    // temp
-
-    // reef location passed in alla webappp, this is temp
+    // these testing commands are just temp, wont be on controller
     robot.driveController.x().onTrue(
       runOnce({
-        autoscore.currentCommand = autoscore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
-        autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
-        autoscore.currentCommand.schedule()
+        autoScore.currentCommand = autoScore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
+        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+        autoScore.currentCommand.schedule()
       })
     )
     robot.driveController.a().onTrue(
       runOnce({
-        autoscore.currentCommand = autoscore.processor()
-        autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
-        autoscore.currentCommand.schedule()
+        autoScore.currentCommand = autoScore.processor()
+        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+        autoScore.currentCommand.schedule()
       })
     )
     // on red alliance side passed in by webapp, this is temp
     robot.driveController.b().onTrue(
       runOnce({
-        autoscore.currentCommand = autoscore.net(true)
-        autoscore.poseSubsystem.autoscoreCurrentCommand = autoscore.currentCommand
-        autoscore.currentCommand.schedule()
+        autoScore.currentCommand = autoScore.net(true)
+        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+        autoScore.currentCommand.schedule()
       })
     )
     robot.driveController.y().onTrue(
       runOnce({
-        println("cancel called")
-        println(autoscore.currentCommand)
-        autoscore.currentCommand.cancel()
-        autoscore.currentCommand.end(false)
+        autoScore.currentCommand.cancel()
       })
     )
 //    var reefPose = AutoScoreCommandConstants.testPose

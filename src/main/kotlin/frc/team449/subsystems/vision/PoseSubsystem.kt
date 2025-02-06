@@ -95,15 +95,8 @@ class PoseSubsystem(
   private var magDec = 0.0004
   private val maxMagPower = 20.0
   private var lastDistance = 0.0
-  val autoDistance = 0.5
+  val autoDistance = 1
   lateinit var autoscoreCurrentCommand : Command
-
-
-
-
-
-
-
 
   init {
     xController.reset()
@@ -327,12 +320,9 @@ class PoseSubsystem(
 
       drive.set(combinedChassisSpeeds)
 
-
     }
 
-
 //    println("controller power: $currentControllerPower mult: $magMultiply")
-    println("mag dec: $magDec")
     lastDistance = distance
   }
 
