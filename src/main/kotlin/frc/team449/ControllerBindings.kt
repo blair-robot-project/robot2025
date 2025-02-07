@@ -4,8 +4,10 @@ import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
@@ -68,11 +70,10 @@ class ControllerBindings(
 //    )
 
 //    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
-//    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
-//    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
+    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
 
-    robot.driveController.x().onTrue(PrintCommand("invoke path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
-    robot.driveController.a().onTrue(PrintCommand("invoke other path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
+    //robot.driveController.x().onTrue(PrintCommand("invoke path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
+    //robot.driveController.a().onTrue(PrintCommand("invoke other path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(
 //      3.0,
