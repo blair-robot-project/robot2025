@@ -34,6 +34,8 @@ class pathfinder(val robot: Robot) : SubsystemBase() {
   var indexinpath = 0
   var speedxnow = 0.0
   var speedynow = 0.0
+  var pathrunning = false
+  var pathvalid = false
 
   init {
     timer.restart()
@@ -48,20 +50,42 @@ class pathfinder(val robot: Robot) : SubsystemBase() {
 
   override fun periodic() { // periodic is 2 loops ahead of path init
     if (indexinpath+2 <= pathSub?.get()!!.size){
-      if ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))) {
-        expectedtime = (pathSub?.get()!!.size - 1) * 0.02 //num sections*time/section
-        println("time now in periodic: ${timer.get()}")
-        println("pathstart: $pathstart")
-        println("expectedtime: $expectedtime")
-        var alongpath = (timer.get() - pathstart) / expectedtime
-        println("alongpath: $alongpath")
-        var numsections = pathSub?.get()!!.size - 1
-        println("num sections: $numsections")
-        println("index thing: ${floor(alongpath * numsections.toInt()) + 1}")
-        indexinpath = (floor(alongpath * numsections)).toInt()+1
+      pathrunning = true
+    }
+    else {
+      pathrunning = false
+    }
+    if ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))){
+      pathvalid = true
+    }
+    else {
+      pathvalid = false
+    }
+    if (pathrunning && pathvalid) {
+      expectedtime = (pathSub?.get()!!.size - 1) * 0.02 //num sections*time/section
+      println("time now in periodic: ${timer.get()}")
+      println("pathstart: $pathstart")
+      println("expectedtime: $expectedtime")
+      var alongpath = (timer.get() - pathstart) / expectedtime
+      println("alongpath: $alongpath")
+      var numsections = pathSub?.get()!!.size - 1
+      println("num sections: $numsections")
+      println("index thing: ${floor(alongpath * numsections.toInt()) + 1}")
+      indexinpath = (floor(alongpath * numsections)).toInt()+1
+      if (indexinpath+2 <= pathSub?.get()!!.size){
+        var prevpose = pathSub?.get()?.get(indexinpath-1)
+        var nextpose = pathSub?.get()?.get(indexinpath)//
+        if (prevpose != null) {
+          if (nextpose != null) {
+            speedxnow = (prevpose.x - nextpose.x)/0.02
+            speedynow = (prevpose.y - nextpose.y)/0.02
+            println("speed x now: $speedxnow, speed y now: $speedynow")
+          }
+        }
         println()
       }
     }
+
     if (adstar.isNewPathAvailable) {
       path = adstar.getCurrentPath(
         PathConstraints(
