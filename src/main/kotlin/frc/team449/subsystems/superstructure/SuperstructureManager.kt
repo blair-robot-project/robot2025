@@ -38,7 +38,8 @@ class SuperstructureManager(
       )
   }
 
-  companion object {
+
+    companion object {
     fun createSuperstructureManager(robot: Robot): SuperstructureManager {
       return SuperstructureManager(
         robot.elevator,

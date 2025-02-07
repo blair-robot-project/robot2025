@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.team449.commands.driveAlign.SimpleReefAlign
@@ -42,6 +43,13 @@ class ControllerBindings(
     premove_l4()
 
     stow()
+
+    mechanismController.pov(0).onTrue(
+      robot.wrist.setPosition(PI/2)
+    )
+    mechanismController.pov(180).onTrue(
+      robot.wrist.setPosition(0.0)
+    )
   }
 
   private fun nonRobotBindings() {

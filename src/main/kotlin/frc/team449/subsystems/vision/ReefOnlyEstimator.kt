@@ -119,7 +119,6 @@ class ReefOnlyEstimator(
       ) {
         lowestAmbiguityScore = targetPoseAmbiguity
         lowestAmbiguityTarget = target
-        print("getting here")
       }
     }
 

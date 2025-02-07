@@ -5,6 +5,10 @@ import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Rotation3d
+import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -25,6 +29,7 @@ import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.*
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -37,6 +42,10 @@ class RobotLoop : TimedRobot() {
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
+
+  private var componentStorage: Array<Pose3d>? = null
+  private var wristMove: Pose3d? = null
+
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -161,9 +170,53 @@ class RobotLoop : TimedRobot() {
 
   override fun testPeriodic() {}
 
-  override fun simulationInit() {}
+  override fun simulationInit() {
+    // set position
+//    componentStorage = arrayOf(
+//      Pose3d(-0.136, 0.0, 0.245,
+//        Rotation3d(0.0, 0.0, 0.0)),
+//      Pose3d(-0.136, 0.0, 0.245,
+//        Rotation3d(0.0, 0.0, 0.0)),
+//      Pose3d(-0.136, 0.0, 0.245,
+//        Rotation3d(0.0, 0.0, 0.0)),
+//      Pose3d(-0.136, 0.0, 0.245,
+//        Rotation3d(0.0, 0.0, 0.0)),
+//      Pose3d(0.61, 0.0, 0.327,
+//        Rotation3d(0.0, 0.0, 0.0)))
+//    componentStorage = arrayOf(Pose3d(),
+//      Pose3d(),
+//      Pose3d(),
+//      Pose3d(),
+//      Pose3d(0.0, 0.0, 0.0,
+//        Rotation3d(0.0, 0.0, 0.0)))
+    robot.poseSubsystem.enableVisionFusion = false
+  }
 
   override fun simulationPeriodic() {
+    // sim pose calculator
+
+//    componentStorage[4]
+    val pivotPos = -robot.pivot.positionSupplier.get()
+
+    componentStorage = arrayOf(
+      Pose3d(-0.136, 0.0, 0.245,
+        Rotation3d(0.0, pivotPos, 0.0)),
+      Pose3d(-0.136, 0.0, 0.245,
+        Rotation3d(0.0, pivotPos, 0.0)),
+      Pose3d(-0.136, 0.0, 0.245,
+        Rotation3d(0.0, pivotPos, 0.0)),
+      Pose3d(-0.136, 0.0, 0.245,
+        Rotation3d(0.0, pivotPos, 0.0)),
+//      Pose3d(0.569, 0.0, 0.366,
+//        Rotation3d(0.0, -robot.wrist.positionSupplier.get(), 0.0))
+      Pose3d(sqrt(0.569.pow(2) + 0.366.pow(2))*cos(-pivotPos + atan(0.569)),
+        0.0,
+        sqrt(0.569.pow(2) + 0.366.pow(2))*sin(-pivotPos + atan(0.366)),
+        Rotation3d(0.0, -robot.wrist.positionSupplier.get(), 0.0))
+    )
+    //sqrt(x0^2+y0^2)*<cos, sin>(theta + atan(y0, x0))
+    DogLog.log("SimComponent", componentStorage)
+
     robot.drive as SwerveSim
 
     VisionConstants.ESTIMATORS.forEach {
