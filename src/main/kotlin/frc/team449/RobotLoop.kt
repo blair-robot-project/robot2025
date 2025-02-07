@@ -2,20 +2,12 @@ package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
 import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
-import com.pathplanner.lib.path.PathConstraints
-import com.pathplanner.lib.pathfinding.LocalADStar
 import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
@@ -25,11 +17,9 @@ import frc.team449.auto.RoutineChooser
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.commands.autoscoreCommands.WebConnection
-import frc.team449.commands.autoscoreCommands.pathfinder
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
-import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.pivot.PivotFeedForward.Companion.createPivotFeedForward
@@ -111,7 +101,7 @@ class RobotLoop : TimedRobot(), Logged {
     Monologue.setupMonologue(this, "/Monologuing", false, false)
 
     URCL.start()
-    Pathfinding.setPathfinder(robot.pathfinder.adstar)
+    Pathfinding.setPathfinder(robot.pathfinder.ADStar)
   }
 
   override fun driverStationConnected() {
@@ -178,7 +168,7 @@ class RobotLoop : TimedRobot(), Logged {
   override fun testPeriodic() {}
 
   override fun simulationInit() {
-    Pathfinding.setPathfinder(robot.pathfinder.adstar)
+    Pathfinding.setPathfinder(robot.pathfinder.ADStar)
   }
 
   override fun simulationPeriodic() {

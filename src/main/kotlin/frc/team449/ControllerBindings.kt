@@ -71,8 +71,8 @@ class ControllerBindings(
 //    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
 //    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
 
-    robot.driveController.x().onTrue(PrintCommand("invoke path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
-    robot.driveController.a().onTrue(PrintCommand("invoke other path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
+    robot.driveController.x().onTrue(PrintCommand("blue path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
+    robot.driveController.a().onTrue(PrintCommand("red path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(
 //      3.0,
