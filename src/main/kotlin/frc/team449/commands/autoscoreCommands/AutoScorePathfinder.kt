@@ -32,6 +32,7 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
   private var poseEnd = zeroPose
   private var pathIndex = 0
   private var lastTimeCalled = 0.0
+  private var pathActive = false
 
   init {
     timer.restart()
@@ -57,32 +58,36 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
       startingTime = timer.get()
     }
     val sections = pathSub.get().size - 1
-    if ((pathSub.get()[0]) != zeroPose) {
-      ET = (pathSub.get().size - 1) * 0.02 //num sections*time/section
-      println("ct: $currentTime")
-      println("st: $startingTime, et: $ET")
-      // pathCompletion ranging from 0 to 1
-      val pathCompletion = (timer.get() - startingTime) / ET
-      pathIndex = floor(pathCompletion * sections).toInt()
-      println("index thing: $pathIndex")
+    if(robot.poseSubsystem.pose.translation.getDistance(pathSub.get()[sections-1].translation) < 0.5) {
+      pathActive = false
     }
-    if (ADStar.isNewPathAvailable) {
-      path = ADStar.getCurrentPath(
-        PathConstraints(
-          RobotConstants.MAX_LINEAR_SPEED,
-          RobotConstants.MAX_ACCEL,
-          RobotConstants.MAX_ROT_SPEED,
-          RobotConstants.ROT_RATE_LIMIT
-        ), GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
-      )
-      resetVelocities()
-      for (point in path.allPathPoints) {
-        velocities += (point.maxV)
+    if(pathActive) {
+      if ((pathSub.get()[0]) != zeroPose) {
+        ET = (pathSub.get().size - 1) * 0.02 //num sections*time/section
+        println("ct: $currentTime")
+        println("st: $startingTime, et: $ET")
+        // pathCompletion ranging from 0 to 1
+        val pathCompletion = (timer.get() - startingTime) / ET
+        pathIndex = floor(pathCompletion * sections).toInt()
+        println("index thing: $pathIndex")
       }
-      pathPub.set(path.pathPoses.toTypedArray<Pose2d>())
-      velsPub.set(velocities)
+      if (ADStar.isNewPathAvailable) {
+        path = ADStar.getCurrentPath(
+          PathConstraints(
+            RobotConstants.MAX_LINEAR_SPEED,
+            RobotConstants.MAX_ACCEL,
+            RobotConstants.MAX_ROT_SPEED,
+            RobotConstants.ROT_RATE_LIMIT
+          ), GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
+        )
+        resetVelocities()
+        for (point in path.allPathPoints) {
+          velocities += (point.maxV)
+        }
+        pathPub.set(path.pathPoses.toTypedArray<Pose2d>())
+        velsPub.set(velocities)
 
-    }
+      }
 //    if (pathSub?.get()!=null) {
 //      println("num poses: ${pathSub?.get()!!.size}")
 //      println()
@@ -94,16 +99,18 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
 //      println()
 //      println()
 //    }
-    if (velsSub.get() != null) {
+      if (velsSub.get() != null) {
 //      for (vel in velsSub?.get()!!) {
 //        print("vel: $vel")
 //      }
-      //println("random timestamp thing hopefully at the beginning of the path: ${velsSub?.atomic?.timestamp}")
-      //println()
-      //println()
-      //println()
-      //println()
+        //println("random timestamp thing hopefully at the beginning of the path: ${velsSub?.atomic?.timestamp}")
+        //println()
+        //println()
+        //println()
+        //println()
+      }
     }
+
   }
 
   fun path(goalPosition: Pose2d): Command {
@@ -112,6 +119,7 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
     return runOnce({
       ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
       ADStar.setGoalPosition(goalPosition.translation)
+      pathActive = true
     }).andThen(PrintCommand("goal updated"))
     //.andThen(PrintCommand("pathstart: $pathstart")).andThen(PrintCommand(" "))
   } }
