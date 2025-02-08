@@ -47,7 +47,7 @@ object SuperstructureGoal {
   val STOW = SuperstructureState(
     Degrees.of(0.0),
     Meters.of(0.0),
-    Degrees.of(180.0),
+    Degrees.of(90.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

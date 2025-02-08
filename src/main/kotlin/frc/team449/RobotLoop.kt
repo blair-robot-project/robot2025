@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.RunCommand
 import frc.team449.auto.RoutineChooser
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
@@ -45,6 +47,7 @@ class RobotLoop : TimedRobot() {
 
   private var componentStorage: Array<Pose3d>? = null
   private var wristMove: Pose3d? = null
+  var offset = 0.0
 
 
   override fun robotInit() {
@@ -183,13 +186,15 @@ class RobotLoop : TimedRobot() {
 //        Rotation3d(0.0, 0.0, 0.0)),
 //      Pose3d(0.61, 0.0, 0.327,
 //        Rotation3d(0.0, 0.0, 0.0)))
-//    componentStorage = arrayOf(Pose3d(),
-//      Pose3d(),
-//      Pose3d(),
-//      Pose3d(),
-//      Pose3d(0.0, 0.0, 0.0,
-//        Rotation3d(0.0, 0.0, 0.0)))
+    componentStorage = arrayOf(Pose3d(),
+      Pose3d(),
+      Pose3d(),
+      Pose3d(),
+      Pose3d(0.0, 0.0, 0.0,
+        Rotation3d(0.0, 0.0, 0.0)))
     robot.poseSubsystem.enableVisionFusion = false
+//    robot.mechController.pov(90).whileTrue(RunCommand({offset += 0.01}).andThen(PrintCommand("yay")))
+//    robot.mechController.pov(270).whileTrue(RunCommand({offset -= 0.01}).andThen(PrintCommand("naur")))
   }
 
   override fun simulationPeriodic() {
@@ -198,24 +203,65 @@ class RobotLoop : TimedRobot() {
 //    componentStorage[4]
     val pivotPos = -robot.pivot.positionSupplier.get()
 
+    offset = robot.elevator.positionSupplier.get() / (ElevatorConstants.MAX_HEIGHT - ElevatorConstants.MIN_HEIGHT)
+    offset *= 1.735
+
+    offset = max(offset, 0.0)
+    offset = min(offset, 1.735)
+
     componentStorage = arrayOf(
+//       pivot/base stage
       Pose3d(-0.136, 0.0, 0.245,
         Rotation3d(0.0, pivotPos, 0.0)),
-      Pose3d(-0.136, 0.0, 0.245,
-        Rotation3d(0.0, pivotPos, 0.0)),
-      Pose3d(-0.136, 0.0, 0.245,
-        Rotation3d(0.0, pivotPos, 0.0)),
-      Pose3d(-0.136, 0.0, 0.245,
-        Rotation3d(0.0, pivotPos, 0.0)),
-//      Pose3d(0.569, 0.0, 0.366,
-//        Rotation3d(0.0, -robot.wrist.positionSupplier.get(), 0.0))
-      Pose3d(sqrt(0.569.pow(2) + 0.366.pow(2))*cos(-pivotPos + atan(0.569)),
+      // first stage max: 0.60
+      Pose3d(-0.136 + min(0.6*cos(-pivotPos), offset*cos(-pivotPos)),
         0.0,
-        sqrt(0.569.pow(2) + 0.366.pow(2))*sin(-pivotPos + atan(0.366)),
-        Rotation3d(0.0, -robot.wrist.positionSupplier.get(), 0.0))
+        0.245 + min(0.6*sin(-pivotPos),offset*sin(-pivotPos)),
+        Rotation3d(0.0, pivotPos, 0.0)),
+      // second stage max : 0.575 (1.175)
+      Pose3d(-0.136 + min(1.175*cos(-pivotPos), offset*cos(-pivotPos)),
+        0.0,
+        0.245 + min(1.175*sin(-pivotPos),offset*sin(-pivotPos)),
+        Rotation3d(0.0, pivotPos, 0.0)),
+      // third stage max: 0.56 (1.735)
+      Pose3d(-0.136 + min(1.735*cos(-pivotPos), offset*cos(-pivotPos)),
+        0.0,
+        0.245 + min(1.735*sin(-pivotPos),offset*sin(-pivotPos)),
+        Rotation3d(0.0, pivotPos, 0.0)),
+      Pose3d(-.136 + (0.7112*cos(-pivotPos)+(0.127*-sin(-pivotPos)))
+        + min(1.735*cos(-pivotPos), offset*cos(-pivotPos)),
+        0.0,
+        .245 + (0.7112*sin(-pivotPos))+(0.127*cos(-pivotPos))
+        + min(1.735*sin(-pivotPos),offset*sin(-pivotPos)),
+        Rotation3d(0.0, -robot.wrist.positionSupplier.get() + pivotPos, 0.0))
     )
+//      Pose3d(-0.136, 0.0, 0.245,
+//        Rotation3d(0.0, pivotPos, 0.0)),
+//      // first stage max: 0.60
+//      Pose3d(-0.136 + offset*cos(-pivotPos),
+//        0.0,
+//        0.245 + offset*cos(-pivotPos),
+//        Rotation3d(0.0, pivotPos, 0.0)),
+//      // second stage max : 0.575 (1.175)
+//      Pose3d(-0.136 + offset*cos(-pivotPos),
+//        0.0,
+//        0.245 + offset*cos(-pivotPos),
+//        Rotation3d(0.0, pivotPos, 0.0)),
+//      // third stage max: 0.56 (1.735)
+//      Pose3d(-0.136 + offset*cos(-pivotPos),
+//        0.0,
+//        0.245 + offset*cos(-pivotPos),
+//        Rotation3d(0.0, pivotPos, 0.0)),
+////      Pose3d(0.569, 0.0, 0.366,
+////        Rotation3d(0.0, -robot.wrist.positionSupplier.get(), 0.0))
+//      Pose3d(sqrt(0.569.pow(2) + 0.366.pow(2))*cos(-pivotPos + atan(0.569)),
+//        0.0,
+//        sqrt(0.569.pow(2) + 0.366.pow(2))*sin(-pivotPos + atan(0.366)),
+//        Rotation3d(0.0, -robot.wrist.positionSupplier.get(), 0.0))
+//    )
     //sqrt(x0^2+y0^2)*<cos, sin>(theta + atan(y0, x0))
     DogLog.log("SimComponent", componentStorage)
+    DogLog.log("offset", offset)
 
     robot.drive as SwerveSim
 

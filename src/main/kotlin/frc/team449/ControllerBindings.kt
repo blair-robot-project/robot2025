@@ -61,34 +61,34 @@ class ControllerBindings(
   }
 
   private fun stow() {
-    mechanismController.rightBumper().onTrue(
+    driveController.button(6).onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
     )
   }
 
-//  private fun score_l1() {
-//    driveController.a().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-//        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-//    )
-//  }
+  private fun score_l1() {
+    driveController.button(1).onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+        .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+    )
+  }
 
   private fun score_l2() {
-    driveController.x().onTrue(
+    driveController.button(2).onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
   private fun score_l3() {
-    driveController.b().onTrue(
+    driveController.button(4).onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
   }
 
   private fun score_l4() {
-    driveController.y().onTrue(
+    driveController.button(5).onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
         .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem))
     )
