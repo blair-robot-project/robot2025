@@ -33,19 +33,7 @@ open class SwerveDrive(
   protected val field: Field2d,
   val maxModuleSpeed: Double
 ) : SubsystemBase() {
-  /*private val xController: PIDController
-    get() = PIDController(10.0, 0.0, 0.0)
-  private val yController: PIDController
-    get() = PIDController(10.0, 0.0, 0.0)
-  private val headingController: PIDController
-    get() = PIDController(7.5, 0.0, 0.0)
 
-  var heading: Rotation2d
-    get() = Rotation2d(MathUtil.angleModulus(this.pose.rotation.radians))
-    set(value) {
-      this.pose = Pose2d(Translation2d(this.pose.x, this.pose.y), value)
-
-    }*/
   var pose: Pose2d = Pose2d()
 
   var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
