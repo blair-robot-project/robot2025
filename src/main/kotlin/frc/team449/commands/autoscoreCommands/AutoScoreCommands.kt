@@ -1,14 +1,7 @@
 package frc.team449.commands.autoscoreCommands
 
 import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
-import com.pathplanner.lib.controllers.PPHolonomicDriveController
-import com.pathplanner.lib.path.GoalEndState
 import com.pathplanner.lib.path.PathConstraints
-import com.pathplanner.lib.path.PathPlannerPath
-import com.pathplanner.lib.path.PathPoint
-import com.pathplanner.lib.path.RotationTarget
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
@@ -16,11 +9,10 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import frc.team449.Robot
+import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.vision.PoseSubsystem
-import frc.team449.subsystems.RobotConstants
 
 class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command) : Command() {
 
@@ -50,7 +42,6 @@ class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command
     }
     if (poseSubsystem.pose.translation.getDistance(poseSubsystem.autoscoreCommandPose.translation) < poseSubsystem.autoDistance) {
       autodistanceTimer -= 0.05
-      // prevent command from timing out if we're close
     }
     return false
   }
@@ -66,12 +57,11 @@ class AutoScoreCommands(
 ) {
 
   private val constraints = PathConstraints(
-    RobotConstants.MAX_LINEAR_SPEED,
-    RobotConstants.MAX_ACCEL,
-    RobotConstants.MAX_ROT_SPEED,
-    Units.degreesToRadians(720.0)
+    AutoScoreCommandConstants.MAX_LINEAR_SPEED,
+    AutoScoreCommandConstants.MAX_ACCEL,
+    AutoScoreCommandConstants.MAX_ROT_SPEED,
+    AutoScoreCommandConstants.ROT_MAX_ACCEL
   )
-
 
   lateinit var currentCommand: Command
 
@@ -123,29 +113,14 @@ class AutoScoreCommands(
       }
     }
     poseSubsystem.autoscoreCommandPose = reefPose
-      /*** pathfinding ***/
+    /*** pathfinding ***/
     val returnCommand = AutoBuilder.pathfindToPose(
       reefPose,
       constraints,
       0.0,
     )
 
-//    val plist = mutableListOf(PathPoint(
-//      reefPose.translation, RotationTarget(0.0, reefPose.rotation), constraints
-//    ))
-//    println(reefPose.rotation)
-
-//    val returnCommand = AutoBuilder.pathfindThenFollowPath(
-//      PathPlannerPath.fromPathPoints
-//      (
-//        plist,
-//        constraints,
-//        GoalEndState(0.0, reefPose.rotation)
-//        ),
-//      constraints)
-
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
-
   }
 
   /**
@@ -167,18 +142,6 @@ class AutoScoreCommands(
       constraints,
       0.0
     )
-
-//    val plist = mutableListOf(PathPoint(
-//      processorPose.translation, RotationTarget(0.0, processorPose.rotation), constraints
-//    ))
-//    val returnCommand = AutoBuilder.pathfindThenFollowPath(
-//      PathPlannerPath.fromPathPoints
-//        (
-//        plist,
-//        constraints,
-//        GoalEndState(0.0, processorPose.rotation)
-//      ),
-//      constraints)
 
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
@@ -213,18 +176,6 @@ class AutoScoreCommands(
       0.0
     )
 
-//    val plist = mutableListOf(PathPoint(
-//      coralIntakePose.translation, RotationTarget(0.0, coralIntakePose.rotation), constraints
-//    ))
-//    val returnCommand = AutoBuilder.pathfindThenFollowPath(
-//      PathPlannerPath.fromPathPoints
-//        (
-//        plist,
-//        constraints,
-//        GoalEndState(0.0, coralIntakePose.rotation)
-//      ),
-//      constraints)
-
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
@@ -250,18 +201,6 @@ class AutoScoreCommands(
       constraints,
       0.0
     )
-//PathPoint(
-//      netPose.translation, RotationTarget(0.0, netPose.rotation), constraints
-//    )
-//    val plist = mutableListOf<PathPoint>()
-//    val returnCommand = AutoBuilder.pathfindThenFollowPath(
-//      PathPlannerPath.fromPathPoints
-//        (
-//        plist,
-//        constraints,
-//        GoalEndState(0.0, netPose.rotation)
-//      ),
-//      constraints)
 
     return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
@@ -295,7 +234,7 @@ class AutoScoreCommands(
    * does nothing right now
    * */
   private fun scoreProcessorCommand(): Command {
-    //no processor currently
+    // no processor currently
     return InstantCommand()
   }
 
@@ -304,7 +243,7 @@ class AutoScoreCommands(
    * does nothing right now
    * */
   private fun scoreNetCommand(): Command {
-    //no net currently
+    // no net currently
     return InstantCommand()
   }
 
@@ -331,7 +270,7 @@ class AutoScoreCommands(
   }
 
   fun processor(): Command {
-    val processorCommand = PrintCommand("processor pose translation: ${AutoScoreCommandConstants.processorPoseRed}").andThen(moveToProcessorCommand()).andThen(scoreProcessorCommand())
+    val processorCommand = moveToProcessorCommand().andThen(scoreProcessorCommand())
     return processorCommand
   }
 }

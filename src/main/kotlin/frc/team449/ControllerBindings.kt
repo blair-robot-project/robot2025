@@ -30,7 +30,6 @@ class ControllerBindings(
   private val autoScore = AutoScoreCommands(robot.poseSubsystem, robot)
 
   private fun robotBindings() {
-
     AutoBuilder.configure(
       robot.poseSubsystem::getPosea,
       robot.poseSubsystem::resetOdometry,

@@ -28,19 +28,15 @@ import kotlin.jvm.optionals.getOrNull
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.WebConnection
-import monologue.Annotations
-import monologue.Logged
-import monologue.Monologue
+
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
-class RobotLoop : TimedRobot(), Logged {
-  @Annotations.Log.NT
+class RobotLoop : TimedRobot() {
   val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
-  @Annotations.Log.NT
   private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
@@ -86,7 +82,6 @@ class RobotLoop : TimedRobot(), Logged {
     robot.light.defaultCommand = BlairChasing(robot.light)
 
     DriverStation.startDataLog(DataLogManager.getLog())
-    Monologue.setupMonologue(this, "/Monologuing", false, false)
 
     controllerBinder.bindButtons()
 
@@ -133,7 +128,6 @@ class RobotLoop : TimedRobot(), Logged {
     robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
 
     robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
-    Monologue.updateAll()
   }
 
   override fun autonomousInit() {

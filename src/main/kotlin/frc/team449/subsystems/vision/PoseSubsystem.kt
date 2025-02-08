@@ -29,7 +29,7 @@ import frc.team449.subsystems.vision.interpolation.InterpolatedVision
 import frc.team449.system.AHRS
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
-
+import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 
 class PoseSubsystem(
   private val ahrs: AHRS,
@@ -95,6 +95,7 @@ class PoseSubsystem(
   private var magDec = 0.0004
   private val maxMagPower = 20.0
   private var lastDistance = 0.0
+  private val agreeVal = 0.75
   val autoDistance = 1
   lateinit var autoscoreCurrentCommand : Command
 
@@ -184,14 +185,11 @@ class PoseSubsystem(
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime
-    if(dt > 0.5) {
-      resetMagVars()
-    }
+
     val distance = pose.translation.getDistance(autoscoreCommandPose.translation)
     val ctrlX = -controller.leftY
     val ctrlY = -controller.leftX
     val controllerMag = hypot(ctrlX, ctrlY)
-
 
     if(distance > lastDistance) {
       magMultiply += magIncConstant
@@ -202,19 +200,17 @@ class PoseSubsystem(
     }
     magDec = MathUtil.clamp(magDec, 0.0, 0.5)
     clampMult()
-    currentControllerPower *= magMultiply
-
 
     if(controllerMag > 0.35) {
       currentControllerPower = MathUtil.clamp(currentControllerPower, 15.0, maxMagPower)
       magMultiply += 0.3
     }
 
-
     //this increases the users power if they are moving a lot
     //also decreases the users power if they are not moving a lot
     currentControllerPower += 1.2/( 1 + exp(-6 * (controllerMag-0.7) ) ) - 0.5
 
+    currentControllerPower *= magMultiply
 
     clampCP()
     if(distance <= autoDistance || controllerMag < 0.1 || currentControllerPower < 3) {
@@ -226,10 +222,7 @@ class PoseSubsystem(
       }
       drive.set(desVel)
     } else {
-
-
       // controller stuff
-
 
       val ctrlRadius = MathUtil.applyDeadband(
         min(sqrt(ctrlX.pow(2) + ctrlY.pow(2)), 1.0),
@@ -298,129 +291,49 @@ class PoseSubsystem(
       )
       //this increases the users power based on how much it is going against pathmag
       if(controllerSpeeds.vxMetersPerSecond < 0 != desVel.vxMetersPerSecond < 0) {
-        currentControllerPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
+        currentControllerPower += (abs(controllerSpeeds.vxMetersPerSecond))/20
       } else if(controllerSpeeds.vyMetersPerSecond < 0 != desVel.vyMetersPerSecond < 0) {
-        currentControllerPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
+        currentControllerPower += (abs(controllerSpeeds.vyMetersPerSecond))/20
       }
+
 
 
       controllerSpeeds *= currentControllerPower / 2
-      val desVelAdjustedSpeeds = desVel / (20 / ( 1 + exp(-(currentControllerPower-15)/2) ) )
+      val desVelAdjustedSpeeds = desVel / (20 / ( 1 + exp(-(currentControllerPower-12)/1) ) )
 
+      println(" x ${
+        abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0) - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0))
+      } y ${abs(MathUtil.clamp(controllerSpeeds.vyMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vyMetersPerSecond, -1.0, 1.0))}")
 
-      val combinedChassisSpeeds = if(controllerMag > 0.95 || currentControllerPower > 16) {
-        controllerSpeeds
+      val combinedChassisSpeeds : ChassisSpeeds
+      if( abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0) ) +
+        abs(MathUtil.clamp(controllerSpeeds.vyMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vyMetersPerSecond, -1.0, 1.0) )
+        < agreeVal
+        ) {
+        combinedChassisSpeeds = desVel
+        currentControllerPower = MathUtil.clamp(currentControllerPower, 0.1, 5.0)
+        currentControllerPower -= 0.3
+        println("agree")
+      } else if(controllerMag > 0.95 || currentControllerPower > 16) {
+        combinedChassisSpeeds = controllerSpeeds
       } else {
-        controllerSpeeds + desVelAdjustedSpeeds
+        combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
+        combinedChassisSpeeds.omegaRadiansPerSecond = controllerSpeeds.omegaRadiansPerSecond
       }
-      combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
-      combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
-      combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -drive.maxRotSpeed, drive.maxRotSpeed)
 
+      combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
+      combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
+      combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -AutoScoreCommandConstants.MAX_ROT_SPEED, AutoScoreCommandConstants.MAX_ROT_SPEED)
 
       drive.set(combinedChassisSpeeds)
 
     }
 
-//    println("controller power: $currentControllerPower mult: $magMultiply")
-    println("controller mag ${controllerMag}")
+//    println("controller mag ${controllerMag}")
     lastDistance = distance
-  }
-
-  fun pathMagBad(desVel: ChassisSpeeds) {
-
-    val ctrlX = -controller.leftY
-    val ctrlY = -controller.leftX
-
-    val ctrlRadius = MathUtil.applyDeadband(
-      min(sqrt(ctrlX.pow(2) + ctrlY.pow(2)), 1.0),
-      RobotConstants.DRIVE_RADIUS_DEADBAND,
-      1.0
-    ).pow(SwerveConstants.JOYSTICK_FILTER_ORDER)
-
-
-    val ctrlTheta = atan2(ctrlY, ctrlX)
-
-
-    val xScaled = ctrlRadius * cos(ctrlTheta) * drive.maxLinearSpeed
-    val yScaled = ctrlRadius * sin(ctrlTheta) * drive.maxLinearSpeed
-
-
-    var xClamped = xScaled
-    var yClamped = yScaled
-
-
-    if (RobotConstants.USE_ACCEL_LIMIT) {
-      dx = xScaled - prevX
-      dy = yScaled - prevY
-      magAcc = hypot(dx / dt, dy / dt)
-      magAccClamped = MathUtil.clamp(magAcc, -drive.accel, drive.accel)
-
-
-      val factor = if (magAcc == 0.0) 0.0 else magAccClamped / magAcc
-      val dxClamped = dx * factor
-      val dyClamped = dy * factor
-      xClamped = prevX + dxClamped
-      yClamped = prevY + dyClamped
-    }
-
-
-    rotScaled = if (!headingLock) {
-      rotRamp.calculate(
-        min(
-          MathUtil.applyDeadband(
-            abs(controller.rightX).pow(SwerveConstants.ROT_FILTER_ORDER),
-            RobotConstants.ROTATION_DEADBAND,
-            1.0
-          ),
-          1.0
-        ) * -sign(controller.rightX) * drive.maxRotSpeed
-      )
-    } else {
-      MathUtil.clamp(
-        rotCtrl.calculate(heading.radians),
-        -RobotConstants.ALIGN_ROT_SPEED,
-        RobotConstants.ALIGN_ROT_SPEED
-      )
-    }
-
-
-    val vel = Translation2d(xClamped, yClamped)
-
-
-    vel.rotateBy(Rotation2d(-rotScaled * dt * skewConstant))
-
-
-    var controllerSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-      vel.x * directionCompensation.invoke(),
-      vel.y * directionCompensation.invoke(),
-      rotScaled,
-      heading
-    )
-    //this increases the users power based on how much it is going against pathmag
-    if(controllerSpeeds.vxMetersPerSecond < 0 != desVel.vxMetersPerSecond < 0) {
-      currentControllerPower += (abs(controllerSpeeds.vxMetersPerSecond) + abs(desVel.vxMetersPerSecond))/20
-    } else if(controllerSpeeds.vyMetersPerSecond < 0 != desVel.vyMetersPerSecond < 0) {
-      currentControllerPower += (abs(controllerSpeeds.vyMetersPerSecond) + abs(desVel.vyMetersPerSecond))/20
-    }
-
-
-    controllerSpeeds *= currentControllerPower / 2
-    val desVelAdjustedSpeeds = desVel / (20 / ( 1 + exp(-(currentControllerPower-15)/2) ) )
-
-    val combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
-    combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
-    combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -drive.maxLinearSpeed, drive.maxLinearSpeed)
-    combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -drive.maxRotSpeed, drive.maxRotSpeed)
-
-
-    drive.set(combinedChassisSpeeds)
+//    println("controller power: $currentControllerPower mult: $magMultiply")
 
   }
-
-//    println("controller power: $currentControllerPower mult: $mag
-
-
 
   private val isReal = RobotBase.isReal()
 
