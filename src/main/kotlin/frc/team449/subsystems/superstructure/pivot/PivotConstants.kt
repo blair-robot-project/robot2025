@@ -11,7 +11,6 @@ object PivotConstants {
   const val LEAD_MOTOR_ID = 10 // TODO(Change motor ID.)
   const val FOLLOWER_MOTOR_ID = 11
 
-
   // TODO(Adjust gearing and UPR.)
   const val GEARING = 1.0 / 75.0
   const val UPR = 2.0 * PI

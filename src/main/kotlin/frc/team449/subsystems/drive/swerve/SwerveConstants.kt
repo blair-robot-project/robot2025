@@ -10,7 +10,6 @@ object SwerveConstants {
   const val USE_FOC = false
   const val DUTY_CYCLE_DEADBAND = 0.001
 
-
   /** Drive motor ports */
   const val DRIVE_MOTOR_FL = 21
   const val DRIVE_MOTOR_FR = 22
