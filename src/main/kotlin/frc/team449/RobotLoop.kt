@@ -98,7 +98,6 @@ class RobotLoop : TimedRobot(), Logged {
 
     robot.elevator.wristLigament.angle = robot.wrist.positionSupplier.get() * (180 / PI)
 
-
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
 
     // Monologue Logging

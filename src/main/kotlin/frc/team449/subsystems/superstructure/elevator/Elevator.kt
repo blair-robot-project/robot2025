@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.util.sendable.SendableBuilder
+import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
@@ -18,9 +19,12 @@ import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.function.Supplier
 import kotlin.math.abs
+import frc.team449.subsystems.superstructure.PowerManager
+import frc.team449.subsystems.superstructure.powerDistribution
 
 open class Elevator(
   private val motor: TalonFX
+
 ) : SubsystemBase() {
 
   open val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -124,7 +128,7 @@ open class Elevator(
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = ElevatorConstants.STATOR_LIM
-      config.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.SUPPLY_LIM
+      config.CurrentLimits.SupplyCurrentLimit = powerDistribution.adjustPowerDistribution
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)

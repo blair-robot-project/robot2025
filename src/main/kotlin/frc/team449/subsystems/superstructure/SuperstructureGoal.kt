@@ -51,7 +51,6 @@ object SuperstructureGoal {
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
-
   val L1_PREMOVE = SuperstructureState(
     L1.pivot,
     L1.elevator,
