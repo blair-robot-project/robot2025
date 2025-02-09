@@ -96,7 +96,7 @@ class MagnetizePIDPoseAlign(
   fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
     val xPID = xController.calculate(currPose.x, desState.x)
     val yPID = yController.calculate(currPose.y, desState.y)
-    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)//
+    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians) //
 
     return ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, currPose.rotation)
   }

@@ -41,7 +41,9 @@ class RemoteADStar : Pathfinder {
     pathPointsSub =
       nt.getDoubleArrayTopic("/PPLibCoprocessor/RemoteADStar/pathPoints")
         .subscribe(
-          DoubleArray(0), PubSubOption.keepDuplicates(true), PubSubOption.sendAll(true)
+          DoubleArray(0),
+          PubSubOption.keepDuplicates(true),
+          PubSubOption.sendAll(true)
         )
 
     nt.addListener(
@@ -77,7 +79,8 @@ class RemoteADStar : Pathfinder {
         }
       } catch (e: Exception) {
         DriverStation.reportError(
-          "RemoteADStar failed to load navgrid. Pathfinding will not be functional.", false
+          "RemoteADStar failed to load navgrid. Pathfinding will not be functional.",
+          false
         )
       }
     }
@@ -140,7 +143,8 @@ class RemoteADStar : Pathfinder {
    * position of the path to properly avoid obstacles
    */
   override fun setDynamicObstacles(
-    obs: List<Pair<Translation2d, Translation2d>>, currentRobotPos: Translation2d
+    obs: List<Pair<Translation2d, Translation2d>>,
+    currentRobotPos: Translation2d
   ) {
     val obsArr = DoubleArray(((obs.size * 2) + 1) * 2)
 
