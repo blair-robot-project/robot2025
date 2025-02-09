@@ -45,33 +45,33 @@ class ControllerBindings(
     )
 
     // these testing commands are just temp, wont be on controller
-    robot.driveController.x().onTrue(
-      runOnce({
-        autoScore.currentCommand = autoScore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
-        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
-        autoScore.currentCommand.schedule()
-      })
-    )
-    robot.driveController.a().onTrue(
-      runOnce({
-        autoScore.currentCommand = autoScore.processor()
-        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
-        autoScore.currentCommand.schedule()
-      })
-    )
-    // on red alliance side passed in by webapp, this is temp
-    robot.driveController.b().onTrue(
-      runOnce({
-        autoScore.currentCommand = autoScore.net(true)
-        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
-        autoScore.currentCommand.schedule()
-      })
-    )
-    robot.driveController.y().onTrue(
-      runOnce({
-        autoScore.currentCommand.cancel()
-      })
-    )
+//    robot.driveController.x().onTrue(
+//      runOnce({
+//        autoScore.currentCommand = autoScore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
+//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+//        autoScore.currentCommand.schedule()
+//      })
+//    )
+//    robot.driveController.a().onTrue(
+//      runOnce({
+//        autoScore.currentCommand = autoScore.processor()
+//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+//        autoScore.currentCommand.schedule()
+//      })
+//    )
+//    // on red alliance side passed in by webapp, this is temp
+//    robot.driveController.b().onTrue(
+//      runOnce({
+//        autoScore.currentCommand = autoScore.net(true)
+//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+//        autoScore.currentCommand.schedule()
+//      })
+//    )
+//    robot.driveController.y().onTrue(
+//      runOnce({
+//        autoScore.currentCommand.cancel()
+//      })
+//    )
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(
 //      3.0,
@@ -87,7 +87,7 @@ class ControllerBindings(
 //        // Goal end velocity in meters/sec
 //      )
 //    )
-
+    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
 //    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
 
 //    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))

@@ -2,6 +2,8 @@ package frc.team449
 
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import frc.team449.auto.choreo.MagnetizePIDPoseAlign
+import frc.team449.commands.autoscoreCommands.pathfinder
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
@@ -55,4 +57,6 @@ class Robot : RobotBase() {
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
+
+  val pathfinder: pathfinder = pathfinder(this)
 }

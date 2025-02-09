@@ -9,8 +9,8 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveConstants
@@ -32,7 +32,7 @@ class MagnetizePIDPoseAlign(
   private val drivetrain: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
   private val pose: Pose2d,
-  private val controller: XboxController,
+  private val controller: CommandXboxController,
   private val xController: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
   private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
   private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
@@ -93,10 +93,10 @@ class MagnetizePIDPoseAlign(
     thetaController.setTolerance(poseTol.rotation.radians)
   }
 
-  private fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
+  fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
     val xPID = xController.calculate(currPose.x, desState.x)
     val yPID = yController.calculate(currPose.y, desState.y)
-    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)
+    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)//
 
     return ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, currPose.rotation)
   }

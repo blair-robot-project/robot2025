@@ -1,6 +1,7 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import com.pathplanner.lib.pathfinding.Pathfinding
 import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
@@ -174,8 +175,9 @@ class RobotLoop : TimedRobot() {
 
   override fun testPeriodic() {}
 
-  override fun simulationInit() {}
-
+  override fun simulationInit() {
+    Pathfinding.setPathfinder(robot.pathfinder.adstar)
+  }
   override fun simulationPeriodic() {
     robot.drive as SwerveSim
 
