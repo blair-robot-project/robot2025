@@ -33,7 +33,7 @@ class ControllerBindings(
       robot.poseSubsystem::getPosea,
       robot.poseSubsystem::resetOdometry,
       robot.drive::currentSpeeds,
-      robot.poseSubsystem::edemPathMag,
+      robot.poseSubsystem::pathfindingMagnetize,
       PPHolonomicDriveController(
         PIDConstants(5.0, 0.0, 0.0),
         PIDConstants(5.0, 0.0, 0.0)

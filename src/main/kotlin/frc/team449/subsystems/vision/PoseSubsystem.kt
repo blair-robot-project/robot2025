@@ -182,7 +182,7 @@ class PoseSubsystem(
   }
 
 
-  fun edemPathMag(desVel: ChassisSpeeds) {
+  fun pathfindingMagnetize(desVel: ChassisSpeeds) {
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime

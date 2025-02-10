@@ -14,26 +14,25 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
-import frc.team449.auto.choreo.MagnetizePIDPoseAlign
 import frc.team449.commands.driveAlign.PIDPoseAlign
 import frc.team449.subsystems.RobotConstants
 import kotlin.math.floor
-import kotlin.math.sqrt
 
 class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
   var ADStar = LocalADStar()
   //lateinit is necessary here
   private var pathPub: StructArrayPublisher<Pose2d>
-  private var velsXPub: DoublePublisher
-  private var velsYPub: DoublePublisher
-  private var velsRotationPub: DoublePublisher
+  private var velXPub: DoublePublisher
+  private var velYPub: DoublePublisher
+  private var velRotationPub: DoublePublisher
   private var pathSub: StructArraySubscriber<Pose2d>
-  private var velsXSub: DoubleSubscriber
-  private var velsYSub: DoubleSubscriber
-  private var velsRotationSub: DoubleSubscriber
+  private var velXSub: DoubleSubscriber
+  private var velYSub: DoubleSubscriber
+  private var velRotationSub: DoubleSubscriber
   private lateinit var path: PathPlannerPath
   private var velocityX = 0.0
   private var velocityY = 0.0
+  private var rotation = 0.0
   private val timer = Timer()
   private var ET = 0.0 //expected time
   private var startingTime = 0.0
@@ -49,23 +48,24 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
   init {
     timer.restart()
     pathPub = NetworkTableInstance.getDefault().getStructArrayTopic("/activePath", Pose2d.struct).publish(*arrayOf<PubSubOption>())
-    velsXPub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityX").publish()
-    velsYPub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityY").publish()
-    velsRotationPub = NetworkTableInstance.getDefault().getDoubleTopic("/pathRotation").publish()
+    velXPub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityX").publish()
+    velYPub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityY").publish()
+    velRotationPub = NetworkTableInstance.getDefault().getDoubleTopic("/pathRotation").publish()
 
     pathSub =
       NetworkTableInstance.getDefault().getStructArrayTopic("/activePath", Pose2d.struct)
         .subscribe(arrayOf(zeroPose, zeroPose))
 
-    velsXSub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityX").subscribe(0.0)
-    velsYSub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityY").subscribe(0.0)
-    velsRotationSub = NetworkTableInstance.getDefault().getDoubleTopic("/pathRotation").subscribe(0.0)
+    velXSub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityX").subscribe(0.0)
+    velYSub = NetworkTableInstance.getDefault().getDoubleTopic("/pathVelocityY").subscribe(0.0)
+    velRotationSub = NetworkTableInstance.getDefault().getDoubleTopic("/pathRotation").subscribe(0.0)
     PathPlannerPath.clearCache()
   }
 
   private fun resetVelocity() {
     velocityX = 0.0
     velocityY = 0.0
+    rotation = 0.0
   }
 
   private fun resetVars() {
@@ -99,9 +99,13 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
         if (prevPose != null) {
           if (nextPose != null) {
             val currentSpeed = poseAlign.calculate(prevPose, nextPose)
+            robot.poseSubsystem.pathfindingMagnetize(currentSpeed)
             velocityX = currentSpeed.vxMetersPerSecond
-            velsXPub.set(velocityX)
-            velsYPub.set(velocityY)
+            velocityY = currentSpeed.vyMetersPerSecond
+            rotation = currentSpeed.omegaRadiansPerSecond
+            velXPub.set(velocityX)
+            velYPub.set(velocityY)
+            velRotationPub.set(rotation)
           }
         }
       }
@@ -128,7 +132,7 @@ class AutoScorePathfinder(val robot: Robot) : SubsystemBase() {
     //println("time now in path command: ${timer.get()}")
     //println("index thing: $indexinpath")
     currentCommand = runOnce {
-      resetVelocity()
+      resetVars()
       ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
       ADStar.setGoalPosition(goalPosition.translation)
       pathActive = true
