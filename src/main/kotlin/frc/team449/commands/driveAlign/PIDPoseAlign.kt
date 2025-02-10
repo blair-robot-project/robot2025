@@ -68,6 +68,25 @@ class PIDPoseAlign(
     )
   }
 
+  fun calculate(endPose : Pose2d) : ChassisSpeeds {
+    val currPose = poseSubsystem.pose
+
+    xPID.setpoint = endPose.x
+    yPID.setpoint = endPose.y
+    headingPID.setpoint = endPose.rotation.radians
+    // Calculate the feedback for X, Y, and theta using their respective controllers
+    val xFeedback = MathUtil.clamp(xPID.calculate(currPose.x), -translationSpeedLim, translationSpeedLim)
+    val yFeedback = MathUtil.clamp(yPID.calculate(currPose.y), -translationSpeedLim, translationSpeedLim)
+    val headingFeedback = MathUtil.clamp(headingPID.calculate(poseSubsystem.heading.radians), -headingSpeedLim, headingSpeedLim)
+
+    return ChassisSpeeds.fromFieldRelativeSpeeds(
+        xFeedback,
+        yFeedback,
+        headingFeedback,
+        currPose.rotation
+      )
+  }
+
   override fun isFinished(): Boolean {
     return xPID.atSetpoint() && yPID.atSetpoint() && headingPID.atSetpoint() &&
       hypot(
