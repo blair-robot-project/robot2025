@@ -16,16 +16,16 @@ object SwerveConstants {
   const val DRIVE_MOTOR_BL = 23
   const val DRIVE_MOTOR_BR = 24
 
-  const val TURN_MOTOR_FL = 23
+  const val TURN_MOTOR_FL = 19
   const val TURN_MOTOR_FR = 6
   const val TURN_MOTOR_BL = 13
   const val TURN_MOTOR_BR = 5
 
   /** Turning encoder channels */
-  const val TURN_ENC_CHAN_FL = 6
+  const val TURN_ENC_CHAN_FL = 9
   const val TURN_ENC_CHAN_FR = 7
-  const val TURN_ENC_CHAN_BL = 8
-  const val TURN_ENC_CHAN_BR = 9
+  const val TURN_ENC_CHAN_BL = 6
+  const val TURN_ENC_CHAN_BR = 8
 
   /** Offsets for the absolute encoders in rotations. */
   const val TURN_ENC_OFFSET_FL = 0.1348
