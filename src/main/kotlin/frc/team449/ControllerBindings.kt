@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommands
@@ -27,52 +26,51 @@ class ControllerBindings(
   private val robot: Robot
 ) {
 
-  private val autoscore = AutoScoreCommands(robot.drive, robot.poseSubsystem, robot.driveController.hid, robot)
+  private val autoScore = AutoScoreCommands(robot.poseSubsystem, robot)
 
   private fun robotBindings() {
-//    println("configuring the drive")
-//    AutoBuilder.configure(
-//      robot.poseSubsystem::getPosea, // poseSupplier - a supplier for the robot's current pose
-//      robot.poseSubsystem::resetOdometry, // resetPose - a consumer for resetting the robot's pose
-//      robot.drive::getCurrentSpeedsa, // robotRelativeSpeedsSupplier - a supplier for the robot's current robot relative chassis speeds
-//      robot.drive::set, // output - Output function that accepts robot-relative ChassisSpeeds
-//      PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-//        PIDConstants(5.0, 0.0, 0.0), // Translation PID constants, placeholders
-//        PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants, placeholders
-//      ),
-//      RobotConfig.fromGUISettings(),
-//      { DriverStation.getAlliance().get() == Alliance.Red },
-//      robot.drive // driveRequirements - the subsystem requirements for the robot's drive train
-//    )
-//
-//    println("drive configured")
-    // reef location passed in alla webappp, this is temp
+    AutoBuilder.configure(
+      robot.poseSubsystem::getPosea,
+      robot.poseSubsystem::resetOdometry,
+      robot.drive::currentSpeeds,
+      robot.poseSubsystem::edemPathMag,
+      PPHolonomicDriveController(
+        PIDConstants(5.0, 0.0, 0.0),
+        PIDConstants(5.0, 0.0, 0.0)
+      ),
+      RobotConfig.fromGUISettings(),
+      { DriverStation.getAlliance().get() == Alliance.Red },
+      robot.drive
+    )
+
+    // these testing commands are just temp, wont be on controller
 //    robot.driveController.x().onTrue(
-//      PrintCommand("moving to reef").andThen(
-//        autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1)
-//      ).andThen(PrintCommand("reef finished"))
+//      runOnce({
+//        autoScore.currentCommand = autoScore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
+//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+//        autoScore.currentCommand.schedule()
+//      })
 //    )
 //    robot.driveController.a().onTrue(
-//      PrintCommand("move to processor button pressed").andThen(
-//      autoscore.moveToProcessorCommand()).andThen(PrintCommand("moved to processor")).andThen(autoscore.scoreProcessorCommand()).andThen(PrintCommand("processor scored"))
+//      runOnce({
+//        autoScore.currentCommand = autoScore.processor()
+//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+//        autoScore.currentCommand.schedule()
+//      })
 //    )
-//    //on red alliance side passed in by webapp, this is temp
+//    // on red alliance side passed in by webapp, this is temp
 //    robot.driveController.b().onTrue(
-//      PrintCommand("moving to net").andThen(
-//        autoscore.moveToNetCommand(false)
-//      ).andThen(PrintCommand("net finished"))
+//      runOnce({
+//        autoScore.currentCommand = autoScore.net(true)
+//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
+//        autoScore.currentCommand.schedule()
+//      })
 //    )
-//    robot.driveController.y().onTrue(PrintCommand("move to coral intake button pressed").andThen(
-//      autoscore.moveToCoralIntakeCommand(true)).andThen(PrintCommand("moved to coral intake"))
-//        .andThen(autoscore.intakeCoralCommand()).andThen(PrintCommand("coral intaken"))
+//    robot.driveController.y().onTrue(
+//      runOnce({
+//        autoScore.currentCommand.cancel()
+//      })
 //    )
-
-//    println("pose from robot loop ${robot.poseSubsystem.getPosea()}")
-//    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
-//    println(robot.pathfinder.pathpoints(AutoScoreCommandConstants.reef1PoseBlue))
-
-    robot.driveController.x().onTrue(PrintCommand("blue path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue)))
-    robot.driveController.a().onTrue(PrintCommand("red path").andThen(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseRed)))
 //    var reefPose = AutoScoreCommandConstants.testPose
 //    val constraints = PathConstraints(
 //      3.0,
@@ -88,7 +86,7 @@ class ControllerBindings(
 //        // Goal end velocity in meters/sec
 //      )
 //    )
-
+    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
 //    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
 
 //    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
@@ -147,9 +145,9 @@ class ControllerBindings(
   }
 
   private fun pointToRight() {
-//    driveController.a().onTrue(
-//      robot.driveCommand.pointAtAngleCommand(Rotation2d.fromDegrees(90.0))
-//    )
+    driveController.a().onTrue(
+      robot.driveCommand.pointAtAngleCommand(Rotation2d.fromDegrees(90.0))
+    )
   }
 
   /** Characterization functions */

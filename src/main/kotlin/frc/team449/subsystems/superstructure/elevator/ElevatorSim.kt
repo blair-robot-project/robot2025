@@ -1,4 +1,4 @@
-package frc.team449.subsystems.elevator
+package frc.team449.subsystems.superstructure.elevator
 
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.TalonFXSimState
@@ -13,7 +13,7 @@ class ElevatorSim(
 
   override val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
     DCMotor.getKrakenX60(1),
-    1 / ElevatorConstants.GEARING,
+    ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
     ElevatorConstants.CARRIAGE_MASS,
     ElevatorConstants.PULLEY_RADIUS,
     ElevatorConstants.MIN_HEIGHT,
@@ -34,7 +34,7 @@ class ElevatorSim(
 //    println("${request.Position}  -  ${elevatorSim.positionMeters}")
     elevatorSim.update(RobotConstants.LOOP_TIME)
 
-    motorSim.setRawRotorPosition(elevatorSim.positionMeters / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
-    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
+    motorSim.setRawRotorPosition(elevatorSim.positionMeters * ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR)
+    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond * ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR)
   }
 }

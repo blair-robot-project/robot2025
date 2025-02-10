@@ -5,10 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.wpilibj.Timer.getFPGATimestamp
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController
-import frc.team449.Robot
-import frc.team449.subsystems.vision.PoseSubsystem
-import kotlin.math.hypot
 
 class SwerveSim(
   modules: List<SwerveModule>,
@@ -16,10 +12,8 @@ class SwerveSim(
   accel: Double,
   maxRotSpeed: Double,
   field: Field2d,
-  maxModuleSpeed: Double,
-  robot: Robot,
-  controller: CommandXboxController
-) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed, robot, controller) {
+  maxModuleSpeed: Double
+) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed) {
 
   private var lastTime = getFPGATimestamp()
   var currHeading = Rotation2d()
@@ -56,7 +50,7 @@ class SwerveSim(
       getPositions()
     )
 
-    speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+    logData()
   }
 
   fun resetOdometryOnly(pose: Pose2d) {

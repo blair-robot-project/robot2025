@@ -4,36 +4,64 @@ import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.path.PathConstraints
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
-import frc.team449.auto.choreo.MagnetizePIDPoseAlign
-import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.vision.PoseSubsystem
 
+class FollowPathCommandCooked(val poseSubsystem: PoseSubsystem, command: Command) : Command() {
+
+  private val currentCommand = command
+  private val autodistanceTime = poseSubsystem.autoDistance * 4.0
+  private var autodistanceTimer = autodistanceTime
+
+  override fun initialize() {
+    currentCommand.initialize()
+  }
+
+  override fun execute() {
+    currentCommand.execute()
+  }
+
+  private fun resetAndEndCommand() {
+    autodistanceTimer = autodistanceTime
+    currentCommand.end(true)
+    currentCommand.cancel()
+  }
+
+  override fun isFinished(): Boolean {
+    if (autodistanceTimer < 0) {
+      println("autoscore command finished")
+      resetAndEndCommand()
+      return true
+    }
+    if (poseSubsystem.pose.translation.getDistance(poseSubsystem.autoscoreCommandPose.translation) < poseSubsystem.autoDistance) {
+      autodistanceTimer -= 0.05
+    }
+    return false
+  }
+
+  override fun end(interrupted: Boolean) {
+    currentCommand.end(interrupted)
+  }
+}
+
 class AutoScoreCommands(
-  private val drive: SwerveDrive,
-  private val poseSubsystem: PoseSubsystem,
-  private val controller: XboxController,
+  val poseSubsystem: PoseSubsystem,
   private val robot: Robot
 ) {
 
-  val constraints = PathConstraints(
-    30.0,
-    40.0,
-    Units.degreesToRadians(540.0),
-    Units.degreesToRadians(720.0)
+  private val constraints = PathConstraints(
+    AutoScoreCommandConstants.MAX_LINEAR_SPEED,
+    AutoScoreCommandConstants.MAX_ACCEL,
+    AutoScoreCommandConstants.MAX_ROT_SPEED,
+    AutoScoreCommandConstants.ROT_MAX_ACCEL
   )
 
-  val usingPathfinding = true
-
-  init {
-    if (usingPathfinding) println("pathfinding") else println("magnezite")
-  }
+  lateinit var currentCommand: Command
 
   /**
    * This command moves the robot to one of the twelve reef locations
@@ -42,11 +70,11 @@ class AutoScoreCommands(
    * @param reefLocation a reefLocationEnum that defines which spot to go to, defined with the numeric system above.
    */
 
-  fun moveToReefCommand(
+  private fun moveToReefCommand(
     reefLocation: AutoScoreCommandConstants.ReefLocation
   ): Command {
-    println("reef thing pressed")
-    var reefNumericalLocation = reefLocation.ordinal + 1
+    println("reef command called")
+    val reefNumericalLocation = reefLocation.ordinal + 1
     // RANDOM POSE so that compiler does not complain about undefined when command returned.
     // var reefPose = Pose2d(AutoScoreCommandConstants.reef1Translation2dRed, AutoScoreCommandConstants.reef1Rotation2dRed)
     var reefPose = AutoScoreCommandConstants.reef1PoseRed
@@ -82,46 +110,38 @@ class AutoScoreCommands(
         12 -> reefPose = AutoScoreCommandConstants.reef12PoseRed
       }
     }
-    if (usingPathfinding) {
-      /*** pathfinding ***/
-      return AutoBuilder.pathfindToPose(
-        reefPose,
-        constraints,
-        0.0,
-        // Goal end velocity in meters/sec
-      )
-    } else {
-      /*** magnetize ***/
-      return MagnetizePIDPoseAlign(drive, poseSubsystem, reefPose, controller)
-    }
+    poseSubsystem.autoscoreCommandPose = reefPose
+    /*** pathfinding ***/
+    val returnCommand = AutoBuilder.pathfindToPose(
+      reefPose,
+      constraints,
+      0.0,
+    )
+
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
    * moves robot to processor location using
    * swerve drive.
    */
-  fun moveToProcessorCommand(): Command {
-    var pose = AutoScoreCommandConstants.processorPoseBlue
+  private fun moveToProcessorCommand(): Command {
+    println("processor command called")
+    var processorPose = AutoScoreCommandConstants.processorPoseBlue
 
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      pose = AutoScoreCommandConstants.processorPoseRed
+      processorPose = AutoScoreCommandConstants.processorPoseRed
     }
 
-    var returnCommand = AutoBuilder.pathfindToPose(
-      pose,
+    poseSubsystem.autoscoreCommandPose = processorPose
+
+    val returnCommand = AutoBuilder.pathfindToPose(
+      processorPose,
       constraints,
-      0.0,
+      0.0
     )
 
-    if(!usingPathfinding) {
-      returnCommand = MagnetizePIDPoseAlign(
-        drive,
-        poseSubsystem,
-        pose,
-        controller
-      )
-    }
-    return returnCommand
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
@@ -130,36 +150,31 @@ class AutoScoreCommands(
    * in, using swerve drive
    * @param isAtTopSource a boolean representing if we're intaking from the top or the bottom source. True if top, false if bottom.
    */
-  fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
-    var pose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
+  private fun moveToCoralIntakeCommand(isAtTopSource: Boolean): Command {
+    println("coral intake called")
+    val coralIntakePose: Pose2d
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      if(isAtTopSource) {
-        pose = AutoScoreCommandConstants.coralIntakePoseRedTop
+      if (isAtTopSource) {
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseRedTop
       } else {
-        pose = AutoScoreCommandConstants.coralIntakePoseRedBottom
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseRedBottom
       }
     } else {
-      if(isAtTopSource) {
-        pose = AutoScoreCommandConstants.coralIntakePoseBlueTop
+      if (isAtTopSource) {
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseBlueTop
       } else {
-        pose =
-          AutoScoreCommandConstants.coralIntakePoseBlueBottom
+        coralIntakePose = AutoScoreCommandConstants.coralIntakePoseBlueBottom
       }
     }
-    var returnCommand = AutoBuilder.pathfindToPose(
-      pose,
+    poseSubsystem.autoscoreCommandPose = coralIntakePose
+
+    val returnCommand = AutoBuilder.pathfindToPose(
+      coralIntakePose,
       constraints,
-      0.0,
+      0.0
     )
-    if (!usingPathfinding) {
-      returnCommand = MagnetizePIDPoseAlign(
-        drive,
-        poseSubsystem,
-        pose,
-        controller
-      )
-    }
-    return returnCommand
+
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
@@ -171,25 +186,21 @@ class AutoScoreCommands(
    * drive.
    * @param onRedAllianceSide a boolean representing which side of the field we're on. If true, the robot moves to the red alliance side to score net.
    */
-  fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
-    var pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
+  private fun moveToNetCommand(onRedAllianceSide: Boolean): Command {
+    var netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField - AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dBlue)
     if (onRedAllianceSide) {
-      pose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
+      netPose = Pose2d(Translation2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.netTranslationDistance, poseSubsystem.pose.y), AutoScoreCommandConstants.netRotation2dRed)
     }
 
-    if (usingPathfinding) {
-      /*** pathfinding ***/
-      val pathfindingCommand = AutoBuilder.pathfindToPose(
-        pose,
-        constraints,
-        10.0,
-        // Goal end velocity in meters/sec
-      )
-      return pathfindingCommand
-    } else {
-      /*** magnetize ***/
-    return MagnetizePIDPoseAlign(drive, poseSubsystem, pose, controller)
-    }
+    poseSubsystem.autoscoreCommandPose = netPose
+    println(poseSubsystem.autoscoreCommandPose.translation)
+    val returnCommand = AutoBuilder.pathfindToPose(
+      netPose,
+      constraints,
+      0.0
+    )
+
+    return FollowPathCommandCooked(poseSubsystem, returnCommand)
   }
 
   /**
@@ -198,23 +209,30 @@ class AutoScoreCommands(
    * @param reefLevel a reefLevel enum that determines which level to score the coral on
    * does nothing right now
    */
-  fun putCoralInReef(reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
+  private fun premoveReefScore(reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
+    return when (reefLevel) {
+      AutoScoreCommandConstants.ReefLevel.L1 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
+      AutoScoreCommandConstants.ReefLevel.L2 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PREMOVE)
+      AutoScoreCommandConstants.ReefLevel.L3 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)
+      AutoScoreCommandConstants.ReefLevel.L4 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+    }
+  }
+
+  private fun reefScore(reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
     return when (reefLevel) {
       AutoScoreCommandConstants.ReefLevel.L1 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
       AutoScoreCommandConstants.ReefLevel.L2 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
       AutoScoreCommandConstants.ReefLevel.L3 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
       AutoScoreCommandConstants.ReefLevel.L4 -> robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
     }
-    //premove will be added in the bindings instead of here
   }
 
   /**
    * returns a command that scores into processor
    * does nothing right now
    * */
-  fun scoreProcessorCommand(): Command {
-    // we don't have processor scoring yet, just setting up.
-    // returns a command that does nothing (for now)
+  private fun scoreProcessorCommand(): Command {
+    // no processor currently
     return InstantCommand()
   }
 
@@ -222,16 +240,35 @@ class AutoScoreCommands(
    * returns a command that scores net into net
    * does nothing right now
    * */
-  fun scoreNetCommand(): Command {
-    // we don't have net scoring yet, just setting up.
-    // returns a command that does nothing (for now)
+  private fun scoreNetCommand(): Command {
+    // no net currently
     return InstantCommand()
   }
 
   /**
    * intakes coral from coral station
    * */
-  fun intakeCoralCommand(): Command {
+  private fun intakeCoralCommand(): Command {
     return robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+  }
+
+  fun net(onRedAllianceSide: Boolean): Command {
+    val netCommand = moveToNetCommand(onRedAllianceSide).andThen(scoreNetCommand())
+    return netCommand
+  }
+
+  fun coral(atTopSource: Boolean): Command {
+    val coralCommand = moveToCoralIntakeCommand(atTopSource).andThen(intakeCoralCommand())
+    return coralCommand
+  }
+
+  fun reef(reefLocation: AutoScoreCommandConstants.ReefLocation, reefLevel: AutoScoreCommandConstants.ReefLevel): Command {
+    val reefCommand = premoveReefScore(reefLevel).alongWith(moveToReefCommand(reefLocation)).andThen(reefScore(reefLevel))
+    return reefCommand
+  }
+
+  fun processor(): Command {
+    val processorCommand = moveToProcessorCommand().andThen(scoreProcessorCommand())
+    return processorCommand
   }
 }

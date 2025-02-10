@@ -6,7 +6,7 @@ package frc.team449.subsystems.vision.interpolation
 import edu.wpi.first.math.geometry.Translation2d
 
 enum class InterpolatedVisionDataset(red: List<VisionInterpolationData>, blue: List<VisionInterpolationData>) {
-  HOMELEFT(
+  HOMEFRONT(
     listOf(
       VisionInterpolationData(
         Translation2d(15.2245, 5.522),

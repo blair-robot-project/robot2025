@@ -7,20 +7,22 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveDrive
-import frc.team449.subsystems.elevator.Elevator
-import frc.team449.subsystems.pivot.Pivot
-import frc.team449.subsystems.wrist.Wrist
+import frc.team449.subsystems.superstructure.elevator.Elevator
+import frc.team449.subsystems.superstructure.pivot.Pivot
+import frc.team449.subsystems.superstructure.wrist.Wrist
 
 class SuperstructureManager(
-  val elevator: Elevator,
-  val pivot: Pivot,
-  val wrist: Wrist,
-  val drive: SwerveDrive
+  private val elevator: Elevator,
+  private val pivot: Pivot,
+  private val wrist: Wrist,
+  private val drive: SwerveDrive
 ) {
+
   var lastRequestedGoal = SuperstructureGoal.STOW
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
+      .andThen(InstantCommand({ lastRequestedGoal = goal }))
       .andThen(
         ConditionalCommand(
           // if extending
@@ -35,8 +37,7 @@ class SuperstructureManager(
           elevator.setPosition(goal.elevator.`in`(Meters))
             .alongWith(wrist.setPosition(goal.wrist.`in`(Radians)))
             .andThen(pivot.setPosition((goal.pivot.`in`(Radians))))
-        ) { goal.elevator > lastRequestedGoal.elevator }
-          .andThen(InstantCommand({ lastRequestedGoal = goal }))
+        ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
   }
 

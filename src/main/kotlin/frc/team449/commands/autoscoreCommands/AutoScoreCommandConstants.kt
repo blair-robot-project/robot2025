@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
+import frc.team449.subsystems.drive.swerve.SwerveConstants
+import kotlin.math.PI
 
 class AutoScoreCommandConstants() {
 
@@ -258,5 +260,10 @@ class AutoScoreCommandConstants() {
     // RADIANS
     val reef12Rotation2dRed = Rotation2d(radians(-60))
     val reef12PoseRed = Pose2d(reef12Translation2dRed, reef12Rotation2dRed)
+
+    const val ROT_MAX_ACCEL = 2 * PI
+    const val MAX_ACCEL = 10.0
+    const val MAX_ROT_SPEED = 5 * PI / 4 // r ad/s
+    val MAX_LINEAR_SPEED = SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED // m/s
   }
 }
