@@ -176,7 +176,7 @@ class RobotLoop : TimedRobot() {
   override fun testPeriodic() {}
 
   override fun simulationInit() {
-    Pathfinding.setPathfinder(robot.pathfinder.adstar)
+    Pathfinding.setPathfinder(robot.pathfinder.ADStar)
   }
   override fun simulationPeriodic() {
     robot.drive as SwerveSim
