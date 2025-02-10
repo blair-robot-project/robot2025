@@ -51,40 +51,27 @@ class PIDPoseAlign(
   }
 
   override fun execute() {
-    val currPose = poseSubsystem.pose
-
-    // Calculate the feedback for X, Y, and theta using their respective controllers
-    val xFeedback = MathUtil.clamp(xPID.calculate(currPose.x), -translationSpeedLim, translationSpeedLim)
-    val yFeedback = MathUtil.clamp(yPID.calculate(currPose.y), -translationSpeedLim, translationSpeedLim)
-    val headingFeedback = MathUtil.clamp(headingPID.calculate(poseSubsystem.heading.radians), -headingSpeedLim, headingSpeedLim)
-
     drive.set(
-      ChassisSpeeds.fromFieldRelativeSpeeds(
-        xFeedback,
-        yFeedback,
-        headingFeedback,
-        currPose.rotation
-      )
+      calculate(poseSubsystem.pose, targetPose)
     )
   }
 
-  fun calculate(endPose : Pose2d) : ChassisSpeeds {
-    val currPose = poseSubsystem.pose
+  fun calculate(currentPose : Pose2d, endPose : Pose2d) : ChassisSpeeds {
 
     xPID.setpoint = endPose.x
     yPID.setpoint = endPose.y
     headingPID.setpoint = endPose.rotation.radians
     // Calculate the feedback for X, Y, and theta using their respective controllers
-    val xFeedback = MathUtil.clamp(xPID.calculate(currPose.x), -translationSpeedLim, translationSpeedLim)
-    val yFeedback = MathUtil.clamp(yPID.calculate(currPose.y), -translationSpeedLim, translationSpeedLim)
+    val xFeedback = MathUtil.clamp(xPID.calculate(currentPose.x), -translationSpeedLim, translationSpeedLim)
+    val yFeedback = MathUtil.clamp(yPID.calculate(currentPose.y), -translationSpeedLim, translationSpeedLim)
     val headingFeedback = MathUtil.clamp(headingPID.calculate(poseSubsystem.heading.radians), -headingSpeedLim, headingSpeedLim)
 
     return ChassisSpeeds.fromFieldRelativeSpeeds(
-        xFeedback,
-        yFeedback,
-        headingFeedback,
-        currPose.rotation
-      )
+      xFeedback,
+      yFeedback,
+      headingFeedback,
+      currentPose.rotation
+    )
   }
 
   override fun isFinished(): Boolean {
