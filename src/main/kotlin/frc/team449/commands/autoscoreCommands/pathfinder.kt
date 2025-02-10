@@ -39,6 +39,7 @@ class pathfinder(val robot: Robot) : SubsystemBase() {
   var prevpose: Pose2d? = robot.poseSubsystem.pose
   var nextpose: Pose2d? = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
   var alongpath = 0.0
+  var goalpos: Pose2d = Pose2d(Translation2d(0.0,0.0), Rotation2d(0.0))
 
   init {
     timer.restart()
@@ -74,17 +75,17 @@ class pathfinder(val robot: Robot) : SubsystemBase() {
           nextpose = pathSub?.get()?.get(indexinpath) //
           if (prevpose != null) {
             if (nextpose != null) {
-              speednow = MagnetizePIDPoseAlign(robot.drive, robot.poseSubsystem, robot.poseSubsystem.pose, robot.driveController).calculate(robot.poseSubsystem.pose, nextpose!!)
+              speednow = MagnetizePIDPoseAlign(robot.drive, robot.poseSubsystem, goalpos, robot.driveController).calculate(robot.poseSubsystem.pose, nextpose!!)
               println("speed now: ${speednow * 1.0}")
-              robot.drive.set(speednow * 1.0)
+              robot.drive.set(speednow *1.0)
             }
           }
           println()
         }
-        if (indexinpath == pathSub?.get()!!.size) {
-          println("done")
-          alongpath = 0.0
-        }
+//        if (indexinpath == pathSub?.get()!!.size) {
+//          println("done")
+//          alongpath = 0.0
+//        }
       } catch (e: Exception) {
         println("path done probably")
         alongpath = 0.0
@@ -118,6 +119,7 @@ class pathfinder(val robot: Robot) : SubsystemBase() {
     // println("time now in path command: ${timer.get()}")
     // println("index thing: $indexinpath")
     return runOnce({
+      goalpos = goalPosition
       alongpath = 0.0
       pathstart = timer.get() //
       // println(robot.poseSubsystem.pose.translation)
