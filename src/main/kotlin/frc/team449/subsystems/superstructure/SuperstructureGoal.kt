@@ -61,15 +61,15 @@ object SuperstructureGoal {
 
   val L2_PREMOVE = SuperstructureState(
     L2.pivot,
-    STOW.elevator,
-    STOW.wrist,
+    L2.elevator,
+    L2.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L3_PREMOVE = SuperstructureState(
     L3.pivot,
-    STOW.elevator,
-    STOW.wrist,
+    L3.elevator,
+    L3.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

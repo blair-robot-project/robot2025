@@ -56,6 +56,7 @@ open class Routines(
     return nothing
   }
 
+  /** link to starting position on the field: https://docs.google.com/document/d/1SOzIJDgJ0GRSVnNTcBhaFfltvHw0IjJTEUsAZbI2hW4/edit?usp=sharing  **/
   /** left and right are from the driver's pov **/
 
   // right taxi
@@ -101,7 +102,7 @@ open class Routines(
         reefETrajectory.resetOdometry(),
         Commands.parallel(
           Commands.sequence(reefETrajectory.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
         ),
         robot.intake.outtakeCoral()
       )
@@ -113,7 +114,7 @@ open class Routines(
   //L1 coral at reef F
   fun l1reefF(): AutoRoutine {
     val F: AutoRoutine = autoFactory.newRoutine("L4 reef F")
-    val reefFTrajectory: AutoTrajectory = F.trajectory("left_F")
+    val reefFTrajectory: AutoTrajectory = F.trajectory("right_F")
     F.active().onTrue(
       Commands.sequence(
         reefFTrajectory.resetOdometry(),
