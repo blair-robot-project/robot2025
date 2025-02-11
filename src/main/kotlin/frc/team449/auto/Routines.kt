@@ -171,15 +171,17 @@ open class Routines(
 
       Commands.sequence(
         reefETrajectory.resetOdometry(),
-        Commands.parallel(
-          Commands.sequence(reefETrajectory.cmd(),robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)),
-          robot.intake.outtakeCoral(),
+         Commands.parallel(
+           Commands.sequence(reefETrajectory.cmd(),robot.drive.driveStop()),
+           robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)),
+           robot.intake.outtakeCoral(),
 
-          Commands.parallel(
+        Commands.parallel(
             Commands.sequence(reefEtoStationTrajectory.cmd(), robot.drive.driveStop()),
-            robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-         robot.intake.intakeCoral(),
+            robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+            robot.intake.intakeCoral()),
+          robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(stationToDTrajectory.cmd(),robot.drive.driveStop()),
@@ -208,8 +210,11 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefJtoStationTrajectory.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
+
 
         Commands.parallel(
           Commands.sequence(stationToLTrajectory.cmd(),robot.drive.driveStop()),
@@ -237,8 +242,11 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefJtoStationTrajectory.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
+
 
         Commands.parallel(
           Commands.sequence(stationToKTrajectory.cmd(),robot.drive.driveStop()),
@@ -270,8 +278,11 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefJtoStationTrajectory.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
+
 
         Commands.parallel(
           Commands.sequence(stationToKTrajectory.cmd(),robot.drive.driveStop()),
@@ -280,8 +291,11 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefKtoStationTrajectory.cmd(),robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
+
 
         Commands.parallel(
           Commands.sequence(stationToLTrajectory.cmd(),robot.drive.driveStop()),
@@ -313,8 +327,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefJtoStationTrajectory.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(stationToKTrajectory.cmd(),robot.drive.driveStop()),
@@ -323,8 +339,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefKtoStationTrajectory.cmd(),robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(stationToKTrajectory.cmd(),robot.drive.driveStop()),
@@ -333,8 +351,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefKtoStationTrajectory.cmd(),robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(stationToKTrajectory.cmd(),robot.drive.driveStop()),
@@ -369,8 +389,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefJToLeftStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(leftStationToReefK.cmd(), robot.drive.driveStop()),
@@ -379,8 +401,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefKToLeftStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(leftStationReefL.cmd(), robot.drive.driveStop()),
@@ -389,8 +413,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefLtoLeftStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(leftStationToReefK.cmd(), robot.drive.driveStop()),
@@ -399,8 +425,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefKToLeftStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(leftStationReefL.cmd(), robot.drive.driveStop()),
@@ -435,8 +463,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefEToRightStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(rightStationToReefD.cmd(), robot.drive.driveStop()),
@@ -445,8 +475,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefDToRightStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(rightStationReefC.cmd(), robot.drive.driveStop()),
@@ -455,8 +487,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefCtoRightStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(rightStationToReefD.cmd(), robot.drive.driveStop()),
@@ -465,8 +499,10 @@ open class Routines(
 
         Commands.parallel(
           Commands.sequence(reefDToRightStation.cmd(), robot.drive.driveStop()),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)),
-        robot.intake.intakeCoral(),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
+          robot.intake.intakeCoral()),
+        robot.intake.stop(),
+
 
         Commands.parallel(
           Commands.sequence(rightStationReefC.cmd(), robot.drive.driveStop()),
