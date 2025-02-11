@@ -31,7 +31,7 @@ object PivotConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
+  val TOLERANCE = Degrees.of(2.0) // TODO(Adjust tolerance.)
 
   const val KP = 1.0
   const val KI = 0.0
@@ -46,7 +46,7 @@ object PivotConstants {
   val CRUISE_VEL = RotationsPerSecond.of(0.3)
   val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0)
 
-  val RESET_ENC_LIMIT = Degrees.of(0.5)
+  val RESET_ENC_LIMIT = Degrees.of(0.05)
 
   /** Encoder Values */
   const val ABS_ENC_DIO_PORT = 4

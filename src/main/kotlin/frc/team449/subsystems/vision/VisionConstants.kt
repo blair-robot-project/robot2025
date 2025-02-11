@@ -36,8 +36,8 @@ object VisionConstants {
 
   /** Robot to Camera distance */
   val front = Transform3d(
-    Translation3d(Units.inchesToMeters(-2.0), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.0)),
-    Rotation3d(0.0, Units.degreesToRadians(-20.5), Units.degreesToRadians(20.0))
+    Translation3d(Units.inchesToMeters(-2.0), Units.inchesToMeters(0.0), Units.inchesToMeters(8.0)),
+    Rotation3d(0.0, Units.degreesToRadians(-17.5), Units.degreesToRadians(0.0))
   )
 
   val TAG_MODEL = TargetModel(
@@ -74,12 +74,12 @@ object VisionConstants {
 
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
-    ApriltagCamera(
-      "reefCam",
-      TAG_LAYOUT,
-      front,
-      VISION_SIM
-    )
+//    ApriltagCamera(
+//      "reefCam",
+//      TAG_LAYOUT,
+//      front,
+//      VISION_SIM
+//    )
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(

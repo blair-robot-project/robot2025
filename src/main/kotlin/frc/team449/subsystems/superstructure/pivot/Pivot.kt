@@ -77,7 +77,7 @@ class Pivot(
   }
 
   private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < PivotConstants.TOLERANCE)
+    return (abs(positionSupplier.get() - request.Position) < PivotConstants.TOLERANCE.`in`(Radians))
   }
 
   override fun periodic() {

@@ -5,6 +5,8 @@ import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -25,6 +27,7 @@ import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.*
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -37,6 +40,19 @@ class RobotLoop : TimedRobot() {
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
+
+  private var componentStorage: Array<Pose3d> = arrayOf(
+    Pose3d(),
+    Pose3d(),
+    Pose3d(),
+    Pose3d(),
+    Pose3d(
+      0.0,
+      0.0,
+      0.0,
+      Rotation3d(0.0, 0.0, 0.0)
+    )
+  )
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -107,14 +123,7 @@ class RobotLoop : TimedRobot() {
     robot.field.robotPose = robot.poseSubsystem.pose
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
 
-    // Superstructure Simulation
-    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
-    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
-
-    robot.elevator.elevatorLigament.angle = Units.radiansToDegrees(robot.pivot.positionSupplier.get())
-    robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
-
-    robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
+    logAdvScopeComponents()
   }
 
   override fun autonomousInit() {
@@ -164,15 +173,72 @@ class RobotLoop : TimedRobot() {
   override fun simulationInit() {}
 
   override fun simulationPeriodic() {
+    // Superstructure Simulation
+    robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
+    robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()
+
+    robot.elevator.elevatorLigament.angle = Units.radiansToDegrees(robot.pivot.positionSupplier.get())
+    robot.elevator.desiredElevatorLigament.angle = Units.radiansToDegrees(robot.pivot.targetSupplier.get())
+
+    robot.elevator.wristLigament.angle = Units.radiansToDegrees(robot.wrist.positionSupplier.get())
+
     robot.drive as SwerveSim
 
     VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.poseSubsystem.pose)
+      it.simulationPeriodic(robot.drive.odometryPose)
     }
 
     VisionConstants.VISION_SIM.debugField.getObject("EstimatedRobot").pose = robot.poseSubsystem.pose
 
     // change elevator angle according to pivot position
     robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
+  }
+
+  private fun logAdvScopeComponents() {
+    val pivotPos = -robot.pivot.positionSupplier.get()
+    val cosPivot = cos(-pivotPos)
+    val sinPivot = sin(-pivotPos)
+
+    val elevatorPos = robot.elevator.positionSupplier.get()
+
+    componentStorage = arrayOf(
+//       pivot/base stage
+      Pose3d(
+        -0.136,
+        0.0,
+        0.245,
+        Rotation3d(0.0, pivotPos, 0.0)
+      ),
+      // first stage max: 0.60
+      Pose3d(
+        -0.136 + min(0.6 * cosPivot, elevatorPos * cosPivot),
+        0.0,
+        0.245 + min(0.6 * sinPivot, elevatorPos * sinPivot),
+        Rotation3d(0.0, pivotPos, 0.0)
+      ),
+      // second stage max : 0.575 (1.175)
+      Pose3d(
+        -0.136 + min(1.175 * cosPivot, elevatorPos * cosPivot),
+        0.0,
+        0.245 + min(1.175 * sinPivot, elevatorPos * sinPivot),
+        Rotation3d(0.0, pivotPos, 0.0)
+      ),
+      // third stage max: 0.56 (1.735)
+      Pose3d(
+        -0.136 + min(1.735 * cosPivot, elevatorPos * cosPivot),
+        0.0,
+        0.245 + min(1.735 * sinPivot, elevatorPos * sinPivot),
+        Rotation3d(0.0, pivotPos, 0.0)
+      ),
+      Pose3d(
+        -.136 + (0.7112 * cosPivot + (0.127 * -sinPivot)) +
+          min(1.735 * cosPivot, elevatorPos * cosPivot),
+        0.0,
+        .245 + (0.7112 * sinPivot) + (0.127 * cosPivot) +
+          min(1.735 * sinPivot, elevatorPos * sinPivot),
+        Rotation3d(0.0, -robot.wrist.positionSupplier.get() + pivotPos, 0.0)
+      )
+    )
+    DogLog.log("AdvScopeComponents", componentStorage)
   }
 }

@@ -16,7 +16,7 @@ object ElevatorConstants {
   val DESIRED_COLOR = Color8Bit(0, 255, 0)
   const val MIN_VIS_HEIGHT = 0.2
 
-  const val MAX_HEIGHT = 2.0
+  const val MAX_HEIGHT = 1.735
   const val MIN_HEIGHT = 0.0
 
   const val LEAD_MOTOR_ID = 1

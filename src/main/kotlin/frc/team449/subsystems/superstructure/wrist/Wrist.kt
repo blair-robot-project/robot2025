@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -62,7 +61,7 @@ class Wrist(
   override fun periodic() {
     logData()
 
-    if (abs(motor.position.valueAsDouble - quadEncoder.position) > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
+    if (abs(motor.position.valueAsDouble - quadEncoder.position) > WristConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
       motor.setPosition(quadEncoder.position)
     }
   }

@@ -25,29 +25,29 @@ object SuperstructureGoal {
 
   val L3 = SuperstructureState(
     Degrees.of(50.0),
-    Meters.of(1.0),
+    Meters.of(0.75),
     Degrees.of(-60.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L4 = SuperstructureState(
     Degrees.of(60.0),
-    Meters.of(1.65),
-    Degrees.of(-50.0),
+    Meters.of(1.25),
+    Degrees.of(-120.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val SUBSTATION_INTAKE = SuperstructureState(
     Degrees.of(60.0),
     Meters.of(0.0),
-    Degrees.of(180.0),
+    Degrees.of(60.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val STOW = SuperstructureState(
-    Degrees.of(0.0),
+    Degrees.of(40.0),
     Meters.of(0.0),
-    Degrees.of(180.0),
+    Degrees.of(90.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
