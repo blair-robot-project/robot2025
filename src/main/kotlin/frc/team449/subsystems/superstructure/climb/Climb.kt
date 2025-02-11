@@ -1,6 +1,7 @@
 package frc.team449.subsystems.superstructure.climb
 
 import com.revrobotics.spark.SparkMax
+import dev.doglog.DogLog
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -23,6 +24,15 @@ class Climb(
     return runOnce {
       motor.stopMotor()
     }
+  }
+
+  override fun periodic() {
+    logData()
+  }
+
+  private fun logData() {
+    DogLog.log("Climb/Motor Voltage", motor.appliedOutput * 12.0)
+    DogLog.log("Climb/IR sensor", !infrared.get())
   }
 
   companion object {
