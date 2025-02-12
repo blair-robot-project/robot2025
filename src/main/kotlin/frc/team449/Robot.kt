@@ -2,7 +2,7 @@ package frc.team449
 
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
-import frc.team449.commands.autoscoreCommands.Pathfinder
+import frc.team449.commands.autoscoreCommands.PathMag
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
@@ -57,5 +57,5 @@ class Robot : RobotBase() {
 
   val light = createLight()
 
-  val pathfinder: Pathfinder = Pathfinder(this)
+  val pathfinder: PathMag = PathMag(this)
 }

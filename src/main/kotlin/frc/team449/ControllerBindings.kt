@@ -86,7 +86,7 @@ class ControllerBindings(
 //        // Goal end velocity in meters/sec
 //      )
 //    )
-    robot.driveController.x().onTrue(robot.pathfinder.path(AutoScoreCommandConstants.reef1PoseBlue))
+    robot.driveController.x().onTrue(robot.pathfinder.getPath(AutoScoreCommandConstants.reef1PoseBlue))
 //    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
 
 //    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
