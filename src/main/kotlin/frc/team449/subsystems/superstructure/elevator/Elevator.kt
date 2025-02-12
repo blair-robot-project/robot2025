@@ -14,15 +14,14 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.function.Supplier
 import kotlin.math.abs
-import frc.team449.subsystems.superstructure.powerDistribution
 
 open class Elevator(
   private val motor: TalonFX
-
 ) : SubsystemBase() {
 
   open val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -112,7 +111,9 @@ open class Elevator(
   }
 
   companion object {
-    fun createElevator(): Elevator {
+    fun createElevator(
+       robot: Robot
+    ): Elevator {
       // TODO(Fill in parameters.)
       val leadMotor = TalonFX(ElevatorConstants.LEAD_MOTOR_ID)
       val followerMotor = TalonFX(ElevatorConstants.FOLLOWER_MOTOR_ID)
@@ -126,7 +127,8 @@ open class Elevator(
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = ElevatorConstants.STATOR_LIM
-      config.CurrentLimits.SupplyCurrentLimit = powerDistribution.elevatorSUPPLY_LIM
+
+      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.elevatorSUPPLY_LIM()
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)

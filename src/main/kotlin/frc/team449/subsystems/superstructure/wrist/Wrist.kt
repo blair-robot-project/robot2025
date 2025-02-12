@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.units.Units.Radians
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import java.util.function.Supplier
 import kotlin.math.abs
@@ -58,7 +59,9 @@ class Wrist(
   }
 
   companion object {
-    fun createWrist(): Wrist {
+    fun createWrist(
+      robot: Robot
+    ): Wrist {
       val leadMotor = TalonFX(WristConstants.MOTOR_ID)
       val config = TalonFXConfiguration()
 
@@ -70,7 +73,7 @@ class Wrist(
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = WristConstants.STATOR_LIM
-      config.CurrentLimits.SupplyCurrentLimit = WristConstants.SUPPLY_LIM
+      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.wristSUPPLY_LIM()
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)

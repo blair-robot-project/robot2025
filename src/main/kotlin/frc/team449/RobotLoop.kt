@@ -85,6 +85,10 @@ class RobotLoop : TimedRobot(), Logged {
   override fun robotPeriodic() {
     CommandScheduler.getInstance().run()
 
+    robot.currentManager.elevatorSUPPLY_LIM()
+    robot.currentManager.pivotSUPPLY_LIM()
+    robot.currentManager.wristSUPPLY_LIM()
+
     // Robot Drive Logging
     robot.field.robotPose = robot.poseSubsystem.pose
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose

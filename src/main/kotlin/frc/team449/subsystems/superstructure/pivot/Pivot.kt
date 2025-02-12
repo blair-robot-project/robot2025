@@ -9,6 +9,7 @@ import edu.wpi.first.units.Units.Radians
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import java.util.function.Supplier
 import kotlin.math.abs
@@ -86,7 +87,9 @@ class Pivot(
   }
 
   companion object {
-    fun createPivot(): Pivot {
+    fun createPivot(
+      robot: Robot
+    ): Pivot {
       val leadMotor = TalonFX(PivotConstants.LEAD_MOTOR_ID)
       val followerMotor = TalonFX(PivotConstants.FOLLOWER_MOTOR_ID)
 
@@ -100,7 +103,7 @@ class Pivot(
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = PivotConstants.STATOR_LIM
-      config.CurrentLimits.SupplyCurrentLimit = PivotConstants.SUPPLY_LIM
+      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.pivotSUPPLY_LIM()
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)

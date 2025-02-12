@@ -7,6 +7,7 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
 import frc.team449.subsystems.light.Light.Companion.createLight
+import frc.team449.subsystems.superstructure.CurrentManager
 import frc.team449.subsystems.superstructure.SuperstructureManager
 import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
 import frc.team449.subsystems.superstructure.elevator.Elevator
@@ -35,8 +36,10 @@ class Robot : RobotBase(), Logged {
   @Log.NT
   override val powerDistribution: PowerDistribution = PowerDistribution(
     RobotConstants.PDH_CAN,
-    PowerDistribution.ModuleType.kRev
+    PowerDistribution.ModuleType.kRev,
   )
+  @Log.NT
+   val currentManager: CurrentManager = CurrentManager(powerDistribution)
 
   @Log.NT
   override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
@@ -50,13 +53,13 @@ class Robot : RobotBase(), Logged {
   override val driveCommand: SwerveOrthogonalCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
 
   @Log.NT
-  val elevator: Elevator = createElevator()
+  val elevator: Elevator = createElevator(Robot())
 
   @Log.NT
-  val pivot: Pivot = createPivot()
+  val pivot: Pivot = createPivot(Robot())
 
   @Log.NT
-  val wrist: Wrist = createWrist()
+  val wrist: Wrist = createWrist(Robot())
 
   @Log.NT
   val intake: Intake = Intake.createIntake()
@@ -64,4 +67,6 @@ class Robot : RobotBase(), Logged {
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
+
+
 }
