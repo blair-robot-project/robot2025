@@ -1,7 +1,6 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
-import dev.doglog.DogLog
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.units.Units.*
@@ -61,12 +60,12 @@ class ControllerBindings(
   }
 
   fun updateSelectedCharacterization(selected: String) {
-     when (selected) {
-       "drive" -> driveCharacterization()
-       "elevator" -> elevatorCharacterizaton()
-       "pivot" -> pivotCharacterizaton()
-       "wrist" -> wristCharacterizaton()
-     }
+    when (selected) {
+      "drive" -> driveCharacterization()
+      "elevator" -> elevatorCharacterizaton()
+      "pivot" -> pivotCharacterizaton()
+      "wrist" -> wristCharacterizaton()
+    }
   }
 
   private fun nonRobotBindings() {
