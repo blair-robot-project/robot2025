@@ -5,8 +5,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.superstructure.wrist.WristConstants
+import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
@@ -25,7 +26,8 @@ open class Elevator(
 
   open val positionSupplier = Supplier { motor.position.valueAsDouble }
   open val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
-  open val targetSupplier = Supplier { request.Position }
+  open val targetSupplier = Supplier { motor.closedLoopReference.valueAsDouble }
+  open val goalSupplier = Supplier { request.Position }
 
   lateinit var elevatorFeedForward: ElevatorFeedForward
 
@@ -89,6 +91,10 @@ open class Elevator(
     return runOnce { motor.setVoltage(3.0) }
   }
 
+  fun setVoltage(voltage: Double): Command {
+    return runOnce { motor.setVoltage(voltage) }
+  }
+
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
@@ -97,16 +103,15 @@ open class Elevator(
     return (abs(positionSupplier.get() - request.Position) < ElevatorConstants.TOLERANCE)
   }
 
-  override fun periodic() {}
+  override fun periodic() {
+    logData()
+  }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("1.0", "Elevator Info")
-    builder.addDoubleProperty("1.1 Voltage", { motor.motorVoltage.valueAsDouble }, null)
-    builder.addDoubleProperty("1.2 Position", { positionSupplier.get() }, null)
-    builder.addDoubleProperty("1.3 Velocity", { velocitySupplier.get() }, null)
-    builder.addDoubleProperty("1.4 Desired Position", { request.Position }, null)
-    builder.addBooleanProperty("1.5 At Tolerance", { atSetpoint() }, null)
-    // builder.addStringProperty("1.7 Command", {this.currentCommand.name}, null)
+  private fun logData() {
+    DogLog.log("Elevator/Desired Target", request.Position)
+    DogLog.log("Elevator/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
+    DogLog.log("Elevator/In Tolerance", atSetpoint())
+    KrakenDogLog.log("Elevator/Motor", motor)
   }
 
   companion object {
@@ -119,7 +124,7 @@ open class Elevator(
       config.MotorOutput.Inverted = ElevatorConstants.INVERTED
       config.MotorOutput.NeutralMode = ElevatorConstants.BRAKE_MODE
       config.MotorOutput.DutyCycleNeutralDeadband = 0.001
-      config.Feedback.SensorToMechanismRatio = 1 / (ElevatorConstants.GEARING * ElevatorConstants.UPR)
+      config.Feedback.SensorToMechanismRatio = ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR
 
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true

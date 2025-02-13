@@ -8,7 +8,7 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 
 object SuperstructureGoal {
-
+  /** TODO: All placeholder guesses, need actual values */
   val L1 = SuperstructureState(
     Degrees.of(30.0),
     Meters.of(0.25),
@@ -25,58 +25,57 @@ object SuperstructureGoal {
 
   val L3 = SuperstructureState(
     Degrees.of(50.0),
-    Meters.of(1.0),
+    Meters.of(0.75),
     Degrees.of(-60.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L4 = SuperstructureState(
     Degrees.of(60.0),
-    Meters.of(1.75),
-    Degrees.of(-50.0),
+    Meters.of(1.25),
+    Degrees.of(-120.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val SUBSTATION_INTAKE = SuperstructureState(
-    Degrees.of(40.0),
-    Meters.of(0.10),
+    Degrees.of(60.0),
+    Meters.of(0.0),
     Degrees.of(60.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val STOW = SuperstructureState(
-    Degrees.of(0.0),
+    Degrees.of(40.0),
     Meters.of(0.0),
-    Degrees.of(180.0),
+    Degrees.of(90.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
-
   val L1_PREMOVE = SuperstructureState(
     L1.pivot,
-    L1.elevator,
-    L1.wrist,
+    STOW.elevator,
+    STOW.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L2_PREMOVE = SuperstructureState(
     L2.pivot,
-    L2.elevator,
-    L2.wrist,
+    STOW.elevator,
+    STOW.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L3_PREMOVE = SuperstructureState(
     L3.pivot,
-    L3.elevator,
-    L3.wrist,
+    STOW.elevator,
+    STOW.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L4_PREMOVE = SuperstructureState(
     L4.pivot,
-    L4.elevator,
-    L4.wrist,
+    STOW.elevator,
+    SUBSTATION_INTAKE.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

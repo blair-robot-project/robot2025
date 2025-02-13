@@ -1,5 +1,7 @@
 package frc.team449.subsystems.vision
 
+import dev.doglog.DogLog
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
@@ -24,6 +26,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+@Logged
 class PoseSubsystem(
   private val ahrs: AHRS,
   private val cameras: List<ApriltagCamera> = mutableListOf(),
@@ -115,9 +118,6 @@ class PoseSubsystem(
     }
   }
 
-  fun getPose() {
-    getPose()
-  }
 
   override fun periodic() {
     if (isReal) {
@@ -136,11 +136,13 @@ class PoseSubsystem(
     if (cameras.isNotEmpty()) localize()
 
     setRobotPose()
+
+    logData()
   }
 
   private fun localize() = try {
     for ((index, camera) in cameras.withIndex()) {
-      val results = camera.estimatedPose()
+      val results = camera.estimatedPose(pose)
       for (result in results) {
         if (result.isPresent) {
           val presentResult = result.get()
@@ -263,30 +265,27 @@ class PoseSubsystem(
     )
   }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("1.0", "Pose")
-    builder.addDoubleArrayProperty("1.1 Estimated Pose", { doubleArrayOf(pose.x, pose.y, pose.rotation.radians) }, null)
+  private fun logData() {
+    DogLog.log("PoseSubsystem/Estimated Pose", pose)
 
-    builder.publishConstString("2.0", "Vision Stats")
-    builder.addBooleanArrayProperty("2.1 Used Last Vision Estimate?", { usedVision }, null)
-    builder.addDoubleArrayProperty("2.2 Number of Targets", { numTargets }, null)
-    builder.addDoubleArrayProperty("2.3 Avg Tag Distance", { tagDistance }, null)
-    builder.addDoubleArrayProperty("2.4 Average Ambiguity", { avgAmbiguity }, null)
-    builder.addDoubleArrayProperty("2.5 Cam Height Error", { heightError }, null)
-    builder.addIntegerArrayProperty("2.6 Total Used Vision Sights", { usedVisionSights }, null)
-    builder.addIntegerArrayProperty("2.7 Total Rejected Vision Sights", { rejectedVisionSights }, null)
+    DogLog.log("PoseSubsystem/Vision Stats/Used Last Vision Estimate", usedVision)
+    DogLog.log("PoseSubsystem/Vision Stats/Number of Targets", numTargets)
+    DogLog.log("PoseSubsystem/Vision Stats/Avg Tag Distance", tagDistance)
+    DogLog.log("PoseSubsystem/Vision Stats/Average Ambiguity", avgAmbiguity)
+    DogLog.log("PoseSubsystem/Vision Stats/Cam Height Error", heightError)
+    DogLog.log("PoseSubsystem/Vision Stats/Total Used Vision Sights", usedVisionSights)
+    DogLog.log("PoseSubsystem/Vision Stats/Total Rejected Vision Sights", rejectedVisionSights)
     for ((index, _) in cameras.withIndex()) {
-      builder.addDoubleArrayProperty("2.8${1 + index} Vision Pose Cam $index", { visionPose.slice(IntRange(0 + 3 * index, 2 + 3 * index)).toDoubleArray() }, null)
+      DogLog.log("PoseSubsystem/Vision Stats/Vision Pose Cam $index", visionPose.slice(IntRange(0 + 3 * index, 2 + 3 * index)).toDoubleArray())
     }
-    builder.addBooleanProperty("2.9 Enabled Vision Fusion", { enableVisionFusion }, null)
+    DogLog.log("PoseSubsystem/Vision Stats/Enabled Vision Fusion", enableVisionFusion)
 
-    builder.publishConstString("3.0", "AHRS Values")
-    builder.addDoubleProperty("3.1 Heading Degrees", { ahrs.heading.degrees }, null)
-    builder.addDoubleProperty("3.2 Pitch Degrees", { ahrs.pitch.degrees }, null)
-    builder.addDoubleProperty("3.3 Roll Degrees", { ahrs.roll.degrees }, null)
-    builder.addDoubleProperty("3.4 Angular X Vel", { ahrs.angularXVel() }, null)
-    builder.addBooleanProperty("3.5 Navx Connected", { ahrs.connected() }, null)
-    builder.addBooleanProperty("3.6 Navx Calibrated", { ahrs.calibrated() }, null)
+    DogLog.log("PoseSubsystem/AHRS Values/Heading Degrees", ahrs.heading.degrees)
+    DogLog.log("PoseSubsystem/AHRS Values/Pitch Degrees", ahrs.pitch.degrees)
+    DogLog.log("PoseSubsystem/AHRS Values/Roll Degrees", ahrs.roll.degrees)
+    DogLog.log("PoseSubsystem/AHRS Values/Angular X Vel", ahrs.angularXVel())
+    DogLog.log("PoseSubsystem/AHRS Values/Navx Connected", ahrs.connected())
+    DogLog.log("PoseSubsystem/AHRS Values/Navx Calibrated", ahrs.calibrated())
   }
 
   companion object {

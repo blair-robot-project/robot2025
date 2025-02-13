@@ -46,7 +46,7 @@ object RobotConstants {
   const val ALIGN_ROT_SPEED = 7 * PI / 2
 
   // Robot Dimensions (INCLUDING BUMPERS)
-  val ROBOT_WIDTH = Units.inchesToMeters(27 + 3.25 * 2)
-  val ROBOT_LENGTH = Units.inchesToMeters(27 + 3.25 * 2)
+  val ROBOT_WIDTH = Units.inchesToMeters(27.25 + 3.25 * 2)
+  val ROBOT_LENGTH = Units.inchesToMeters(27.5 + 3.25 * 2)
   val ROBOT_WEIGHT = 55.0 // TODO: find (incl. bumpers + battery) (kg)
 }

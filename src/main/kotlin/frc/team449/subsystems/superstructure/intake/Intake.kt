@@ -1,10 +1,12 @@
 package frc.team449.subsystems.superstructure.intake
 
 import com.revrobotics.spark.SparkMax
+import dev.doglog.DogLog
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.createSparkMax
+import kotlin.math.log
 
 // TODO(the entire class bru)
 class Intake(
@@ -46,6 +48,16 @@ class Intake(
       frontMotor.stopMotor()
       backMotor.stopMotor()
     }
+  }
+
+  override fun periodic() {
+    logData()
+  }
+
+  private fun logData() {
+    DogLog.log("Intake/Front Motor Voltage", frontMotor.appliedOutput * 12.0)
+    DogLog.log("Intake/Back Motor Voltage", backMotor.appliedOutput * 12.0)
+    DogLog.log("Intake/IR sensor", !infrared.get())
   }
 
   companion object {

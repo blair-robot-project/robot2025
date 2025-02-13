@@ -12,7 +12,6 @@ class PivotFeedForward(
   private val elevator: Elevator,
   private val ks: Double,
   private val kv: Double,
-  private val ka: Double,
   kgRetracted: Double,
   kgExtended: Double
 ) {
@@ -37,7 +36,6 @@ class PivotFeedForward(
         elevator,
         PivotConstants.KS,
         PivotConstants.KV,
-        PivotConstants.KA,
         PivotConstants.KG_MIN,
         PivotConstants.KG_MAX,
       )

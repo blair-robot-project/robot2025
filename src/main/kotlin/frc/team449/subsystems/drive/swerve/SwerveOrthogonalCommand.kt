@@ -1,12 +1,13 @@
 package frc.team449.subsystems.drive.swerve
 
+import dev.doglog.DogLog
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
@@ -17,6 +18,7 @@ import frc.team449.subsystems.vision.PoseSubsystem
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
 
+@Logged
 class SwerveOrthogonalCommand(
   private val drive: SwerveDrive,
   private val poseEstimator: PoseSubsystem,
@@ -186,7 +188,7 @@ class SwerveOrthogonalCommand(
         rotScaled,
         poseEstimator.heading
       )
-      drive.driveRobotRelative(
+      drive.set(
         desVel
       )
 
@@ -194,7 +196,7 @@ class SwerveOrthogonalCommand(
       desiredVel[1] = desVel.vyMetersPerSecond
       desiredVel[2] = desVel.omegaRadiansPerSecond
     } else {
-      drive.driveRobotRelative(
+      drive.set(
         ChassisSpeeds(
           vel.x,
           vel.y,
@@ -202,32 +204,24 @@ class SwerveOrthogonalCommand(
         )
       )
     }
+
+    logData()
   }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("1.0", "Controller X and Y Values")
-    builder.addDoubleProperty("1.1 currX", { if (abs(controller.leftY) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftY }, null)
-    builder.addDoubleProperty("1.2 currY", { if (abs(controller.leftX) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftX }, null)
-    builder.addDoubleProperty("1.3 prevX", { prevX }, null)
-    builder.addDoubleProperty("1.4 prevY", { prevY }, null)
+  private fun logData() {
+    DogLog.log("TeleopDrive/Controller/currX", if (abs(controller.leftY) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftY)
+    DogLog.log("TeleopDrive/Controller/currY", if (abs(controller.leftX) < RobotConstants.DRIVE_RADIUS_DEADBAND) .0 else -controller.leftX)
+    DogLog.log("TeleopDrive/Controller/prevX", prevX)
+    DogLog.log("TeleopDrive/Controller/prevY", prevY)
 
-    builder.publishConstString("2.0", "Delta X, Y, Time over one loop")
-    builder.addDoubleProperty("2.1 dx", { dx }, null)
-    builder.addDoubleProperty("2.2 dy", { dy }, null)
-    builder.addDoubleProperty("2.3 dt", { dt }, null)
+    DogLog.log("TeleopDrive/Delta/dx", dx)
+    DogLog.log("TeleopDrive/Delta/dy", dy)
+    DogLog.log("TeleopDrive/Delta/dt", dt)
 
-    builder.publishConstString("3.0", "Magnitude of Acceleration")
-    builder.addDoubleProperty("3.1 magAcc", { magAcc }, null)
-    builder.addDoubleProperty("3.2 magAccClamped", { magAccClamped }, null)
+    DogLog.log("TeleopDrive/Accel/Raw Accel", magAcc)
+    DogLog.log("TeleopDrive/Accel/Clamped Accel", magAccClamped)
 
-    builder.publishConstString("4.0", "Turning Skew")
-    builder.addDoubleProperty("4.1 skew constant", { skewConstant }, { k: Double -> skewConstant = k })
-
-    builder.publishConstString("5.0", "Given Speeds")
-    builder.addDoubleArrayProperty("Chassis Speed", { desiredVel }, null)
-
-    builder.publishConstString("6.0", "Rotation Controller")
-    builder.addBooleanProperty("6.1 In Heading Lock", { headingLock }, null)
-    builder.addBooleanProperty("6.2 In Snap to Angle Tolerance", ::checkSnapToAngleTolerance, null)
+    DogLog.log("TeleopDrive/Rotation Control/In Heading Lock", headingLock)
+    DogLog.log("TeleopDrive/Rotation Control/In Snap to Angle Tolerance", checkSnapToAngleTolerance())
   }
 }
