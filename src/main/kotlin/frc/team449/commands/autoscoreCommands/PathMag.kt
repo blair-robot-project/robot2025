@@ -14,9 +14,12 @@ import edu.wpi.first.networktables.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.RunCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
+import frc.team449.commands.driveAlign.PIDPoseAlign
 import frc.team449.subsystems.RobotConstants
+import kotlin.math.floor
 
 class PathMag(val robot: Robot): SubsystemBase() {
   var adStar = LocalADStar()
@@ -86,12 +89,19 @@ class PathMag(val robot: Robot): SubsystemBase() {
 //          if (nextPose != null) {
             //currentSpeed = PIDPoseAlign(robot.drive, robot.poseSubsystem, nextPose!!, 100.0, 100.0).calculate(robot.poseSubsystem.pose, nextPose!!)
         currentSpeed = trajectory.sample(timer.get() - startTime).fieldSpeeds
+        //currentSpeed = PIDPoseAlign(robot.drive, robot.poseSubsystem, (pathSub?.get()?.get((floor((timer.get() - startTime) / expectedTime!! * pathSub?.get()!!.size - 1)).toInt() + 1)!!), 100.0, 100.0).calculate(robot.poseSubsystem.pose, (pathSub?.get()?.get((floor((timer.get() - startTime) / expectedTime!! * pathSub?.get()!!.size - 1)).toInt() + 1)!!))
+
         println("time since start: ${timer.get() - startTime}")
-        println("speed now: $currentSpeed")
-        runOnce {
+        println("speed now: ${currentSpeed*1.0}")
+//        runOnce {
+//          robot.drive.set(currentSpeed)
+//          println("set")
+//        }
+        //run { robot.drive.set(currentSpeed) }
+        val setCommand = RunCommand({
           robot.drive.set(currentSpeed)
-          println("set")
-        }
+        })
+        setCommand.schedule()
         pathRunning = (robot.poseSubsystem.pose != goalPos)
         pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
         println("path running: $pathRunning")
