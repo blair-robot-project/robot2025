@@ -12,8 +12,9 @@ object IntakeConstants {
   const val FRONT_MOTOR_INVERTED = false
   const val BACK_MOTOR_INVERTED = true
 
-  const val CORAL_INTAKE_VOLTAGE = 3.0
-  const val CORAL_OUTTAKE_VOLTAGE = -2.0
+  const val CORAL_INTAKE_VOLTAGE = 6.0
+  const val CORAL_HOLD_VOLTAGE = 2.0
+  const val CORAL_OUTTAKE_VOLTAGE = -4.0
   const val ALGAE_INTAKE_VOLTAGE = 7.0
   const val ALGAE_OUTTAKE_VOLTAGE = -10.0
 
