@@ -6,6 +6,7 @@ import com.pathplanner.lib.path.PathConstraints
 import com.pathplanner.lib.path.PathPlannerPath
 import com.pathplanner.lib.pathfinding.LocalADStar
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.RunCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
+import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 
 class PathMag(val robot: Robot): SubsystemBase() {
@@ -35,7 +37,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
 //  private var nextPose: Pose2d? = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
 //  private var alongPath = 0.0
   private var goalPos: Pose2d = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
-  private lateinit var trajectory: PathPlannerTrajectory
+  private var trajectory: PathPlannerTrajectory? = null
+  private var thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
+  private var rot = 0.0000000000000001
 
   init {
     timer.restart()
@@ -46,7 +50,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
   }
 
   override fun periodic() {
+//    adStar.setStartPosition(robot.poseSubsystem.pose.translation)
     if (adStar.isNewPathAvailable) {
+      println("new path")
       path = adStar.getCurrentPath(
         PathConstraints(
           RobotConstants.MAX_LINEAR_SPEED,
@@ -57,7 +63,16 @@ class PathMag(val robot: Robot): SubsystemBase() {
         GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
       )
       if (path != null) {
-        trajectory = path!!.generateTrajectory(robot.drive.currentSpeeds, robot.poseSubsystem.pose.rotation, RobotConfig.fromGUISettings())
+        println("new path, not null")
+        //if (robot.poseSubsystem.pose.rotation != Rotation2d(0.00, 0.00)) {
+          println("new trajectory")
+          trajectory = path!!.generateTrajectory(
+            robot.drive.currentSpeeds,
+            robot.poseSubsystem.pose.rotation,
+//            Rotation2d(0.01,0.01),
+            RobotConfig.fromGUISettings()
+          )
+        //}
 //        alongPath = 0.0
 //        pathIndex = 0
         expectedTime = 0.0
@@ -68,68 +83,78 @@ class PathMag(val robot: Robot): SubsystemBase() {
       }
     }
     if (pathRunning && pathValid) {
-      if (path == null) {
-        println("path null")
+      if (trajectory==null){
+        println("trajectory null")
       }
-      expectedTime = trajectory.totalTimeSeconds
+      if (trajectory != null) {
+        if (path == null) {
+          println("path null")
+        }
+        expectedTime = trajectory?.totalTimeSeconds
 //      alongPath = (timer.get() - startTime) / expectedTime!!
 //      val numSections = pathSub?.get()!!.size - 1
 
-      if (timer.get()-startTime < expectedTime!!) {
-        println("time now in periodic: ${timer.get()}")
-        println("path start: $startTime")
-        println("expected time: $expectedTime")
+        if (timer.get() - startTime < expectedTime!!) {
+          println("time now in periodic: ${timer.get()}")
+          println("path start: $startTime")
+          println("expected time: $expectedTime")
 //        println("num sections: $numSections")
 //        println("along path: $alongPath")
 //        println("index thing: ${floor(alongPath * numSections) + 1}")
 
 //        if (prevPose != null) {
 //          if (nextPose != null) {
-            //currentSpeed = PIDPoseAlign(robot.drive, robot.poseSubsystem, nextPose!!, 100.0, 100.0).calculate(robot.poseSubsystem.pose, nextPose!!)
-        currentSpeed = trajectory.sample(timer.get() - startTime).fieldSpeeds
-        //currentSpeed = PIDPoseAlign(robot.drive, robot.poseSubsystem, (pathSub?.get()?.get((floor((timer.get() - startTime) / expectedTime!! * pathSub?.get()!!.size - 1)).toInt() + 1)!!), 100.0, 100.0).calculate(robot.poseSubsystem.pose, (pathSub?.get()?.get((floor((timer.get() - startTime) / expectedTime!! * pathSub?.get()!!.size - 1)).toInt() + 1)!!))
+          //currentSpeed = PIDPoseAlign(robot.drive, robot.poseSubsystem, nextPose!!, 100.0, 100.0).calculate(robot.poseSubsystem.pose, nextPose!!)
+          currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds ?: robot.drive.currentSpeeds
+          //currentSpeed = PIDPoseAlign(robot.drive, robot.poseSubsystem, (pathSub?.get()?.get((floor((timer.get() - startTime) / expectedTime!! * pathSub?.get()!!.size - 1)).toInt() + 1)!!), 100.0, 100.0).calculate(robot.poseSubsystem.pose, (pathSub?.get()?.get((floor((timer.get() - startTime) / expectedTime!! * pathSub?.get()!!.size - 1)).toInt() + 1)!!))
 
-        println("time since start: ${timer.get() - startTime}")
-        println("speed now: ${currentSpeed*1.0}")
+          println("time since start: ${timer.get() - startTime}")
+          println("speed now: $currentSpeed")
 //        runOnce {
 //          robot.drive.set(currentSpeed)
 //          println("set")
 //        }
-        //run { robot.drive.set(currentSpeed) }
-        val setCommand = RunCommand({
-          robot.drive.set(currentSpeed)
-        }).withTimeout(0.02)
-        setCommand.schedule()
-        pathRunning = (robot.poseSubsystem.pose != goalPos)
-        pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
-        println("path running: $pathRunning")
-        println("path valid: $pathValid")
-        println()
-      }
-      else {
+          //run { robot.drive.set(currentSpeed) }
+          val setCommand = RunCommand({
+            robot.poseSubsystem.pathfindingMagnetize(currentSpeed)
+          }).withTimeout(0.02)
+          setCommand.schedule()
+          pathRunning = (robot.poseSubsystem.pose != goalPos)
+          pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
+          println("path running: $pathRunning")
+          println("path valid: $pathValid")
+          println()
+        } else {
 //        alongPath = 0.0
 //        pathIndex = 0
-        expectedTime = 0.0
+          expectedTime = 0.0
 //        prevPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
 //        nextPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
-      }
-    } else {
+        }
+      } else {
 //      alongPath = 0.0
 //      pathIndex = 0
-      expectedTime = 0.0
+        expectedTime = 0.0
 //      prevPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
 //      nextPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
+      }
+      robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.000000001))
+      println("rotation: ${robot.poseSubsystem.pose.rotation}")
+      //if (robot.poseSubsystem.pose.rotation != Rotation2d(0.00, 0.00)) {
+        //println("pose: ${robot.poseSubsystem.pose.translation}")
+        adStar.setStartPosition(robot.poseSubsystem.pose.translation)
+      //}
     }
-
   }
   fun getPath(goalPosition: Pose2d): Command {
     return runOnce {
+      rot=thetaController.calculate(goalPosition.rotation.degrees)
 //        alongPath = 0.0
 //        pathIndex = 0
 //        prevPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
 //        nextPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
       goalPos = goalPosition
-      startTime = timer.get() //
+      startTime = timer.get()+0.018 //
       // println(robot.poseSubsystem.pose.translation)
       adStar.setStartPosition(robot.poseSubsystem.pose.translation)
       adStar.setGoalPosition(goalPosition.translation)

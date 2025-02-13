@@ -430,25 +430,21 @@ class PoseSubsystem(
   }
 
 
-  /**
-   * pathfinds to a pose while allowing driver control through magnetization
-   * @param desState pose to travel to
-   */
-  fun setMagnetizePathplanning(desState: Pose2d) {
-
-
-    val xController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
-    val yController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
-    val thetaController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
-
-
-    val xPID = xController.calculate(pose.x, desState.x)
-    val yPID = yController.calculate(pose.y, desState.y)
-    val angPID = thetaController.calculate(pose.rotation.radians, desState.rotation.radians)
-
-
-    ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, desState.rotation)
-  }
+//  fun setMagnetizePathplanning(desState: Pose2d) {
+//
+//
+//    val xController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
+//    val yController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
+//    val thetaController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
+//
+//
+//    val xPID = xController.calculate(pose.x, desState.x)
+//    val yPID = yController.calculate(pose.y, desState.y)
+//    val angPID = thetaController.calculate(pose.rotation.radians, desState.rotation.radians)
+//
+//
+//    ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, desState.rotation)
+//  }
 
 
   override fun periodic() {
