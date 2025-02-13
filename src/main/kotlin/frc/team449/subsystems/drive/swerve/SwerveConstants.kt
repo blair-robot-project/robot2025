@@ -2,6 +2,8 @@ package frc.team449.subsystems.drive.swerve
 
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Distance
+import edu.wpi.first.units.measure.Mass
 import kotlin.math.PI
 
 object SwerveConstants {
@@ -88,4 +90,11 @@ object SwerveConstants {
   val WHEELBASE = Units.inchesToMeters(27.0 - 5.25) // ex. FL to BL, aka 5.25in less than robot length
   val TRACKWIDTH = Units.inchesToMeters(27.0 - 5.25) // ex. BL to BR, aka 5.25in less than robot width
   val X_SHIFT = 0.0 // ex. if your modules aren't centered and have a shifted wheelbase
+
+  /** Robotmass = Total Robot Weight */
+  /**  Bumperlength_x = Length of Robot Bumper along the X axis */
+  /** Bumperlength_y = Length of Robot Bumper along the Y axis */
+  val ROBOTMASS: Mass = Kilograms.of(100.0)
+  val BUMPERLENGTH_X: Distance = Meters.of(3.0)
+  val BUMPERLENGTH_Y: Distance = Meters.of(3.0)
 }

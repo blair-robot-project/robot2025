@@ -1,20 +1,14 @@
 package frc.team449.subsystems.drive.swerve.sim
 
-import com.ctre.phoenix6.hardware.TalonFX
-import com.revrobotics.spark.SparkMax
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.wpilibj.Timer
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveModule
-import frc.team449.system.encoder.Encoder
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 import org.ironmaple.simulation.motorsims.SimulatedMotorController
 import kotlin.math.PI
 import kotlin.math.abs
@@ -90,5 +84,24 @@ class SwerveModuleSim(
 
   override fun update() {
     // MapleSim handles updating
+  }
+
+  companion object {
+    fun createModuleSim(
+      name: String,
+      module: SwerveModuleSimulation,
+      location: Translation2d
+      ): SwerveModuleSim {
+      return SwerveModuleSim(
+        name,
+        module,
+        PIDController(
+          SwerveConstants.TURN_KP,
+          SwerveConstants.TURN_KI,
+          SwerveConstants.TURN_KD
+        ),
+        location
+      )
+    }
   }
 }
