@@ -17,9 +17,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.RunCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
-import frc.team449.commands.driveAlign.PIDPoseAlign
 import frc.team449.subsystems.RobotConstants
-import kotlin.math.floor
 
 class PathMag(val robot: Robot): SubsystemBase() {
   var adStar = LocalADStar()
@@ -100,7 +98,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
         //run { robot.drive.set(currentSpeed) }
         val setCommand = RunCommand({
           robot.drive.set(currentSpeed)
-        })
+        }).withTimeout(0.02)
         setCommand.schedule()
         pathRunning = (robot.poseSubsystem.pose != goalPos)
         pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
