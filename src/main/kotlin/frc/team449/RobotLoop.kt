@@ -22,6 +22,7 @@ import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
+import frc.team449.subsystems.superstructure.wrist.WristFeedForward.Companion.createWristFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
@@ -74,6 +75,7 @@ class RobotLoop : TimedRobot() {
     // Custom Feedforwards
     robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
     robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
+    robot.wrist.wristFeedForward = createWristFeedForward(robot.pivot)
 
     // Generate Auto Routines
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")

@@ -4,12 +4,15 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.GravityTypeValue
 import dev.doglog.DogLog
+import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -33,13 +36,20 @@ class Wrist(
 
   private val isReal = RobotBase.isReal()
 
+  lateinit var wristFeedForward: WristFeedForward
+
+  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.runOnce {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(
+            wristFeedForward.calculate(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble)
+          )
       )
-    }
+    }.until(::atSetpoint)
   }
 
   fun manualDown(): Command {
@@ -55,7 +65,7 @@ class Wrist(
   }
 
   private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < WristConstants.TOLERANCE)
+    return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
   }
 
   override fun periodic() {
@@ -73,7 +83,7 @@ class Wrist(
   }
 
   private fun logData() {
-    DogLog.log("Wrist/Desired Target", request.Position)
+    DogLog.log("Wrist/Desired Target", targetSupplier.get())
     DogLog.log("Wrist/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
     DogLog.log("Wrist/In Tolerance", atSetpoint())
     DogLog.log("Wrist/Abs/Pos", absoluteEncoder.position)

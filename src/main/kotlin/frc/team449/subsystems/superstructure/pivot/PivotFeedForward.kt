@@ -18,8 +18,8 @@ class PivotFeedForward(
   private val map = InterpolatingDoubleTreeMap()
 
   init {
-    map.put(ElevatorConstants.MIN_HEIGHT, kgRetracted)
-    map.put(ElevatorConstants.MAX_HEIGHT, kgExtended)
+    map.put(ElevatorConstants.SIM_MIN_HEIGHT, kgRetracted)
+    map.put(ElevatorConstants.SIM_MAX_HEIGHT, kgExtended)
   }
 
   private fun calculateKg(): Double {
