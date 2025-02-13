@@ -49,6 +49,10 @@ class Wrist(
     }.until(::atSetpoint)
   }
 
+  fun setVoltage(volts: Double): Command {
+    return this.runOnce { motor.setVoltage(volts) }
+  }
+
   fun manualDown(): Command {
     return runOnce { motor.setVoltage(-3.0) }
   }

@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
@@ -40,7 +41,9 @@ class RobotLoop : TimedRobot() {
 
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
+
+  private val characChooser = SendableChooser<String>()
 
   private var componentStorage: Array<Pose3d> = arrayOf(
     Pose3d(),
@@ -91,6 +94,13 @@ class RobotLoop : TimedRobot() {
 
     controllerBinder.bindButtons()
 
+    characChooser.addOption("Elevator", "elevator")
+    characChooser.addOption("Pivot", "pivot")
+    characChooser.addOption("Wrist", "wrist")
+    characChooser.addOption("Drive", "drive")
+
+    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
+
     DogLog.setOptions(
       DogLogOptions()
         .withCaptureDs(true)
@@ -102,6 +112,7 @@ class RobotLoop : TimedRobot() {
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 

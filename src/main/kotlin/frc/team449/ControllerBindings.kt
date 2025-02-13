@@ -1,6 +1,7 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
+import dev.doglog.DogLog
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.units.Units.*
@@ -26,6 +27,7 @@ import kotlin.random.Random
 class ControllerBindings(
   private val driveController: CommandXboxController,
   private val mechanismController: CommandXboxController,
+  private val characterizationController: CommandXboxController,
   private val robot: Robot
 ) {
 
@@ -51,6 +53,20 @@ class ControllerBindings(
     premove_l4()
 
     stow()
+  }
+
+  private fun characterizationBindings() {
+    manualElevator()
+    manualPivot()
+  }
+
+  fun updateSelectedCharacterization(selected: String) {
+     when (selected) {
+       "drive" -> driveCharacterization()
+       "elevator" -> elevatorCharacterizaton()
+       "pivot" -> pivotCharacterizaton()
+       "wrist" -> wristCharacterizaton()
+     }
   }
 
   private fun nonRobotBindings() {
@@ -153,21 +169,21 @@ class ControllerBindings(
   }
 
   private fun manualPivot() {
-    mechanismController.povUp().whileTrue(
+    characterizationController.b().whileTrue(
       robot.pivot.setPosition(robot.pivot.positionSupplier.get() + PI * 0.02 / 8)
     )
 
-    mechanismController.povDown().whileTrue(
+    characterizationController.x().whileTrue(
       robot.pivot.setPosition(robot.pivot.positionSupplier.get() - PI * 0.02 / 8)
     )
   }
 
   private fun manualElevator() {
-    mechanismController.povRight().whileTrue(
+    characterizationController.y().whileTrue(
       robot.elevator.setPosition(robot.elevator.positionSupplier.get() + 0.10 * 0.02)
     )
 
-    mechanismController.povLeft().whileTrue(
+    characterizationController.a().whileTrue(
       robot.elevator.setPosition(robot.elevator.positionSupplier.get() - 0.10 * 0.02)
     )
   }
@@ -226,22 +242,22 @@ class ControllerBindings(
     )
 
     // Quasistatic Forwards
-    driveController.povUp().onTrue(
+    characterizationController.povUp().onTrue(
       driveRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
     // Quasistatic Reverse
-    driveController.povDown().onTrue(
+    characterizationController.povDown().onTrue(
       driveRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
     // Dynamic Forwards
-    driveController.povRight().onTrue(
+    characterizationController.povRight().onTrue(
       driveRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
     // Dynamic Reverse
-    driveController.povLeft().onTrue(
+    characterizationController.povLeft().onTrue(
       driveRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
@@ -261,24 +277,24 @@ class ControllerBindings(
       )
     )
 
-    driveController.povUp().onTrue(
+    characterizationController.povUp().onTrue(
       elevatorRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povDown().onTrue(
+    characterizationController.povDown().onTrue(
       elevatorRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
-    driveController.povRight().onTrue(
+    characterizationController.povRight().onTrue(
       elevatorRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povLeft().onTrue(
+    characterizationController.povLeft().onTrue(
       elevatorRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
 
-  fun pivotCharacterizaton() {
+  private fun pivotCharacterizaton() {
     val pivotRoutine = SysIdRoutine(
       SysIdRoutine.Config(
         Volts.of(0.5).per(Second),
@@ -293,20 +309,53 @@ class ControllerBindings(
       )
     )
 
-    driveController.povUp().onTrue(
+    characterizationController.povUp().onTrue(
       pivotRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povDown().onTrue(
+    characterizationController.povDown().onTrue(
       pivotRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
-    driveController.povRight().onTrue(
+    characterizationController.povRight().onTrue(
       pivotRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povLeft().onTrue(
+    characterizationController.povLeft().onTrue(
       pivotRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+    )
+  }
+
+  private fun wristCharacterizaton() {
+    println("hola")
+    val wristRoutine = SysIdRoutine(
+      SysIdRoutine.Config(
+        Volts.of(0.5).per(Second),
+        Volts.of(3.0),
+        Seconds.of(10.0)
+      ) { state -> SignalLogger.writeString("state", state.toString()) },
+      Mechanism(
+        { voltage: Voltage -> robot.wrist.setVoltage(voltage.`in`(Volts)) },
+        null,
+        robot.wrist,
+        "elevator"
+      )
+    )
+
+    characterizationController.povUp().onTrue(
+      wristRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+    )
+
+    characterizationController.povDown().onTrue(
+      wristRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+    )
+
+    characterizationController.povRight().onTrue(
+      wristRoutine.dynamic(SysIdRoutine.Direction.kForward)
+    )
+
+    characterizationController.povLeft().onTrue(
+      wristRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
 
@@ -314,5 +363,6 @@ class ControllerBindings(
   fun bindButtons() {
     nonRobotBindings()
     robotBindings()
+    characterizationBindings()
   }
 }
