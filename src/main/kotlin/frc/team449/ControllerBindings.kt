@@ -6,14 +6,19 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism
+import frc.team449.commands.driveAlign.SimpleReefAlign
+import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -29,10 +34,16 @@ class ControllerBindings(
     /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
      * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
      */
-//    score_l1()
+    score_l1()
     score_l2()
     score_l3()
     score_l4()
+
+    autoScoreLeft()
+    autoScoreRight()
+
+    substationIntake()
+    coralOuttake()
 
     premove_l1()
     premove_l2()
@@ -59,8 +70,42 @@ class ControllerBindings(
     )
   }
 
+  private fun autoScoreLeft() {
+    driveController.leftTrigger().onTrue(
+      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+        .andThen(robot.intake.outtakeCoral())
+        .andThen(WaitUntilCommand { false })
+        .until { !robot.intake.coralDetected() && RobotBase.isReal() }
+        .andThen(robot.intake.stop())
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+    )
+  }
+
+  private fun autoScoreRight() {
+    driveController.rightTrigger().onTrue(
+      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
+    )
+  }
+
+  private fun substationIntake() {
+    driveController.leftBumper().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+        .alongWith(robot.intake.intakeCoral())
+        .andThen(WaitUntilCommand { false })
+        .until { robot.intake.coralDetected() && RobotBase.isReal() }
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+        .andThen(robot.intake.holdCoral())
+    )
+  }
+
+  private fun coralOuttake() {
+    driveController.rightBumper().onTrue(
+      robot.intake.outtakeCoral()
+    )
+  }
+
   private fun score_l1() {
-    driveController.a().onTrue(
+    driveController.povDown().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
     )
   }
@@ -104,6 +149,26 @@ class ControllerBindings(
   private fun premove_l4() {
     mechanismController.y().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+    )
+  }
+
+  private fun manualPivot() {
+    mechanismController.povUp().whileTrue(
+      robot.pivot.setPosition(robot.pivot.positionSupplier.get() + PI * 0.02 / 8)
+    )
+
+    mechanismController.povDown().whileTrue(
+      robot.pivot.setPosition(robot.pivot.positionSupplier.get() - PI * 0.02 / 8)
+    )
+  }
+
+  private fun manualElevator() {
+    mechanismController.povRight().whileTrue(
+      robot.elevator.setPosition(robot.elevator.positionSupplier.get() + 0.10 * 0.02)
+    )
+
+    mechanismController.povLeft().whileTrue(
+      robot.elevator.setPosition(robot.elevator.positionSupplier.get() - 0.10 * 0.02)
     )
   }
 

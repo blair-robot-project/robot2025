@@ -16,8 +16,8 @@ class ElevatorSim(
     ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
     ElevatorConstants.CARRIAGE_MASS,
     ElevatorConstants.PULLEY_RADIUS,
-    ElevatorConstants.MIN_HEIGHT,
-    ElevatorConstants.MAX_HEIGHT,
+    ElevatorConstants.SIM_MIN_HEIGHT,
+    ElevatorConstants.SIM_MAX_HEIGHT,
     simulateGravity = false,
     PI / 12
   )

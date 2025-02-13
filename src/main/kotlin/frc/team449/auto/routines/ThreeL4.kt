@@ -59,7 +59,7 @@ class ThreeL4(
       .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide)))
       .andThen(robot.intake.outtakeCoral())
       .andThen(
-        WaitUntilCommand { robot.intake.infrared.get() }
+        WaitUntilCommand { !robot.intake.coralDetected() }
           .onlyIf { RobotBase.isReal() }
       )
       .andThen(WaitCommand(0.15))
@@ -70,7 +70,7 @@ class ThreeL4(
       .andThen(robot.intake.intakeCoral())
       .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
       .andThen(
-        WaitUntilCommand { !robot.intake.infrared.get() }
+        WaitUntilCommand { robot.intake.coralDetected() }
           .onlyIf { RobotBase.isReal() }
       )
       .andThen(WaitCommand(0.15))
