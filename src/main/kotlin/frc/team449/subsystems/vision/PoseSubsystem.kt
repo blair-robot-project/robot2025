@@ -148,22 +148,6 @@ class PoseSubsystem(
     resetMagVars()
   }
 
-
-//  private fun calculate(currPose: Pose2d, desState: Pose2d): ChassisSpeeds {
-//    val xPID = xController.calculate(currPose.x, desState.x)
-//    val yPID = yController.calculate(currPose.y, desState.y)
-//    val angPID = thetaController.calculate(currPose.rotation.radians, desState.rotation.radians)
-//
-//
-//    return ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, currPose.rotation)
-//  }
-//
-//
-//  private fun allControllersAtReference(): Boolean {
-//    return xController.atSetpoint() && yController.atSetpoint() && thetaController.atSetpoint()
-//  }
-
-
   private fun resetMagVars() {
     currentControllerPower = 15.0
     magMultiply = 1.00
@@ -302,9 +286,9 @@ class PoseSubsystem(
       controllerSpeeds *= currentControllerPower / 2
       val desVelAdjustedSpeeds = desVel / (20 / ( 1 + exp(-(currentControllerPower-12)/1) ) )
 
-      println(" x ${
-        abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0) - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0))
-      } y ${abs(MathUtil.clamp(controllerSpeeds.vyMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vyMetersPerSecond, -1.0, 1.0))}")
+//      println(" x ${
+//        abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0) - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0))
+//      } y ${abs(MathUtil.clamp(controllerSpeeds.vyMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vyMetersPerSecond, -1.0, 1.0))}")
 
       val combinedChassisSpeeds : ChassisSpeeds
       if( abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0) ) +
@@ -314,7 +298,7 @@ class PoseSubsystem(
         combinedChassisSpeeds = desVel
         currentControllerPower = MathUtil.clamp(currentControllerPower, 0.1, 5.0)
         currentControllerPower -= 0.3
-        println("agree")
+//        println("agree")
       } else if(controllerMag > 0.95 || currentControllerPower > 16) {
         combinedChassisSpeeds = controllerSpeeds
       } else {

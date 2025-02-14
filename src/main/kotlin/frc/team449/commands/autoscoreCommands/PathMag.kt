@@ -67,6 +67,11 @@ class PathMag(val robot: Robot): SubsystemBase() {
         pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0,0.0)))
         startTime = timer.get() //
       }
+      else{
+        println("new path, null ")
+        pathRunning=false
+        pathValid=false
+      }
     }
     if (pathRunning && pathValid) {
       if (trajectory == null) {
@@ -97,7 +102,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
           expectedTime = 0.0
         }
         robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.000000001))
-        println("rotation: ${robot.poseSubsystem.pose.rotation}")
+//        println("rotation: ${robot.poseSubsystem.pose.rotation}")
         adStar.setStartPosition(robot.poseSubsystem.pose.translation)
       }
     }
