@@ -22,6 +22,8 @@ import frc.team449.subsystems.superstructure.wrist.Wrist.Companion.createWrist
 import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
 import frc.team449.system.AHRS
+import choreo.auto.AutoChooser
+
 
 @Logged
 class Robot : RobotBase() {

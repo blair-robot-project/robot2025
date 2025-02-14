@@ -1,6 +1,7 @@
 package frc.team449.subsystems.drive.swerve
 
 import dev.doglog.DogLog
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -73,13 +74,13 @@ open class SwerveDrive(
   fun getModuleVel(): Double {
     var totalVel = 0.0
     modules.forEach { totalVel += it.state.speedMetersPerSecond }
-    return totalVel / modules.size
+    return totalVel / modules.size}
 
 
   /** Stops the robot's drive. */
   fun driveStop(): Command {
     return runOnce {
-      driveRobotRelative(ChassisSpeeds(0.0, 0.0, 0.0))
+      set(ChassisSpeeds(0.0, 0.0, 0.0))
     }
   }
 

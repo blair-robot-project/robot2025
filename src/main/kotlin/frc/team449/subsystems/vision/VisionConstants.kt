@@ -83,8 +83,8 @@ object VisionConstants {
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(
-    InterpolatedVisionDataset.HOMEFRONT,
-//    InterpolatedVisionDataset.HOMERIGHT
+    //InterpolatedVisionDataset.HOMEFRONT,
+  //InterpolatedVisionDataset.HOMERIGHT
   )
 
   val ENCODER_TRUST: Matrix<N3, N1> = MatBuilder.fill(Nat.N3(), Nat.N1(), .125, .125, .0075)

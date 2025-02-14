@@ -36,7 +36,6 @@ class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
 
-  @Log.NT
   private val field = robot.field
 
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
@@ -118,8 +117,7 @@ class RobotLoop : TimedRobot() {
 
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
-    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
-    CommandScheduler.getInstance().schedule(this.autoCommand)
+
 
     if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
       BreatheHue(robot.light, 0).schedule()
@@ -131,9 +129,7 @@ class RobotLoop : TimedRobot() {
   override fun autonomousPeriodic() {}
 
   override fun teleopInit() {
-    if (autoCommand != null) {
-      CommandScheduler.getInstance().cancel(autoCommand)
-    }
+
 
     (robot.light.currentCommand ?: InstantCommand()).cancel()
 
@@ -187,8 +183,20 @@ class RobotLoop : TimedRobot() {
 
     val elevatorPos = robot.elevator.positionSupplier.get()
 
+     var componentStorage: Array<Pose3d> = arrayOf(
+      Pose3d(),
+      Pose3d(),
+      Pose3d(),
+      Pose3d(),
+      Pose3d(
+        0.0,
+        0.0,
+        0.0,
+        Rotation3d(0.0, 0.0, 0.0)
+      )
+    )
     componentStorage = arrayOf(
-//       pivot/base stage
+//      pivot/base stage
       Pose3d(
         -0.136,
         0.0,

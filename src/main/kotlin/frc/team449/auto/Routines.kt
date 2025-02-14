@@ -39,7 +39,7 @@ open class Routines(
     )
     val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, robot.poseSubsystem.heading)
     // Apply the generated speeds
-    robot.drive.driveRobotRelative(newSpeeds)
+    robot.drive.set(newSpeeds)
   }
 
   val autoFactory = AutoFactory(
