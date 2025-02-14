@@ -65,6 +65,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
         pathPub?.set(path!!.pathPoses.toTypedArray<Pose2d>())
         pathRunning = (robot.poseSubsystem.pose != goalPos)
         pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0,0.0)))
+        startTime = timer.get() //
       }
     }
     if (pathRunning && pathValid) {
@@ -104,7 +105,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
   fun getPath(goalPosition: Pose2d): Command {
     return runOnce {
       goalPos = goalPosition
-      startTime = timer.get()+0.018 //
+      startTime = timer.get() //
       adStar.setStartPosition(robot.poseSubsystem.pose.translation)
       adStar.setGoalPosition(goalPosition.translation)
     }.andThen(PrintCommand("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t goal updated")) //
