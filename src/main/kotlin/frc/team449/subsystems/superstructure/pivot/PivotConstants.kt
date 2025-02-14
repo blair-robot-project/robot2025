@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Encoder
 import kotlin.math.PI
 
 object PivotConstants {
-  const val LEAD_MOTOR_ID = 10 // TODO(Change motor ID.)
+  const val LEAD_MOTOR_ID = 10 // left side
   const val FOLLOWER_MOTOR_ID = 11
 
   // TODO(Adjust gearing and UPR.)
