@@ -2,6 +2,7 @@ package frc.team449.subsystems.vision
 
 import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.MatBuilder
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
@@ -12,7 +13,6 @@ import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.Filesystem
 import frc.team449.control.vision.ApriltagCamera
 import frc.team449.subsystems.vision.interpolation.InterpolatedVisionDataset
 import org.photonvision.estimation.TargetModel
@@ -32,7 +32,7 @@ object VisionConstants {
 //  val TAG_LAYOUT: AprilTagFieldLayout = TEST_TAG_LAYOUT
 
   /** WPILib's AprilTagFieldLayout for the 2025 Reefscape Game */
-  val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout(Filesystem.getDeployDirectory().absolutePath + "/reef_only_2025.json")
+  val TAG_LAYOUT: AprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark)
 
   /** Robot to Camera distance */
   val front = Transform3d(
