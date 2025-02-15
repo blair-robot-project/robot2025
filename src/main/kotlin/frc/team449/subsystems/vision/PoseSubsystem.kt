@@ -148,6 +148,8 @@ class PoseSubsystem(
     resetMagVars()
   }
 
+  
+
   private fun resetMagVars() {
     currentControllerPower = 15.0
     magMultiply = 1.00

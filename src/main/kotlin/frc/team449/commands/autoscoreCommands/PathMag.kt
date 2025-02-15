@@ -92,6 +92,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
           val setCommand = RunCommand({
             robot.poseSubsystem.pathfindingMagnetize(currentSpeed)
           }).withTimeout(0.02)
+          setCommand.addRequirements(robot.drive)
           setCommand.schedule()
           pathRunning = (robot.poseSubsystem.pose != goalPos)
           pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
@@ -101,7 +102,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
         } else {
           expectedTime = 0.0
         }
-        robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.000000001))
+        //robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.000000001))
 //        println("rotation: ${robot.poseSubsystem.pose.rotation}")
         adStar.setStartPosition(robot.poseSubsystem.pose.translation)
       }
