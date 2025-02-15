@@ -27,13 +27,13 @@ object SwerveConstants {
   const val TURN_ENC_CHAN_BR = 1
 
   /** Offsets for the absolute encoders in rotations. */
-  const val TURN_ENC_OFFSET_FL = 0.0 + 0.354379
-  const val TURN_ENC_OFFSET_FR = 0.0 + 0.048082
-  const val TURN_ENC_OFFSET_BL = 0.5 - 0.450049
-  const val TURN_ENC_OFFSET_BR = 0.5 + 0.377951
+  const val TURN_ENC_OFFSET_FL = -0.048002 + (3.1307501455930757 / 2 / PI)
+  const val TURN_ENC_OFFSET_FR = -0.388454 - (3.0700034346051477 / 2 / PI)
+  const val TURN_ENC_OFFSET_BL = -0.354592
+  const val TURN_ENC_OFFSET_BR = -0.030209
 
   /** Inverted */
-  const val DRIVE_INVERTED = true
+  const val DRIVE_INVERTED = false
   const val TURN_INVERTED = true
   const val TURN_ENC_INVERTED = false
 
@@ -44,7 +44,7 @@ object SwerveConstants {
 
   /** Feed forward values for driving each module */
   const val DRIVE_KS = 0.20285 + 0.02
-  const val DRIVE_KV = 3.3887 + 0.2 + 0.0935
+  const val DRIVE_KV = 2.3887 + 0.2 + 0.0935
   const val DRIVE_KA = 0.43365 + 0.035 + 0.0185
 
   // TODO: Figure out this value
