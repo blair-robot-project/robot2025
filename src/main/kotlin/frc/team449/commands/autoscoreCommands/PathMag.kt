@@ -42,23 +42,27 @@ class PathMag(val robot: Robot): SubsystemBase() {
   }
 
   override fun periodic() {
+    println("rotation: ${robot.poseSubsystem.pose.rotation}")
     if (adStar.isNewPathAvailable) {
       println("new path")
       path = adStar.getCurrentPath(
         PathConstraints(
-          RobotConstants.MAX_LINEAR_SPEED,
-          RobotConstants.MAX_ACCEL,
-          RobotConstants.MAX_ROT_SPEED,
+          AutoScoreCommandConstants.MAX_LINEAR_SPEED,
+          AutoScoreCommandConstants.MAX_ACCEL,
+          AutoScoreCommandConstants.MAX_ROT_SPEED,
           RobotConstants.ROT_RATE_LIMIT
         ),
-        GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
+        //GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
+        //GoalEndState(0.0, goalPos.rotation)
+        GoalEndState(0.0, Rotation2d(0.0))
       )
       if (path != null) {
         println("new path, not null")
         println("new trajectory")
         trajectory = path!!.generateTrajectory(
           robot.drive.currentSpeeds,
-          robot.poseSubsystem.pose.rotation,
+          //robot.poseSubsystem.pose.rotation,
+          Rotation2d(0.0),
           RobotConfig.fromGUISettings()
         )
         expectedTime = trajectory!!.totalTimeSeconds
@@ -102,7 +106,6 @@ class PathMag(val robot: Robot): SubsystemBase() {
         } else {
           expectedTime = 0.0
         }
-        //robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.000000001))
 //        println("rotation: ${robot.poseSubsystem.pose.rotation}")
         adStar.setStartPosition(robot.poseSubsystem.pose.translation)
       }

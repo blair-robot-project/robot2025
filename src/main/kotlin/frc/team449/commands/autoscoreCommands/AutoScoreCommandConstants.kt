@@ -92,6 +92,7 @@ class AutoScoreCommandConstants() {
     // Reef pose angles are in radians
     // BLUE
     // reef 1st pose values
+    //val reef1Translation2dBlue = Translation2d(5.740777969, 5.895766)
     val reef1Translation2dBlue = Translation2d(4.906, 5.1359)
 
     // RADIANS
