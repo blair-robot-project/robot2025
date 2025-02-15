@@ -35,7 +35,6 @@ open class SwerveDrive(
 
   var pose: Pose2d = Pose2d()
 
-
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
@@ -74,8 +73,8 @@ open class SwerveDrive(
   fun getModuleVel(): Double {
     var totalVel = 0.0
     modules.forEach { totalVel += it.state.speedMetersPerSecond }
-    return totalVel / modules.size}
-
+    return totalVel / modules.size
+  }
 
   /** Stops the robot's drive. */
   fun driveStop(): Command {
