@@ -107,6 +107,7 @@ class SimpleReefAlign(
   }
 
   override fun execute() {
+    println("reef align")
     val currentPose: Pose2d = poseSubsystem.pose
 
     val currentDistance = currentPose.translation.getDistance(targetPose.translation)

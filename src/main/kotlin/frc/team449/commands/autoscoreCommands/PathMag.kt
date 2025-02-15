@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.RunCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
+import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.RobotConstants
 
 class PathMag(val robot: Robot): SubsystemBase() {
@@ -61,10 +62,11 @@ class PathMag(val robot: Robot): SubsystemBase() {
         println("new trajectory")
         trajectory = path!!.generateTrajectory(
           robot.drive.currentSpeeds,
-          //robot.poseSubsystem.pose.rotation,
-          Rotation2d(0.0),
+          Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)),
+          //Rotation2d(0.0),
           RobotConfig.fromGUISettings()
         )
+        println("real rotation: ${robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         expectedTime = trajectory!!.totalTimeSeconds
         pathPub?.set(path!!.pathPoses.toTypedArray<Pose2d>())
         pathRunning = (robot.poseSubsystem.pose != goalPos)
@@ -104,6 +106,8 @@ class PathMag(val robot: Robot): SubsystemBase() {
           println("path valid: $pathValid")
           println()
         } else {
+          //
+          SimpleReefAlign(robot.drive, robot.poseSubsystem).schedule()
           expectedTime = 0.0
         }
 //        println("rotation: ${robot.poseSubsystem.pose.rotation}")
