@@ -17,12 +17,13 @@ import kotlin.math.PI
 open class Routines(
   val robot: Robot
 ) {
+  // Removed magic numbers
   private val xController: PIDController
-    get() = PIDController(10.0, 0.0, 0.0)
+    get() = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
   private val yController: PIDController
-    get() = PIDController(10.0, 0.0, 0.0)
+    get() = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
   private val headingController: PIDController
-    get() = PIDController(6.7, 0.0, 0.0)
+    get() = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
 
   init {
     headingController.enableContinuousInput(-Math.PI, Math.PI)
@@ -33,7 +34,7 @@ open class Routines(
       sample.vx + xController.calculate(robot.poseSubsystem.pose.x, sample.x),
       sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
       sample.omega + headingController.calculate(
-        robot.poseSubsystem.pose.rotation.radians + if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) PI else 0.0,
+        robot.poseSubsystem.pose.rotation.radians + if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) PI else 0.0, // Needs testing
         sample.heading
       )
     )
@@ -533,7 +534,7 @@ open class Routines(
     autoChooser.addRoutine("l1 J & l4 L", this::reefJL)
     autoChooser.addRoutine("l1 J & l4 K", this::reefJK)
     autoChooser.addRoutine("l4 J,K,L", this::reefJKL)
-    autoChooser.addRoutine("l1_J + full K", this::reefJ_fullReefK)
+    autoChooser.addRoutine("l1 J + full K", this::reefJ_fullReefK)
     autoChooser.addRoutine("l1 rightSpam", this::rightSpamL1)
     autoChooser.addRoutine("l1 leftSpam", this::leftSpamL1)
   }
