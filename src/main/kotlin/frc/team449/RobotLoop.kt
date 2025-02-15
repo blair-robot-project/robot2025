@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
@@ -118,7 +117,6 @@ class RobotLoop : TimedRobot() {
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
 
-
     if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
       BreatheHue(robot.light, 0).schedule()
     } else {
@@ -129,8 +127,6 @@ class RobotLoop : TimedRobot() {
   override fun autonomousPeriodic() {}
 
   override fun teleopInit() {
-
-
     (robot.light.currentCommand ?: InstantCommand()).cancel()
 
     robot.drive.defaultCommand = robot.driveCommand
@@ -183,7 +179,7 @@ class RobotLoop : TimedRobot() {
 
     val elevatorPos = robot.elevator.positionSupplier.get()
 
-     var componentStorage: Array<Pose3d> = arrayOf(
+    var componentStorage: Array<Pose3d> = arrayOf(
       Pose3d(),
       Pose3d(),
       Pose3d(),

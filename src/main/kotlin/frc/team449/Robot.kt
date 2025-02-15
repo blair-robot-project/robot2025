@@ -1,5 +1,6 @@
 package frc.team449
 
+import choreo.auto.AutoChooser
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -22,8 +23,6 @@ import frc.team449.subsystems.superstructure.wrist.Wrist.Companion.createWrist
 import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
 import frc.team449.system.AHRS
-import choreo.auto.AutoChooser
-
 
 @Logged
 class Robot : RobotBase() {
@@ -45,7 +44,6 @@ class Robot : RobotBase() {
 
   val autoChooser = AutoChooser()
 
-
   override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
 
   override val driveCommand: SwerveOrthogonalCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
@@ -63,6 +61,4 @@ class Robot : RobotBase() {
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
-
-
 }

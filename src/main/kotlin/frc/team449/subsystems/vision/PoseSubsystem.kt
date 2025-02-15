@@ -118,7 +118,6 @@ class PoseSubsystem(
     }
   }
 
-
   override fun periodic() {
     if (isReal) {
       this.poseEstimator.update(
