@@ -6,6 +6,7 @@ import com.pathplanner.lib.path.PathConstraints
 import com.pathplanner.lib.path.PathPlannerPath
 import com.pathplanner.lib.pathfinding.LocalADStar
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.RunCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
+import frc.team449.auto.AutoConstants
 import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.RobotConstants
 
@@ -33,6 +35,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
   private var pathValid = false
   private var goalPos: Pose2d = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
   private var trajectory: PathPlannerTrajectory? = null
+  //private var thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0,0.0)
+  private var thetaController: PIDController = PIDController(0.5, 0.0,0.0)
+  private var desRot = (0.0)
 
   init {
     timer.restart()
@@ -43,7 +48,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
   }
 
   override fun periodic() {
-    println("rotation: ${robot.poseSubsystem.pose.rotation}")
+    println("rot now: ${robot.poseSubsystem.pose.rotation.radians}")
+    desRot = thetaController.calculate(robot.poseSubsystem.pose.rotation.radians, goalPos.rotation.radians)
+    //println("rotation: ${robot.poseSubsystem.pose.rotation}")
     if (adStar.isNewPathAvailable) {
       println("new path")
       path = adStar.getCurrentPath(
@@ -92,7 +99,18 @@ class PathMag(val robot: Robot): SubsystemBase() {
           println("time now in periodic: ${timer.get()}")
           println("path start: $startTime")
           println("expected time: $expectedTime")
-          currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds ?: robot.drive.currentSpeeds
+
+          currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
+            ChassisSpeeds(
+              it.vxMetersPerSecond,
+              it.vyMetersPerSecond,
+              //it.omegaRadiansPerSecond)
+              desRot)
+          } ?: robot.drive.currentSpeeds
+//
+
+          println("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t desired rotation: $desRot")
+
           println("time since start: ${timer.get() - startTime}")
           println("speed now: $currentSpeed")
           val setCommand = RunCommand({
