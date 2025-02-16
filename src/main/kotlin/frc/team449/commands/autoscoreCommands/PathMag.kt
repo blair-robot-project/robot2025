@@ -50,7 +50,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
   override fun periodic() {
     println("desired rot value: ${goalPos.rotation.radians}")
     println("rot now: ${robot.poseSubsystem.pose.rotation.radians}")
-    desRot = thetaController.calculate(robot.poseSubsystem.pose.rotation.radians, goalPos.rotation.radians)
+    desRot = thetaController.calculate(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI), goalPos.rotation.radians.mod(2*Math.PI))
     //println("rotation: ${robot.poseSubsystem.pose.rotation}")
     if (adStar.isNewPathAvailable) {
       println("new path")
@@ -74,7 +74,6 @@ class PathMag(val robot: Robot): SubsystemBase() {
           Rotation2d(0.0),
           RobotConfig.fromGUISettings()
         )
-        println("real rotation: ${robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         expectedTime = trajectory!!.totalTimeSeconds
         pathPub?.set(path!!.pathPoses.toTypedArray<Pose2d>())
         pathRunning = (robot.poseSubsystem.pose != goalPos)
@@ -101,14 +100,28 @@ class PathMag(val robot: Robot): SubsystemBase() {
           println("path start: $startTime")
           println("expected time: $expectedTime")
 
-          currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
-            ChassisSpeeds(
-              it.vxMetersPerSecond,
-              it.vyMetersPerSecond,
-              //it.omegaRadiansPerSecond)
-              desRot)
-          } ?: robot.drive.currentSpeeds
-//
+          if (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-0.5 && robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+0.5) {
+            println("at setpoint !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
+              ChassisSpeeds(
+                it.vxMetersPerSecond,
+                it.vyMetersPerSecond,
+                it.omegaRadiansPerSecond)
+              //desRot
+              //0.0)
+            } ?: robot.drive.currentSpeeds
+          }
+
+          if (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) != goalPos.rotation.radians.mod(2*Math.PI)) {
+            currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
+              ChassisSpeeds(
+                it.vxMetersPerSecond,
+                it.vyMetersPerSecond,
+                //it.omegaRadiansPerSecond)
+                desRot
+              )
+            } ?: robot.drive.currentSpeeds
+          }
 
           println("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t desired rotation speed: $desRot")
 
