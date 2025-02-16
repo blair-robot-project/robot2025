@@ -19,7 +19,7 @@ import kotlin.math.abs
 // TODO(the entire class bru)
 class Wrist(
   private val motor: TalonFX,
-  val absoluteEncoder: AbsoluteEncoder,
+//  val absoluteEncoder: AbsoluteEncoder,
 //  val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
 
@@ -93,8 +93,8 @@ class Wrist(
     DogLog.log("Wrist/Desired Target", targetSupplier.get())
     DogLog.log("Wrist/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
     DogLog.log("Wrist/In Tolerance", atSetpoint())
-    DogLog.log("Wrist/Abs/Pos", absoluteEncoder.position)
-    DogLog.log("Wrist/Abs/Vel", absoluteEncoder.velocity)
+/*    DogLog.log("Wrist/Abs/Pos", absoluteEncoder.position)
+    DogLog.log("Wrist/Abs/Vel", absoluteEncoder.velocity)*/
 //    No quad Encoder
 //    DogLog.log("Wrist/Quad/Pos", quadEncoder.position)
 //    DogLog.log("Wrist/Quad/Vel", quadEncoder.velocity)
@@ -141,15 +141,15 @@ class Wrist(
         leadMotor.deviceTemp
       )
 
-      val absEnc = AbsoluteEncoder.createAbsoluteEncoder(
-        "Wrist Absolute Enc",
-        WristConstants.ABS_ENC_DIO_PORT,
-        WristConstants.ABS_OFFSET,
-        WristConstants.ENC_RATIO,
-        WristConstants.ENC_INVERTED,
-        min = WristConstants.ABS_RANGE.first,
-        max = WristConstants.ABS_RANGE.second
-      )
+//      val absEnc = AbsoluteEncoder.createAbsoluteEncoder(
+//        "Wrist Absolute Enc",
+//        WristConstants.ABS_ENC_DIO_PORT,
+//        WristConstants.ABS_OFFSET,
+//        WristConstants.ENC_RATIO,
+//        WristConstants.ENC_INVERTED,
+//        min = WristConstants.ABS_RANGE.first,
+//        max = WristConstants.ABS_RANGE.second
+//      )
 
 //      val quadEnc = QuadEncoder.createQuadEncoder(
 //        "Wrist Quad Enc",
@@ -161,7 +161,7 @@ class Wrist(
 //        WristConstants.SAMPLES_TO_AVERAGE
 //      )
 
-      return Wrist(leadMotor, absEnc)//, quadEnc)
+      return Wrist(leadMotor)//, absEnc)//, quadEnc)
     }
   }
 }

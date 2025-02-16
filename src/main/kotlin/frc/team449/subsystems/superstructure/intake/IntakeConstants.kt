@@ -17,5 +17,5 @@ object IntakeConstants {
   const val ALGAE_INTAKE_VOLTAGE = 7.0
   const val ALGAE_OUTTAKE_VOLTAGE = -10.0
 
-  const val SENSOR_DIO_PORT = 11
+  const val SENSOR_DIO_PORT = 0
 }

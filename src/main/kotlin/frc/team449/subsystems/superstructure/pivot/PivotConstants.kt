@@ -54,7 +54,7 @@ object PivotConstants {
   const val ENC_INVERTED = false
   val ABS_RANGE = Pair(-0.25, 0.75)
   const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
-  val QUAD_ENCODER = Encoder(5, 10)
+  val QUAD_ENCODER = Encoder(1, 3)
   const val ENC_CPR = 2048
   const val SAMPLES_TO_AVERAGE = 127
 }
