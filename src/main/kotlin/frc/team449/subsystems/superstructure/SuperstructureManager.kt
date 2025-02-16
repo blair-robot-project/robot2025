@@ -3,7 +3,7 @@ package frc.team449.subsystems.superstructure
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.units.Units.Radians
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands.waitUntil
+import edu.wpi.first.wpilibj2.command.Commands.*
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
@@ -32,9 +32,13 @@ class SuperstructureManager(
             )
           ),
           // if retracting
-          elevator.setPosition(goal.elevator.`in`(Meters))
-            .alongWith(pivot.setPosition((goal.pivot.`in`(Radians)))
-            .andThen(wrist.setPosition(goal.wrist.`in`(Radians))))
+          sequence(
+            parallel(
+              elevator.setPosition(goal.elevator.`in`(Meters)),
+              pivot.setPosition(goal.pivot.`in`(Radians)),
+            ),
+            wrist.setPosition(goal.wrist.`in`(Radians))
+          )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
   }
