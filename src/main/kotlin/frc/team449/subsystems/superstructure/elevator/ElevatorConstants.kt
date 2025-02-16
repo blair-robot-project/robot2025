@@ -16,11 +16,11 @@ object ElevatorConstants {
   val DESIRED_COLOR = Color8Bit(0, 255, 0)
   const val MIN_VIS_HEIGHT = 0.2
 
-  const val MAX_HEIGHT = 1.735
-  const val MIN_HEIGHT = 0.0
+  val SIM_MAX_HEIGHT = Units.inchesToMeters(52.5)
+  val SIM_MIN_HEIGHT = 0.0
 
-  const val LEAD_MOTOR_ID = 1
-  const val FOLLOWER_MOTOR_ID = 22 // TODO(Change motor ID.)
+  const val LEAD_MOTOR_ID = 30
+  const val FOLLOWER_MOTOR_ID = 31 // TODO(Change motor ID.)
 
   val INVERTED = InvertedValue.CounterClockwise_Positive
   const val FOLLOWER_INVERTED_TO_MASTER = true

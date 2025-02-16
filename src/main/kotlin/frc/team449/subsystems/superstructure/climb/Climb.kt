@@ -11,7 +11,7 @@ import frc.team449.system.motor.createSparkMax
 // TODO(the entire class bru)
 class Climb(
   private val motor: SparkMax,
-  val infrared: DigitalInput
+  private val infrared: DigitalInput
 ) : SubsystemBase() {
 
   fun runClimbWheels(): Command {
@@ -24,6 +24,10 @@ class Climb(
     return runOnce {
       motor.stopMotor()
     }
+  }
+
+  fun isClimbEngaged(): Boolean {
+    return !infrared.get()
   }
 
   override fun periodic() {

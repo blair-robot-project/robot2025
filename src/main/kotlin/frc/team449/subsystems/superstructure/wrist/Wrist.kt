@@ -33,13 +33,24 @@ class Wrist(
 
   private val isReal = RobotBase.isReal()
 
+  lateinit var wristFeedForward: WristFeedForward
+
+  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.runOnce {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(
+            wristFeedForward.calculate(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble)
+          )
       )
-    }
+    }.until(::atSetpoint)
+  }
+
+  fun setVoltage(volts: Double): Command {
+    return this.runOnce { motor.setVoltage(volts) }
   }
 
   fun manualDown(): Command {
@@ -55,7 +66,7 @@ class Wrist(
   }
 
   private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < WristConstants.TOLERANCE)
+    return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
   }
 
   override fun periodic() {
@@ -73,7 +84,7 @@ class Wrist(
   }
 
   private fun logData() {
-    DogLog.log("Wrist/Desired Target", request.Position)
+    DogLog.log("Wrist/Desired Target", targetSupplier.get())
     DogLog.log("Wrist/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
     DogLog.log("Wrist/In Tolerance", atSetpoint())
     DogLog.log("Wrist/Abs/Pos", absoluteEncoder.position)

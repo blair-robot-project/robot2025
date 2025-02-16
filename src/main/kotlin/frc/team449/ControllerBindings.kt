@@ -6,14 +6,19 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism
+import frc.team449.commands.driveAlign.SimpleReefAlign
+import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -21,6 +26,7 @@ import kotlin.random.Random
 class ControllerBindings(
   private val driveController: CommandXboxController,
   private val mechanismController: CommandXboxController,
+  private val characterizationController: CommandXboxController,
   private val robot: Robot
 ) {
 
@@ -29,10 +35,16 @@ class ControllerBindings(
     /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
      * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
      */
-//    score_l1()
+    score_l1()
     score_l2()
     score_l3()
     score_l4()
+
+    autoScoreLeft()
+    autoScoreRight()
+
+    substationIntake()
+    coralOuttake()
 
     premove_l1()
     premove_l2()
@@ -40,6 +52,20 @@ class ControllerBindings(
     premove_l4()
 
     stow()
+  }
+
+  private fun characterizationBindings() {
+    manualElevator()
+    manualPivot()
+  }
+
+  fun updateSelectedCharacterization(selected: String) {
+    when (selected) {
+      "drive" -> driveCharacterization()
+      "elevator" -> elevatorCharacterizaton()
+      "pivot" -> pivotCharacterizaton()
+      "wrist" -> wristCharacterizaton()
+    }
   }
 
   private fun nonRobotBindings() {
@@ -59,8 +85,42 @@ class ControllerBindings(
     )
   }
 
+  private fun autoScoreLeft() {
+    driveController.leftTrigger().onTrue(
+      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+        .andThen(robot.intake.outtakeCoral())
+        .andThen(WaitUntilCommand { false })
+        .until { !robot.intake.coralDetected() && RobotBase.isReal() }
+        .andThen(robot.intake.stop())
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+    )
+  }
+
+  private fun autoScoreRight() {
+    driveController.rightTrigger().onTrue(
+      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
+    )
+  }
+
+  private fun substationIntake() {
+    driveController.leftBumper().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+        .alongWith(robot.intake.intakeCoral())
+        .andThen(WaitUntilCommand { false })
+        .until { robot.intake.coralDetected() && RobotBase.isReal() }
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+        .andThen(robot.intake.holdCoral())
+    )
+  }
+
+  private fun coralOuttake() {
+    driveController.rightBumper().onTrue(
+      robot.intake.outtakeCoral()
+    )
+  }
+
   private fun score_l1() {
-    driveController.a().onTrue(
+    driveController.povDown().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
     )
   }
@@ -104,6 +164,26 @@ class ControllerBindings(
   private fun premove_l4() {
     mechanismController.y().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+    )
+  }
+
+  private fun manualPivot() {
+    characterizationController.b().whileTrue(
+      robot.pivot.setPosition(robot.pivot.positionSupplier.get() + PI * 0.02 / 8)
+    )
+
+    characterizationController.x().whileTrue(
+      robot.pivot.setPosition(robot.pivot.positionSupplier.get() - PI * 0.02 / 8)
+    )
+  }
+
+  private fun manualElevator() {
+    characterizationController.y().whileTrue(
+      robot.elevator.setPosition(robot.elevator.positionSupplier.get() + 0.10 * 0.02)
+    )
+
+    characterizationController.a().whileTrue(
+      robot.elevator.setPosition(robot.elevator.positionSupplier.get() - 0.10 * 0.02)
     )
   }
 
@@ -161,22 +241,22 @@ class ControllerBindings(
     )
 
     // Quasistatic Forwards
-    driveController.povUp().onTrue(
+    characterizationController.povUp().onTrue(
       driveRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
     // Quasistatic Reverse
-    driveController.povDown().onTrue(
+    characterizationController.povDown().onTrue(
       driveRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
     // Dynamic Forwards
-    driveController.povRight().onTrue(
+    characterizationController.povRight().onTrue(
       driveRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
     // Dynamic Reverse
-    driveController.povLeft().onTrue(
+    characterizationController.povLeft().onTrue(
       driveRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
@@ -196,24 +276,24 @@ class ControllerBindings(
       )
     )
 
-    driveController.povUp().onTrue(
+    characterizationController.povUp().onTrue(
       elevatorRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povDown().onTrue(
+    characterizationController.povDown().onTrue(
       elevatorRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
-    driveController.povRight().onTrue(
+    characterizationController.povRight().onTrue(
       elevatorRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povLeft().onTrue(
+    characterizationController.povLeft().onTrue(
       elevatorRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
 
-  fun pivotCharacterizaton() {
+  private fun pivotCharacterizaton() {
     val pivotRoutine = SysIdRoutine(
       SysIdRoutine.Config(
         Volts.of(0.5).per(Second),
@@ -228,20 +308,53 @@ class ControllerBindings(
       )
     )
 
-    driveController.povUp().onTrue(
+    characterizationController.povUp().onTrue(
       pivotRoutine.quasistatic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povDown().onTrue(
+    characterizationController.povDown().onTrue(
       pivotRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
     )
 
-    driveController.povRight().onTrue(
+    characterizationController.povRight().onTrue(
       pivotRoutine.dynamic(SysIdRoutine.Direction.kForward)
     )
 
-    driveController.povLeft().onTrue(
+    characterizationController.povLeft().onTrue(
       pivotRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+    )
+  }
+
+  private fun wristCharacterizaton() {
+    println("hola")
+    val wristRoutine = SysIdRoutine(
+      SysIdRoutine.Config(
+        Volts.of(0.5).per(Second),
+        Volts.of(3.0),
+        Seconds.of(10.0)
+      ) { state -> SignalLogger.writeString("state", state.toString()) },
+      Mechanism(
+        { voltage: Voltage -> robot.wrist.setVoltage(voltage.`in`(Volts)) },
+        null,
+        robot.wrist,
+        "elevator"
+      )
+    )
+
+    characterizationController.povUp().onTrue(
+      wristRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+    )
+
+    characterizationController.povDown().onTrue(
+      wristRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+    )
+
+    characterizationController.povRight().onTrue(
+      wristRoutine.dynamic(SysIdRoutine.Direction.kForward)
+    )
+
+    characterizationController.povLeft().onTrue(
+      wristRoutine.dynamic(SysIdRoutine.Direction.kReverse)
     )
   }
 
@@ -249,5 +362,6 @@ class ControllerBindings(
   fun bindButtons() {
     nonRobotBindings()
     robotBindings()
+    characterizationBindings()
   }
 }
