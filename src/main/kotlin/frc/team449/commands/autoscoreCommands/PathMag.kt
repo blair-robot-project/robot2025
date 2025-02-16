@@ -36,7 +36,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
   private var goalPos: Pose2d = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
   private var trajectory: PathPlannerTrajectory? = null
   //private var thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0,0.0)
-  private var thetaController: PIDController = PIDController(0.5, 0.0,0.0)
+  private var thetaController: PIDController = PIDController(0.01, 0.0,0.0)
   private var desRot = (0.0)
 
   init {
@@ -48,6 +48,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
   }
 
   override fun periodic() {
+    println("desired rot value: ${goalPos.rotation.radians}")
     println("rot now: ${robot.poseSubsystem.pose.rotation.radians}")
     desRot = thetaController.calculate(robot.poseSubsystem.pose.rotation.radians, goalPos.rotation.radians)
     //println("rotation: ${robot.poseSubsystem.pose.rotation}")
@@ -69,8 +70,8 @@ class PathMag(val robot: Robot): SubsystemBase() {
         println("new trajectory")
         trajectory = path!!.generateTrajectory(
           robot.drive.currentSpeeds,
-          Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)),
-          //Rotation2d(0.0),
+          //Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)),
+          Rotation2d(0.0),
           RobotConfig.fromGUISettings()
         )
         println("real rotation: ${robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -109,7 +110,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
           } ?: robot.drive.currentSpeeds
 //
 
-          println("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t desired rotation: $desRot")
+          println("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t desired rotation speed: $desRot")
 
           println("time since start: ${timer.get() - startTime}")
           println("speed now: $currentSpeed")
