@@ -3,6 +3,7 @@ package frc.team449.subsystems.superstructure.wrist
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -29,7 +30,7 @@ class Wrist(
 
   private val request = MotionMagicVoltage(
     SuperstructureGoal.STOW.wrist.`in`(Radians)
-  )
+  ).withEnableFOC(false)
 
   private val isReal = RobotBase.isReal()
 
@@ -50,7 +51,11 @@ class Wrist(
   }
 
   fun setVoltage(volts: Double): Command {
-    return this.runOnce { motor.setVoltage(volts) }
+    return this.run { motor.setControl(VoltageOut(volts)) }
+  }
+
+  fun setVoltageChar(volts: Double) {
+    motor.setControl(VoltageOut(volts))
   }
 
   fun manualDown(): Command {

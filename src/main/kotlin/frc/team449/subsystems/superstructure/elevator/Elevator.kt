@@ -67,7 +67,7 @@ open class Elevator(
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
     SuperstructureGoal.STOW.elevator.`in`(Meters)
-  )
+  ).withEnableFOC(false)
 
   // last request is sticky
   fun setPosition(position: Double): Command {

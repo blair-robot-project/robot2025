@@ -51,7 +51,7 @@ object PivotConstants {
   /** Encoder Values */
   const val ABS_ENC_DIO_PORT = 4
   const val ABS_OFFSET = 0.0
-  const val ENC_INVERTED = false
+  const val ENC_INVERTED = true
   val ABS_RANGE = Pair(-0.25, 0.75)
   const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
   val QUAD_ENCODER = Encoder(1, 3)

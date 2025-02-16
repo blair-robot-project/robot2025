@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -29,6 +30,8 @@ class ControllerBindings(
   private val characterizationController: CommandXboxController,
   private val robot: Robot
 ) {
+
+  var selectedChar: String = "drive"
 
   private fun robotBindings() {
     /** Call robot functions you create below */
@@ -52,6 +55,14 @@ class ControllerBindings(
     premove_l4()
 
     stow()
+
+    pivotCharacterizaton()
+//    when (selectedChar) {
+//      "drive" -> driveCharacterization()
+//      "elevator" -> elevatorCharacterizaton()
+//      "pivot" -> pivotCharacterizaton()
+//      "wrist" -> wristCharacterizaton()
+//    }
   }
 
   private fun characterizationBindings() {
@@ -60,12 +71,7 @@ class ControllerBindings(
   }
 
   fun updateSelectedCharacterization(selected: String) {
-    when (selected) {
-      "drive" -> driveCharacterization()
-      "elevator" -> elevatorCharacterizaton()
-      "pivot" -> pivotCharacterizaton()
-      "wrist" -> wristCharacterizaton()
-    }
+    selectedChar = selected
   }
 
   private fun nonRobotBindings() {
@@ -168,22 +174,33 @@ class ControllerBindings(
   }
 
   private fun manualPivot() {
+    // up
     characterizationController.b().whileTrue(
-      robot.pivot.setPosition(robot.pivot.positionSupplier.get() + PI * 0.02 / 8)
+      robot.pivot.manualUp()
+    ).onFalse(
+      robot.pivot.stop()
     )
-
+    // down
     characterizationController.x().whileTrue(
-      robot.pivot.setPosition(robot.pivot.positionSupplier.get() - PI * 0.02 / 8)
+      robot.pivot.manualDown()
+    ).onFalse(
+      robot.pivot.stop()
     )
   }
 
   private fun manualElevator() {
+    // up
     characterizationController.y().whileTrue(
-      robot.elevator.setPosition(robot.elevator.positionSupplier.get() + 0.10 * 0.02)
+      robot.wrist.manualUp()
+    ).onFalse(
+      robot.wrist.stop()
     )
 
+    // down
     characterizationController.a().whileTrue(
-      robot.elevator.setPosition(robot.elevator.positionSupplier.get() - 0.10 * 0.02)
+      robot.wrist.manualDown()
+    ).onFalse(
+      robot.wrist.stop()
     )
   }
 
@@ -232,9 +249,13 @@ class ControllerBindings(
   /** Characterization functions */
   private fun driveCharacterization() {
     val driveRoutine = SysIdRoutine(
-      SysIdRoutine.Config(),
+      SysIdRoutine.Config(
+        Volts.of(1.0).per(Second),
+        Volts.of(2.0),
+        Seconds.of(4.0)
+      ) { state -> SignalLogger.writeString("state", state.toString()) },
       Mechanism(
-        { voltage: Voltage -> robot.drive.setVoltage(voltage.`in`(Volts)) },
+        { voltage: Voltage -> robot.drive.setVoltage(-voltage.`in`(Volts)) },
         null,
         robot.drive
       )
@@ -264,9 +285,9 @@ class ControllerBindings(
   private fun elevatorCharacterizaton() {
     val elevatorRoutine = SysIdRoutine(
       SysIdRoutine.Config(
-        Volts.of(0.5).per(Second),
+        Volts.of(1.0).per(Second),
         Volts.of(2.0),
-        Seconds.of(10.0)
+        Seconds.of(2.0)
       ) { state -> SignalLogger.writeString("state", state.toString()) },
       Mechanism(
         { voltage: Voltage -> robot.elevator.setVoltage(voltage.`in`(Volts)) },
@@ -296,12 +317,12 @@ class ControllerBindings(
   private fun pivotCharacterizaton() {
     val pivotRoutine = SysIdRoutine(
       SysIdRoutine.Config(
-        Volts.of(0.5).per(Second),
+        Volts.of(1.5).per(Second),
         Volts.of(3.0),
-        Seconds.of(10.0)
+        Seconds.of(3.0)
       ) { state -> SignalLogger.writeString("state", state.toString()) },
       Mechanism(
-        { voltage: Voltage -> robot.pivot.setVoltage(voltage.`in`(Volts)) },
+        { voltage: Voltage -> robot.pivot.setVoltageChar(-voltage.`in`(Volts)) },
         null,
         robot.pivot,
         "elevator"
@@ -326,7 +347,6 @@ class ControllerBindings(
   }
 
   private fun wristCharacterizaton() {
-    println("hola")
     val wristRoutine = SysIdRoutine(
       SysIdRoutine.Config(
         Volts.of(0.5).per(Second),
@@ -334,15 +354,17 @@ class ControllerBindings(
         Seconds.of(10.0)
       ) { state -> SignalLogger.writeString("state", state.toString()) },
       Mechanism(
-        { voltage: Voltage -> robot.wrist.setVoltage(voltage.`in`(Volts)) },
+        { voltage: Voltage -> robot.wrist.setVoltageChar(voltage.`in`(Volts)) },
         null,
         robot.wrist,
-        "elevator"
+        "wrist"
       )
     )
 
     characterizationController.povUp().onTrue(
-      wristRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+      wristRoutine.quasistatic(SysIdRoutine.Direction.kForward).alongWith(
+        PrintCommand("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+      )
     )
 
     characterizationController.povDown().onTrue(

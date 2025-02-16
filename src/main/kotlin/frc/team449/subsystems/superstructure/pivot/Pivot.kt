@@ -44,7 +44,7 @@ class Pivot(
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
     SuperstructureGoal.STOW.pivot.`in`(Radians)
-  )
+  ).withEnableFOC(false)
 
   private val isReal = RobotBase.isReal()
 
@@ -61,15 +61,19 @@ class Pivot(
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return runOnce { motor.setVoltage(-6.0) }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return runOnce { motor.setVoltage(6.0) }
   }
 
   fun setVoltage(voltage: Double): Command {
     return runOnce { motor.setVoltage(voltage) }
+  }
+
+  fun setVoltageChar(voltage: Double) {
+    motor.setVoltage(voltage)
   }
 
   fun stop(): Command {
@@ -98,6 +102,7 @@ class Pivot(
     DogLog.log("Pivot/Desired Target", request.Position)
     DogLog.log("Pivot/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
     DogLog.log("Pivot/In Tolerance", atSetpoint())
+    DogLog.log("Pivot/Position Supplier", positionSupplier.get())
     DogLog.log("Pivot/Abs/Pos", absoluteEncoder.position)
     DogLog.log("Pivot/Abs/Vel", absoluteEncoder.velocity)
     DogLog.log("Pivot/Quad/Pos", quadEncoder.position)

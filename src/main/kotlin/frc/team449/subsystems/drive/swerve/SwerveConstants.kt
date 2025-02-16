@@ -28,10 +28,14 @@ object SwerveConstants {
   const val TURN_ENC_CHAN_BR = 8
 
   /** Offsets for the absolute encoders in rotations. */
-   val TURN_ENC_OFFSET_FL = Units.radiansToRotations(-1.9721847889188047)
-   val TURN_ENC_OFFSET_FR = Units.radiansToRotations(-1.3803421761481829)
-   val TURN_ENC_OFFSET_BL = Units.radiansToRotations(-0.8920550992085665)
-   val TURN_ENC_OFFSET_BR = Units.radiansToRotations(-1.7617422152440068)
+   val TURN_ENC_OFFSET_FL = Units.radiansToRotations(-1.9721847889188047) +
+    Units.radiansToRotations(-0.023566500800433245) + 0.5
+   val TURN_ENC_OFFSET_FR = Units.radiansToRotations(-1.3803421761481829) +
+     Units.radiansToRotations(-1.4175450743616982)
+   val TURN_ENC_OFFSET_BL = Units.radiansToRotations(-0.8920550992085665) +
+     Units.radiansToRotations(-1.9177244935091542 + 3.114585873128222) + 0.5
+   val TURN_ENC_OFFSET_BR = Units.radiansToRotations(-1.7617422152440068) +
+     Units.radiansToRotations(-2.2696186936648175 - 0.8904340373587881)
 
   /** Inverted */
   const val DRIVE_INVERTED = false
@@ -44,7 +48,7 @@ object SwerveConstants {
   const val TURN_KD = 0.0
 
   /** Feed forward values for driving each module */
-  const val DRIVE_KS = 0.20285 + 0.02
+  const val DRIVE_KS = 0.0
   const val DRIVE_KV = 2.54 // Estimate based of max speed of 4.724 m/s max speed
   const val DRIVE_KA = 0.43365 + 0.035 + 0.0185
 

@@ -16,7 +16,7 @@ object WristConstants {
 
   const val MOTOR_ID = 41
 
-  val TOLERANCE = Degrees.of(1.5)
+  val TOLERANCE = Degrees.of(5.0)
   const val GEARING = 1.0 / 300.0
   const val UPR = 2 * PI
 
@@ -29,11 +29,11 @@ object WristConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val KS = 0.0
-  const val KG = 0.0
-  const val KV = 0.0
+  const val KS = 0.070338
+  const val KG = 0.19939
+  const val KV = 5.119
 
-  const val KP = 1.0
+  const val KP = 1.6944
   const val KI = 0.0
   const val KD = 0.0
 
