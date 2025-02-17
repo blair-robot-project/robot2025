@@ -123,7 +123,7 @@ class RobotLoop : TimedRobot() {
 //    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
 //      .ignoringDisable(true)
 //      .schedule()
-    robot.wrist.zero()
+    robot.wrist.startupZero()
   }
 
   override fun driverStationConnected() {

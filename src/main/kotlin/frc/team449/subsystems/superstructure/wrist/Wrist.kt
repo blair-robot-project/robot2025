@@ -72,8 +72,8 @@ class Wrist(
     return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
   }
 
-  fun zero() {
-    motor.setPosition(0.0)
+  fun startupZero() {
+    motor.setPosition(-124.436755)
   }
 
   override fun periodic() {

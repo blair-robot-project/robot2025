@@ -40,6 +40,11 @@ object VisionConstants {
     Rotation3d(0.0, Units.degreesToRadians(-17.5), Units.degreesToRadians(0.0))
   )
 
+  val testTrans = Transform3d(
+    Translation3d(Units.inchesToMeters(-10.838), Units.inchesToMeters(10.435), Units.inchesToMeters(8.970)),
+    Rotation3d(0.0, Units.degreesToRadians(28.125), Units.degreesToRadians(7.5))
+  )
+
   val TAG_MODEL = TargetModel(
     Units.inchesToMeters(6.5),
     Units.inchesToMeters(6.5)
@@ -80,6 +85,13 @@ object VisionConstants {
 //      front,
 //      VISION_SIM
 //    )
+    ApriltagCamera(
+      "Camera_03",
+      TAG_LAYOUT,
+testTrans,
+      VISION_SIM
+    )
+
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(
