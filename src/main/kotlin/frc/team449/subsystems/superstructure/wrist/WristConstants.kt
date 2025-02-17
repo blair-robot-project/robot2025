@@ -14,9 +14,9 @@ object WristConstants {
   const val WIDTH = 2.0
   val COLOR = Color8Bit(Color.kWhite)
 
-  const val MOTOR_ID = 40 // TODO(Change motor ID.)
+  const val MOTOR_ID = 41
 
-  const val TOLERANCE = 0.05
+  val TOLERANCE = Degrees.of(5.0)
   const val GEARING = 1.0 / 300.0
   const val UPR = 2 * PI
 
@@ -27,19 +27,20 @@ object WristConstants {
   const val SUPPLY_LIM = 40.0
 
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
+  val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val KS = 0.0
-  const val KV = 0.0
-  const val KA = 0.0
+  const val KS = 0.070338
+  const val KG = 0.19939
+  const val KV = 5.119
 
-  const val KP = 1.0
+  const val KP = 1.6944
   const val KI = 0.0
   const val KD = 0.0
 
   val CRUISE_VEL = RadiansPerSecond.of(2 * PI)
   val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
 
-  val RESET_ENC_LIMIT = Degrees.of(0.5)
+  val RESET_ENC_LIMIT = Degrees.of(0.05)
 
   /** Encoder Values */
   const val ABS_ENC_DIO_PORT = 1
@@ -47,7 +48,6 @@ object WristConstants {
   const val ENC_INVERTED = false
   val ABS_RANGE = Pair(-0.25, 0.75)
   const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
-  val QUAD_ENCODER = Encoder(2, 3)
   const val ENC_CPR = 2048
   const val SAMPLES_TO_AVERAGE = 127
 }

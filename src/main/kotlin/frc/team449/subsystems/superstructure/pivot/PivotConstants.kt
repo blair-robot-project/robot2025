@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.Encoder
 import kotlin.math.PI
 
 object PivotConstants {
-  const val LEAD_MOTOR_ID = 2 // TODO(Change motor ID.)
-  const val FOLLOWER_MOTOR_ID = 33
+  const val LEAD_MOTOR_ID = 10 // left side
+  const val FOLLOWER_MOTOR_ID = 11
 
   // TODO(Adjust gearing and UPR.)
   const val GEARING = 1.0 / 75.0
@@ -31,7 +31,7 @@ object PivotConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
+  val TOLERANCE = Degrees.of(2.0) // TODO(Adjust tolerance.)
 
   const val KP = 1.0
   const val KI = 0.0
@@ -46,15 +46,15 @@ object PivotConstants {
   val CRUISE_VEL = RotationsPerSecond.of(0.3)
   val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0)
 
-  val RESET_ENC_LIMIT = Degrees.of(0.5)
+  val RESET_ENC_LIMIT = Degrees.of(0.05)
 
   /** Encoder Values */
   const val ABS_ENC_DIO_PORT = 4
   const val ABS_OFFSET = 0.0
-  const val ENC_INVERTED = false
+  const val ENC_INVERTED = true
   val ABS_RANGE = Pair(-0.25, 0.75)
   const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
-  val QUAD_ENCODER = Encoder(5, 10)
+  val QUAD_ENCODER = Encoder(1, 3)
   const val ENC_CPR = 2048
   const val SAMPLES_TO_AVERAGE = 127
 }

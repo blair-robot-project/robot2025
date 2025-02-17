@@ -3,6 +3,7 @@ package frc.team449.subsystems.superstructure
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.units.Units.Radians
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
@@ -26,17 +27,18 @@ class SuperstructureManager(
       .andThen(
         ConditionalCommand(
           // if extending
-          pivot.setPosition(goal.pivot.`in`(Radians))
-            .andThen(
-              elevator.setPosition(goal.elevator.`in`(Meters))
-                .alongWith(
-                  wrist.setPosition(goal.wrist.`in`(Radians))
-                )
-            ),
+          Commands.sequence(
+            wrist.setPosition(goal.wrist.`in`(Radians)),
+            pivot.setPosition(goal.pivot.`in`(Radians)),
+            elevator.setPosition(goal.elevator.`in`(Meters))
+          ),
+
           // if retracting
-          elevator.setPosition(goal.elevator.`in`(Meters))
-            .alongWith(wrist.setPosition(goal.wrist.`in`(Radians)))
-            .andThen(pivot.setPosition((goal.pivot.`in`(Radians))))
+          Commands.sequence(
+            elevator.setPosition(goal.elevator.`in`(Meters)),
+            pivot.setPosition(goal.pivot.`in`(Radians)),
+            wrist.setPosition(goal.wrist.`in`(Radians))
+          )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
   }

@@ -1,8 +1,10 @@
 package frc.team449.auto.routines
 
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
 import frc.team449.auto.AutoUtil
 import frc.team449.auto.choreo.ChoreoRoutine
@@ -56,7 +58,10 @@ class ThreeL4(
     return robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
       .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide)))
       .andThen(robot.intake.outtakeCoral())
-//      .andThen(WaitUntilCommand { !robot.intake.infrared.get() })
+      .andThen(
+        WaitUntilCommand { !robot.intake.coralDetected() }
+          .onlyIf { RobotBase.isReal() }
+      )
       .andThen(WaitCommand(0.15))
   }
 
@@ -64,7 +69,10 @@ class ThreeL4(
     return InstantCommand(robot.drive::stop)
       .andThen(robot.intake.intakeCoral())
       .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
-//      .andThen(WaitUntilCommand { !robot.intake.infrared.get() })
+      .andThen(
+        WaitUntilCommand { robot.intake.coralDetected() }
+          .onlyIf { RobotBase.isReal() }
+      )
       .andThen(WaitCommand(0.15))
       .andThen(robot.intake.stop())
   }

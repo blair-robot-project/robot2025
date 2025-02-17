@@ -1,7 +1,6 @@
 package frc.team449
 
 import com.ctre.phoenix6.SignalLogger
-import com.pathplanner.lib.pathfinding.Pathfinding
 import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
@@ -26,28 +25,18 @@ import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
-import frc.team449.commands.autoscoreCommands.AutoScoreCommands
-import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
-import frc.team449.commands.autoscoreCommands.WebConnection
-
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
 class RobotLoop : TimedRobot() {
-  val robot = Robot()
+
+  private val robot = Robot()
 
   private val routineChooser: RoutineChooser = RoutineChooser(robot)
 
-  private val field = robot.field
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
-
-  private val autoScore = AutoScoreCommands(
-    robot.poseSubsystem,
-    robot
-  )
-  private var webCom : WebConnection? = null
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -82,8 +71,6 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-    DriverStation.startDataLog(DataLogManager.getLog())
-
     controllerBinder.bindButtons()
 
     DogLog.setOptions(
@@ -111,7 +98,6 @@ class RobotLoop : TimedRobot() {
 
   override fun driverStationConnected() {
     FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
-    webCom = WebConnection()
   }
 
   override fun robotPeriodic() {
@@ -175,9 +161,8 @@ class RobotLoop : TimedRobot() {
 
   override fun testPeriodic() {}
 
-  override fun simulationInit() {
-    Pathfinding.setPathfinder(robot.pathfinder.adStar)
-  }
+  override fun simulationInit() {}
+
   override fun simulationPeriodic() {
     robot.drive as SwerveSim
 
@@ -189,55 +174,5 @@ class RobotLoop : TimedRobot() {
 
     // change elevator angle according to pivot position
     robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
-
-    webCom?.command = webCom?.commandSubscriber?.get().toString()
-
-    if (webCom?.command != "none" && DriverStation.isDSAttached()) {
-      println("command received")
-      webCom?.isDonePublish?.set(false)
-
-      val command : Command
-      //get the value
-      when (webCom?.command) {
-        "processor" -> command = autoScore.processor()
-        "intakeCoralTop" -> command = autoScore.coral(true)
-        "intakeCoralBottom" -> command = autoScore.coral(false)
-        "netRed" -> command = autoScore.net(true)
-        "netBlue" -> command = autoScore.net(false)
-        else -> {
-          //format will be l_ location__
-          val level = webCom?.command?.slice(0..1)
-          val location = webCom?.command?.slice(3..<webCom?.command!!.length)
-          var reefLocation = AutoScoreCommandConstants.ReefLocation.Location1
-          var reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
-          when (location) {
-            "location1" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location1)
-            "location2" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location2)
-            "location3" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location3)
-            "location4" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location4)
-            "location5" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location5)
-            "location6" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location6)
-            "location7" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location7)
-            "location8" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location8)
-            "location9" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location9)
-            "location10" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location10)
-            "location11" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location11)
-            "location12" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location12)
-          }
-          when (level) {
-            "l1" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
-            "l2" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L2)
-            "l3" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L3)
-            "l4" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L4)
-          }
-          command = autoScore.reef(reefLocation, reefLevel)
-        }
-      }
-      autoScore.currentCommand = command
-      autoScore.poseSubsystem.autoscoreCurrentCommand = command
-      command.schedule()
-      webCom?.isDonePublish?.set(true)
-      webCom?.commandPublisher?.set("none")
-    }
   }
 }

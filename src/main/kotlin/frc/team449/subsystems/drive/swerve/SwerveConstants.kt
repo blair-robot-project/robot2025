@@ -11,26 +11,31 @@ object SwerveConstants {
   const val DUTY_CYCLE_DEADBAND = 0.001
 
   /** Drive motor ports */
-  const val DRIVE_MOTOR_FL = 2
-  const val DRIVE_MOTOR_FR = 5
-  const val DRIVE_MOTOR_BL = 7
-  const val DRIVE_MOTOR_BR = 4
-  const val TURN_MOTOR_FL = 1
+  const val DRIVE_MOTOR_FL = 21
+  const val DRIVE_MOTOR_FR = 22
+  const val DRIVE_MOTOR_BL = 23
+  const val DRIVE_MOTOR_BR = 24
+
+  const val TURN_MOTOR_FL = 19
   const val TURN_MOTOR_FR = 6
-  const val TURN_MOTOR_BL = 8
-  const val TURN_MOTOR_BR = 3
+  const val TURN_MOTOR_BL = 13
+  const val TURN_MOTOR_BR = 5
 
   /** Turning encoder channels */
-  const val TURN_ENC_CHAN_FL = 6
+  const val TURN_ENC_CHAN_FL = 9
   const val TURN_ENC_CHAN_FR = 7
-  const val TURN_ENC_CHAN_BL = 8
-  const val TURN_ENC_CHAN_BR = 9
+  const val TURN_ENC_CHAN_BL = 6
+  const val TURN_ENC_CHAN_BR = 8
 
   /** Offsets for the absolute encoders in rotations. */
-  const val TURN_ENC_OFFSET_FL = 0.1348
-  const val TURN_ENC_OFFSET_FR = 0.2927 + 0.5
-  const val TURN_ENC_OFFSET_BL = 0.4755
-  const val TURN_ENC_OFFSET_BR = 0.391 + 0.5
+   val TURN_ENC_OFFSET_FL = Units.radiansToRotations(-1.9721847889188047) +
+    Units.radiansToRotations(-0.023566500800433245) + 0.5
+   val TURN_ENC_OFFSET_FR = Units.radiansToRotations(-1.3803421761481829) +
+     Units.radiansToRotations(-1.4175450743616982)
+   val TURN_ENC_OFFSET_BL = Units.radiansToRotations(-0.8920550992085665) +
+     Units.radiansToRotations(-1.9177244935091542 + 3.114585873128222) + 0.5
+   val TURN_ENC_OFFSET_BR = Units.radiansToRotations(-1.7617422152440068) +
+     Units.radiansToRotations(-2.2696186936648175 - 0.8904340373587881)
 
   /** Inverted */
   const val DRIVE_INVERTED = false
@@ -43,8 +48,8 @@ object SwerveConstants {
   const val TURN_KD = 0.0
 
   /** Feed forward values for driving each module */
-  const val DRIVE_KS = 0.20285 + 0.02
-  const val DRIVE_KV = 2.3887 + 0.2 + 0.0935
+  const val DRIVE_KS = 0.0
+  const val DRIVE_KV = 2.54 // Estimate based of max speed of 4.724 m/s max speed
   const val DRIVE_KA = 0.43365 + 0.035 + 0.0185
 
   // TODO: Figure out this value
@@ -60,7 +65,7 @@ object SwerveConstants {
   const val DRIVE_GEARING = (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0)
   val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
   const val TURN_UPR = 2 * PI
-  val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.85) // (12 - DRIVE_KS) / DRIVE_KV
+  val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.5) // (12 - DRIVE_KS) / DRIVE_KV
 
   val MAX_DRIVE_SPEED = 3.5 // estimate
   val DRIVE_CURRENT_LIMIT = 40.0

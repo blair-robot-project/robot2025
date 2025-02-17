@@ -3,6 +3,7 @@ package frc.team449.subsystems.superstructure.wrist
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -10,7 +11,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -20,8 +20,8 @@ import kotlin.math.abs
 // TODO(the entire class bru)
 class Wrist(
   private val motor: TalonFX,
-  val absoluteEncoder: AbsoluteEncoder,
-  val quadEncoder: QuadEncoder
+//  val absoluteEncoder: AbsoluteEncoder,
+//  val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
 
   val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -30,17 +30,32 @@ class Wrist(
 
   private val request = MotionMagicVoltage(
     SuperstructureGoal.STOW.wrist.`in`(Radians)
-  )
+  ).withEnableFOC(false)
 
   private val isReal = RobotBase.isReal()
 
+  lateinit var wristFeedForward: WristFeedForward
+
+  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.runOnce {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(
+            wristFeedForward.calculate(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble)
+          )
       )
-    }
+    }.until(::atSetpoint)
+  }
+
+  fun setVoltage(volts: Double): Command {
+    return this.run { motor.setControl(VoltageOut(volts)) }
+  }
+
+  fun setVoltageChar(volts: Double) {
+    motor.setControl(VoltageOut(volts))
   }
 
   fun manualDown(): Command {
@@ -56,15 +71,21 @@ class Wrist(
   }
 
   private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < WristConstants.TOLERANCE)
+    return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
   }
+
+  fun zero() {
+    motor.setPosition(0.0);
+  }
+
 
   override fun periodic() {
     logData()
 
-    if (abs(motor.position.valueAsDouble - quadEncoder.position) > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
-      motor.setPosition(quadEncoder.position)
-    }
+    // No quad encoder
+//    if (abs(motor.position.valueAsDouble - quadEncoder.position) > WristConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
+//      motor.setPosition(quadEncoder.position)
+//    }
   }
 
   override fun simulationPeriodic() {
@@ -74,13 +95,14 @@ class Wrist(
   }
 
   private fun logData() {
-    DogLog.log("Wrist/Desired Target", request.Position)
+    DogLog.log("Wrist/Desired Target", targetSupplier.get())
     DogLog.log("Wrist/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
     DogLog.log("Wrist/In Tolerance", atSetpoint())
-    DogLog.log("Wrist/Abs/Pos", absoluteEncoder.position)
-    DogLog.log("Wrist/Abs/Vel", absoluteEncoder.velocity)
-    DogLog.log("Wrist/Quad/Pos", quadEncoder.position)
-    DogLog.log("Wrist/Quad/Vel", quadEncoder.velocity)
+/*    DogLog.log("Wrist/Abs/Pos", absoluteEncoder.position)
+    DogLog.log("Wrist/Abs/Vel", absoluteEncoder.velocity)*/
+//    No quad Encoder
+//    DogLog.log("Wrist/Quad/Pos", quadEncoder.position)
+//    DogLog.log("Wrist/Quad/Vel", quadEncoder.velocity)
     KrakenDogLog.log("Wrist/Motor", motor)
   }
 
@@ -124,27 +146,27 @@ class Wrist(
         leadMotor.deviceTemp
       )
 
-      val absEnc = AbsoluteEncoder.createAbsoluteEncoder(
-        "Wrist Absolute Enc",
-        WristConstants.ABS_ENC_DIO_PORT,
-        WristConstants.ABS_OFFSET,
-        WristConstants.ENC_RATIO,
-        WristConstants.ENC_INVERTED,
-        min = WristConstants.ABS_RANGE.first,
-        max = WristConstants.ABS_RANGE.second
-      )
+//      val absEnc = AbsoluteEncoder.createAbsoluteEncoder(
+//        "Wrist Absolute Enc",
+//        WristConstants.ABS_ENC_DIO_PORT,
+//        WristConstants.ABS_OFFSET,
+//        WristConstants.ENC_RATIO,
+//        WristConstants.ENC_INVERTED,
+//        min = WristConstants.ABS_RANGE.first,
+//        max = WristConstants.ABS_RANGE.second
+//      )
 
-      val quadEnc = QuadEncoder.createQuadEncoder(
-        "Wrist Quad Enc",
-        WristConstants.QUAD_ENCODER,
-        WristConstants.ENC_CPR,
-        WristConstants.ENC_RATIO,
-        1.0,
-        WristConstants.ENC_INVERTED,
-        WristConstants.SAMPLES_TO_AVERAGE
-      )
+//      val quadEnc = QuadEncoder.createQuadEncoder(
+//        "Wrist Quad Enc",
+//        WristConstants.QUAD_ENCODER,
+//        WristConstants.ENC_CPR,
+//        WristConstants.ENC_RATIO,
+//        1.0,
+//        WristConstants.ENC_INVERTED,
+//        WristConstants.SAMPLES_TO_AVERAGE
+//      )
 
-      return Wrist(leadMotor, absEnc, quadEnc)
+      return Wrist(leadMotor)//, absEnc)//, quadEnc)
     }
   }
 }
