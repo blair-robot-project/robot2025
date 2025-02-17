@@ -88,7 +88,7 @@ object VisionConstants {
     ApriltagCamera(
       "Camera_03",
       TAG_LAYOUT,
-testTrans,
+      testTrans,
       VISION_SIM
     )
 

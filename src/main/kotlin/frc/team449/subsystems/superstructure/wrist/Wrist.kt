@@ -73,7 +73,7 @@ class Wrist(
   }
 
   fun startupZero() {
-    motor.setPosition(-124.436755)
+    motor.setPosition(WristConstants.STARTUP_ANGLE.`in`(Radians))
   }
 
   override fun periodic() {

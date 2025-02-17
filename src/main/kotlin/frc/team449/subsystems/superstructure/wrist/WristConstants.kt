@@ -39,6 +39,8 @@ object WristConstants {
   val CRUISE_VEL = RadiansPerSecond.of(2 * PI)
   val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
 
+  val STARTUP_ANGLE = Degrees.of(-124.436755)
+
   val RESET_ENC_LIMIT = Degrees.of(0.05)
 
   /** Encoder Values */
