@@ -77,7 +77,7 @@ open class Elevator(
           .withPosition(position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(
-            elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
+            elevatorFeedForward.calculate(positionSupplier.get(), motor.closedLoopReferenceSlope.valueAsDouble)
           )
       )
     }.until(::atSetpoint)
