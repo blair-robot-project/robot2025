@@ -90,10 +90,6 @@ class RobotLoop : TimedRobot() {
     QuadCalibration(robot.pivot, robot.pivot.absoluteEncoder, robot.pivot.quadEncoder, name = "Pivot")
       .ignoringDisable(true)
       .schedule()
-
-    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
-      .ignoringDisable(true)
-      .schedule()
   }
 
   override fun driverStationConnected() {
