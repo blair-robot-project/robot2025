@@ -43,7 +43,7 @@ class RobotLoop : TimedRobot() {
   private var routineMap = hashMapOf<String, Command>()
   private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
 
-  private val characChooser = SendableChooser<String>()
+//  private val characChooser = SendableChooser<String>()
 
   private var componentStorage: Array<Pose3d> = arrayOf(
     Pose3d(),
@@ -93,13 +93,13 @@ class RobotLoop : TimedRobot() {
     robot.light.defaultCommand = BlairChasing(robot.light)
 
     controllerBinder.bindButtons()
-
-    characChooser.addOption("Elevator", "elevator")
-    characChooser.addOption("Pivot", "pivot")
-    characChooser.addOption("Wrist", "wrist")
-    characChooser.addOption("Drive", "drive")
-
-    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
+//
+//    characChooser.addOption("Elevator", "elevator")
+//    characChooser.addOption("Pivot", "pivot")
+//    characChooser.addOption("Wrist", "wrist")
+//    characChooser.addOption("Drive", "drive")
+//
+//    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
 
     DogLog.setOptions(
       DogLogOptions()
@@ -112,7 +112,7 @@ class RobotLoop : TimedRobot() {
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
-    SmartDashboard.putData("Characterization", characChooser)
+//    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 
