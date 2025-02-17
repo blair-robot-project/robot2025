@@ -28,16 +28,20 @@ class SuperstructureManager(
         ConditionalCommand(
           // if extending
           Commands.sequence(
-            wrist.setPosition(goal.wrist.`in`(Radians)),
-            pivot.setPosition(goal.pivot.`in`(Radians)),
+            Commands.parallel(
+              wrist.setPosition(goal.wrist.`in`(Radians)),
+              pivot.setPosition(goal.pivot.`in`(Radians))
+            ),
             elevator.setPosition(goal.elevator.`in`(Meters))
           ),
 
           // if retracting
           Commands.sequence(
             elevator.setPosition(goal.elevator.`in`(Meters)),
-            pivot.setPosition(goal.pivot.`in`(Radians)),
-            wrist.setPosition(goal.wrist.`in`(Radians))
+            Commands.parallel(
+              pivot.setPosition(goal.pivot.`in`(Radians)),
+              wrist.setPosition(goal.wrist.`in`(Radians))
+            )
           )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
