@@ -17,7 +17,7 @@ object WristConstants {
   const val MOTOR_ID = 41
 
   val TOLERANCE = Degrees.of(5.0)
-  const val GEARING = 1.0 / 300.0
+  const val GEARING = 17.0 / 576.0
   const val UPR = 2 * PI
 
   val INVERTED = InvertedValue.CounterClockwise_Positive
@@ -33,9 +33,9 @@ object WristConstants {
   const val KG = 0.19939
   const val KV = 5.119
 
-  const val KP = 1.6944
+  const val KP = 1.1119
   const val KI = 0.0
-  const val KD = 0.0
+  const val KD = 0.0096482
 
   val CRUISE_VEL = RadiansPerSecond.of(2 * PI)
   val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)

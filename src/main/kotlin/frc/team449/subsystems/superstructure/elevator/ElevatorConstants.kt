@@ -33,10 +33,10 @@ object ElevatorConstants {
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
   // Physical Constants TODO(Adjust all of these.)
-  const val GEARING_MOTOR_TO_PULLEY = 5.0 / 3
-  const val PULLEY_RADIUS = 0.018415
-  const val GEARING_MOTOR_TO_ELEVATOR = GEARING_MOTOR_TO_PULLEY / (PULLEY_RADIUS * 2 * PI)
-  const val UPR = 2 * PI * PULLEY_RADIUS
+  const val GEARING_MOTOR_TO_PULLEY = 1.0 / 6.0
+  val PULLEY_RADIUS = Units.inchesToMeters(1.5 / 2)
+  val UPR = 2 * PI * PULLEY_RADIUS
+  val GEARING_MOTOR_TO_ELEVATOR = 1 / (GEARING_MOTOR_TO_PULLEY * UPR)
   const val CARRIAGE_MASS = 7.0
 
   const val TOLERANCE = 0.025 // TODO(Adjust tolerance.)

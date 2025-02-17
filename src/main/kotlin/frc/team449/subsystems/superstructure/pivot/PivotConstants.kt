@@ -12,7 +12,7 @@ object PivotConstants {
   const val FOLLOWER_MOTOR_ID = 11
 
   // TODO(Adjust gearing and UPR.)
-  const val GEARING = 1.0 / 75.0
+  const val GEARING = 1.0 / 252.0
   const val UPR = 2.0 * PI
 
   // Simulation Constants
@@ -53,7 +53,7 @@ object PivotConstants {
   const val ABS_OFFSET = 0.0
   const val ENC_INVERTED = true
   val ABS_RANGE = Pair(-0.25, 0.75)
-  const val ENC_RATIO = 2 * PI / (30.0 / 30.0)
+  const val ENC_RATIO = 2 * PI * (1.0 / 2.0)
   val QUAD_ENCODER = Encoder(1, 3)
   const val ENC_CPR = 2048
   const val SAMPLES_TO_AVERAGE = 127
