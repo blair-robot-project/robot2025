@@ -1,6 +1,5 @@
 package frc.team449.subsystems.superstructure.elevator
 
-import edu.wpi.first.math.controller.ElevatorFeedforward
 import frc.team449.subsystems.superstructure.pivot.Pivot
 import kotlin.math.pow
 import kotlin.math.sign

@@ -11,15 +11,13 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.system.encoder.AbsoluteEncoder
-import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
 // TODO(the entire class bru)
 class Wrist(
-  private val motor: TalonFX,
+  private val motor: TalonFX
 //  val absoluteEncoder: AbsoluteEncoder,
 //  val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
@@ -75,9 +73,8 @@ class Wrist(
   }
 
   fun zero() {
-    motor.setPosition(0.0);
+    motor.setPosition(0.0)
   }
-
 
   override fun periodic() {
     logData()
@@ -166,7 +163,7 @@ class Wrist(
 //        WristConstants.SAMPLES_TO_AVERAGE
 //      )
 
-      return Wrist(leadMotor)//, absEnc)//, quadEnc)
+      return Wrist(leadMotor) // , absEnc)//, quadEnc)
     }
   }
 }

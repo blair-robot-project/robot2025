@@ -28,14 +28,14 @@ object SwerveConstants {
   const val TURN_ENC_CHAN_BR = 8
 
   /** Offsets for the absolute encoders in rotations. */
-   val TURN_ENC_OFFSET_FL = Units.radiansToRotations(-1.9721847889188047) +
+  val TURN_ENC_OFFSET_FL = Units.radiansToRotations(-1.9721847889188047) +
     Units.radiansToRotations(-0.023566500800433245) + 0.5
-   val TURN_ENC_OFFSET_FR = Units.radiansToRotations(-1.3803421761481829) +
-     Units.radiansToRotations(-1.4175450743616982)
-   val TURN_ENC_OFFSET_BL = Units.radiansToRotations(-0.8920550992085665) +
-     Units.radiansToRotations(-1.9177244935091542 + 3.114585873128222) + 0.5
-   val TURN_ENC_OFFSET_BR = Units.radiansToRotations(-1.7617422152440068) +
-     Units.radiansToRotations(-2.2696186936648175 - 0.8904340373587881)
+  val TURN_ENC_OFFSET_FR = Units.radiansToRotations(-1.3803421761481829) +
+    Units.radiansToRotations(-1.4175450743616982)
+  val TURN_ENC_OFFSET_BL = Units.radiansToRotations(-0.8920550992085665) +
+    Units.radiansToRotations(-1.9177244935091542 + 3.114585873128222) + 0.5
+  val TURN_ENC_OFFSET_BR = Units.radiansToRotations(-1.7617422152440068) +
+    Units.radiansToRotations(-2.2696186936648175 - 0.8904340373587881)
 
   /** Inverted */
   const val DRIVE_INVERTED = false
