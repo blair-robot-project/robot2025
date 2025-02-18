@@ -26,15 +26,32 @@ class Intake(
     }
   }
 
+  fun coralDetected(): Boolean {
+    return !infrared.get()
+  }
+
+//  fun intakeAlgae(): Command {
+//    return runOnce {
+//      frontMotor.setVoltage(-IntakeConstants.ALGAE_INTAKE_VOLTAGE)
+//      backMotor.setVoltage(IntakeConstants.ALGAE_INTAKE_VOLTAGE)
+//    }
+//  }
+//
+//  fun outtakeAlgae(): Command {
+//    return runOnce {
+//      frontMotor.setVoltage(-IntakeConstants.ALGAE_OUTTAKE_VOLTAGE)
+//      backMotor.setVoltage(IntakeConstants.ALGAE_OUTTAKE_VOLTAGE)
+//    }
+//  }
+
+
   fun outtakeCoral(): Command {
     return runOnce {
       motor.setVoltage(-IntakeConstants.CORAL_OUTTAKE_VOLTAGE)
     }
   }
 
-  fun coralDetected(): Boolean {
-    return !infrared.get()
-  }
+
 
 //  fun intakeAlgae(): Command {
 //    return runOnce {

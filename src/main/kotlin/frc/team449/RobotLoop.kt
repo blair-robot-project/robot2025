@@ -39,7 +39,6 @@ class RobotLoop : TimedRobot() {
 
   private val field = robot.field
 
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -78,7 +77,6 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-    controllerBinder.bindButtons()
 
     DogLog.setOptions(
       DogLogOptions()
@@ -91,7 +89,6 @@ class RobotLoop : TimedRobot() {
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
-    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 
