@@ -84,14 +84,16 @@ open class Elevator(
   }
 
   fun manualDown(): Command {
-    return this.runOnce {
+    return this.run {
       motor.setVoltage(-2.0)
+      request.Position = positionSupplier.get()
     }
   }
 
   fun manualUp(): Command {
-    return this.runOnce {
+    return this.run {
       motor.setVoltage(2.0)
+      request.Position = positionSupplier.get()
     }
   }
 

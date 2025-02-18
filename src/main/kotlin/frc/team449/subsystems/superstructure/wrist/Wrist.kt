@@ -65,11 +65,17 @@ class Wrist(
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return run {
+      motor.setVoltage(-1.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return runOnce {
+      motor.setVoltage(1.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun stop(): Command {

@@ -32,7 +32,8 @@ class SuperstructureManager(
               wrist.setPosition(goal.wrist.`in`(Radians)),
               pivot.setPosition(goal.pivot.`in`(Radians))
             ),
-            elevator.setPosition(goal.elevator.`in`(Meters))
+            elevator.setPosition(goal.elevator.`in`(Meters)),
+            holdAll()
           ),
 
           // if retracting
@@ -41,10 +42,19 @@ class SuperstructureManager(
             Commands.parallel(
               pivot.setPosition(goal.pivot.`in`(Radians)),
               wrist.setPosition(goal.wrist.`in`(Radians))
-            )
+            ),
+            holdAll()
           )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
+  }
+
+  private fun holdAll(): Command {
+    return Commands.parallel(
+      pivot.hold(),
+      wrist.hold(),
+      elevator.hold()
+    )
   }
 
   companion object {
