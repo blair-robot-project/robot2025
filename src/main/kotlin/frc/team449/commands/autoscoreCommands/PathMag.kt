@@ -7,10 +7,12 @@ import com.pathplanner.lib.path.PathPlannerPath
 import com.pathplanner.lib.pathfinding.LocalADStar
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.networktables.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
@@ -35,10 +37,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
   private var pathValid = false
   private var goalPos: Pose2d = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
   private var trajectory: PathPlannerTrajectory? = null
-  //private var thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0,0.0)
-  private var thetaController: PIDController = PIDController(0.01, 0.0,0.0)
+  private var thetaController: PIDController = PIDController(2.0, 0.0,0.0)
   private var desRot = (0.0)
-
+//
   init {
     timer.restart()
     pathPub = NetworkTableInstance.getDefault().getStructArrayTopic("/ADStarPath", Pose2d.struct).publish(*arrayOf<PubSubOption>())
@@ -48,8 +49,15 @@ class PathMag(val robot: Robot): SubsystemBase() {
   }
 
   override fun periodic() {
-    println("desired rot value: ${goalPos.rotation.radians}")
-    println("rot now: ${robot.poseSubsystem.pose.rotation.radians}")
+    if (robot.poseSubsystem.pose.translation.x >= goalPos.translation.x - 0.05 &&  robot.poseSubsystem.pose.translation.x <= goalPos.translation.x + 0.05
+      && robot.poseSubsystem.pose.translation.y >= goalPos.translation.y - 0.05 && robot.poseSubsystem.pose.translation.y <= goalPos.translation.y + 0.05
+      ) {
+      println("at translation setpoint!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    }
+    println("path running: $pathRunning")
+    println("path valid: $pathValid")
+    println("desired rot value: ${goalPos.rotation.radians.mod(2*Math.PI)}")
+    println("rot now: ${robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)}")
     desRot = thetaController.calculate(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI), goalPos.rotation.radians.mod(2*Math.PI))
     //println("rotation: ${robot.poseSubsystem.pose.rotation}")
     if (adStar.isNewPathAvailable) {
@@ -58,12 +66,13 @@ class PathMag(val robot: Robot): SubsystemBase() {
         PathConstraints(
           AutoScoreCommandConstants.MAX_LINEAR_SPEED,
           AutoScoreCommandConstants.MAX_ACCEL,
-          AutoScoreCommandConstants.MAX_ROT_SPEED,
+          5*2*Math.PI,
           RobotConstants.ROT_RATE_LIMIT
         ),
         //GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
         //GoalEndState(0.0, goalPos.rotation)
         GoalEndState(0.0, Rotation2d(0.0))
+        //GoalEndState(0.0, Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)))
       )
       if (path != null) {
         println("new path, not null")
@@ -76,7 +85,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
         )
         expectedTime = trajectory!!.totalTimeSeconds
         pathPub?.set(path!!.pathPoses.toTypedArray<Pose2d>())
-        pathRunning = (robot.poseSubsystem.pose != goalPos)
+        pathRunning = (robot.poseSubsystem.pose.translation != goalPos.translation)
         pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0,0.0)))
         startTime = timer.get() //
       }
@@ -100,15 +109,15 @@ class PathMag(val robot: Robot): SubsystemBase() {
           println("path start: $startTime")
           println("expected time: $expectedTime")
 
-          if (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-0.5 && robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+0.5) {
-            println("at setpoint !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+          if ((robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-0.05) && (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+0.05)) {
+            println("at rot setpoint !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
               ChassisSpeeds(
                 it.vxMetersPerSecond,
                 it.vyMetersPerSecond,
-                it.omegaRadiansPerSecond)
+                //it.omegaRadiansPerSecond)
               //desRot
-              //0.0)
+              0.0)
             } ?: robot.drive.currentSpeeds
           }
 
@@ -117,8 +126,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
               ChassisSpeeds(
                 it.vxMetersPerSecond,
                 it.vyMetersPerSecond,
-                //it.omegaRadiansPerSecond)
+                //it.omegaRadiansPerSecond
                 desRot
+                //robot.driveController.rightX*3.0
               )
             } ?: robot.drive.currentSpeeds
           }
@@ -134,15 +144,12 @@ class PathMag(val robot: Robot): SubsystemBase() {
           setCommand.schedule()
           pathRunning = (robot.poseSubsystem.pose != goalPos)
           pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
-          println("path running: $pathRunning")
-          println("path valid: $pathValid")
           println()
         } else {
           //
-          SimpleReefAlign(robot.drive, robot.poseSubsystem).schedule()
+//          SimpleReefAlign(robot.drive, robot.poseSubsystem).schedule()
           expectedTime = 0.0
         }
-//        println("rotation: ${robot.poseSubsystem.pose.rotation}")
         adStar.setStartPosition(robot.poseSubsystem.pose.translation)
       }
     }

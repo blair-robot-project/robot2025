@@ -96,7 +96,7 @@ class AutoScoreCommandConstants() {
     val reef1Translation2dBlue = Translation2d(4.906, 5.1359)
 
     // RADIANS
-    val reef1Rotation2dBlue = Rotation2d(radians(240))
+    val reef1Rotation2dBlue = Rotation2d(radians(-118))
     val reef1PoseBlue = Pose2d(reef1Translation2dBlue, reef1Rotation2dBlue)
 
     // reef 2nd pose values
