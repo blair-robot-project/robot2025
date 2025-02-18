@@ -3,78 +3,86 @@ body {
     background: rgb(114, 114, 138);
 }
 
-.reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .netContainer, .coralIntakeContainer, .choiceContainer {
+.reefContainer, .processorContainer, .netContainer, .coralIntakeContainer {
     display: flex;
-    gap: 50px;
+    gap: 5vw;
     justify-content: center;
-    margin-top: 50px;
-    height: 500px;
+    height: 10vh;
+}
+
+.reefContainer {
+    height: 50vh;
+    align-items: center;
+    gap: 3vh;
+}
+
+.scoringContainer, .messageContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 5vh;
+    width: 100vw;
+    height: 100vh;
 }
 
 .levelContainer, .locationContainer {
     display: flex;
     flex-direction: column;
-    gap: 50px;
     align-items: center;
+}
+
+.levelContainer {
+    gap: 3vh;
 }
 
 .buttonContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 50px;
-}
-
-.reefContainer {
-    align-items: center;
-    margin-top: 60px;
+    gap: 5vw;
 }
 
 .Button, .Level {
-    background-color: red;
-    width: 250px;
-    height: 100px;
+    background-color: #DD0000;
+    width: 25vw;
+    height: 10vh;
     color: white;
     font-size: 28px;
     font-weight: bold;
-    border-radius: 50px;
+    border-radius: 5vh;
     font-family: 'Orbitron';
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 10px;
+    padding: 0 1vh;
 }
 .Level {
-    width: 150px;
+    width: 10vw;
 }
 
 #confirmText {
-    width: 300px;
+    width: 20vw;
 }
 
 .Button:hover {
-    background-color: rgb(255, 100, 100);
+    background-color: rgb(255, 0, 0);
 }
 
 .Button:active {
     background-color: rgb(200, 0, 0);
 }
 
-#locationSelect {
-    margin-top: 50px;
-}
-
 h1 {
     color: white;
 }
 
-#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice, #msgDisplayer {
+#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice, #messageDisplay {
     align-self: center;
     justify-self: center;
+    align-items: center;
 }
 
-#msgDisplayer {
+#messageDisplay {
     color: red;
     font-size: 48px;
 }
@@ -89,7 +97,7 @@ h1 {
 }
 
 #areaSelectionText {
-    width: 315px;
+    width: 15vw;
     text-align: center;
 }
 

@@ -10,90 +10,77 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <div class="choiceContainer" style="display: none">
-        <div class="Button" id="processorChoice">Processor</div>
-        <div class="Button" id="reefChoice">Reef</div>
-        <div class="Button" id="netChoice">Net</div>
-        <div class="Button" id="coralIntakeChoice">Coral Intake</div>
-    </div>
-    <div class="reefContainer" style="display: none">
-        <div class="levelContainer">
-            <div class="Level" id="L4">
-                Level 4 Score
+    <div class="scoringContainer" style="display: none;">
+        <div class="reefContainer">
+            <div class="levelContainer" width="25%" height="100%">
+                <div class="Level" id="L4">
+                    Level 4 Score
+                </div>
+                <div class="Level" id="L3">
+                    Level 3 Score
+                </div>
+                <div class="Level" id="L2">
+                    Level 2 Score
+                </div>
+                <div class="Level" id="L1">
+                    Level 1 Score
+                </div>
             </div>
-            <div class="Level" id="L3">
-                Level 3 Score
+            <div class="coralLevelImage" width="25%" height="100%">
+                <img src="coralLevelImages/coralNone.png" alt="" id="coral">
             </div>
-            <div class="Level" id="L2">
-                Level 2 Score
-            </div>
-            <div class="Level" id="L1">
-                Level 1 Score
-            </div>
-        </div>
-        <div class="imageContainer">
-            <img src="coralLevelImages/coralNone.png" alt="" width="256px" height="512px" id="coral">
-        </div>
-        <div class="locationContainer">
-            <div class="imageContainer">
+            <div class="locationContainer" width="25%" height="100%">
                 <img src="locationSelectorImages/locationSelectorNone.png" alt="" width="315px" height="274px" id="locationSelect">
-                <h1 id="areaSelectionText">Click area you want to go to.</h1>
+                <h1 id="areaSelectionText" width="100%">Click the area you want to go to.</h1>
+            </div>
+            <div class="confirmChoice" width="25%" height="100%">
+                <h1 class="reefText" id="coralText">Coral Level: None</h1>
+                <h1 class="reefText" id="areaText">Reef Area: None</h1>
+                <div class="Button" id="confirmText">
+                    Choose Robot Alignment
+                </div>
             </div>
         </div>
-        <div class="confirmChoice">
-            <h1 class="reefText" id="coralText">Coral Level: None</h1>
-            <h1 class="reefText" id="areaText">Reef Area: None</h1>
-            <div class="Button" id="confirmText">
-                Choose Robot Alignment
+        <div class="processorContainer">
+            <div class="buttonContainer">
+                <div class="Button" id="processorScore">
+                    Score Processor
+                </div>
             </div>
         </div>
-    </div>
-    <div class="netContainer" style="display: none">
-        <div class="buttonContainer">
-            <div class="Button" id="netScoreRed">
-                Score Net on Red Side
-            </div>
-            <div class="Button" id="netScoreBlue">
-                Score Net on Blue Side
-            </div>
-        </div>
-        <div class="imageContainer">
-            <img src="" alt="">
-        </div>
-    </div>
-    <div class="processorContainer" style="display: none">
-        <div class="buttonContainer">
-            <div class="Button" id="processorScore">
-                Score Processor
+        <div class="netContainer">
+            <div class="buttonContainer">
+                <div class="Button" id="netScoreRed">
+                    Score Net on Red Side
+                </div>
+                <div class="Button" id="netScoreBlue">
+                    Score Net on Blue Side
+                </div>
             </div>
         </div>
-        <div class="imageContainer">
-            <img src="processorImages/processorEmpty.png" alt="" width="582px" height="419px" id="processor">
-        </div>
-    </div>
-    <div class="coralIntakeContainer" style="display: none">
-        <div class="buttonContainer">
-            <div class="Button" id="coralIntakeTop">
-                Intake Coral Top
-            </div>
-            <div class="Button" id="coralIntakeBottom">
-                Intake Coral Bottom
+        <div class="coralIntakeContainer">
+            <div class="buttonContainer">
+                <div class="Button" id="coralIntakeTop">
+                    Intake Coral Top
+                </div>
+                <div class="Button" id="coralIntakeBottom">
+                    Intake Coral Bottom
+                </div>
             </div>
         </div>
     </div>
-    <div class="screenChangeContainer" style="display: none">
-        <h1 id="msgDisplayer"></h1>
+    <div class="messageContainer" style="display: none">
+        <h1 id="messageDisplay"></h1>
     </div>
     <script src="ntsetup.js"></script>
-    <script src="menuControl.js"></script>
-    <script src="robotCommunicationBackend.js"></script>
+    <script src="robotCommunication.js"></script>
     <script src="processor.js"></script>
     <script src="net.js"></script>
     <script src="reefPlacement.js"></script>
     <script src="coralLevel.js"></script>
     <script src="coralIntake.js"></script>
-    <script src="robotCommunication.js"></script>
 
 </body>
 </html>

@@ -10,7 +10,7 @@ locationImg.onmouseleave = () => {
 }
 
 document.addEventListener("mousemove", (event) => {
-    if(menu == "reef" && inPicker && !areaSelected) {
+    if(inPicker && !areaSelected) {
         let imgPosition = locationImg.getBoundingClientRect();
         let imageCenterX = imgPosition.left + (imgPosition.right-imgPosition.left) / 2;
         let imageCenterY = imgPosition.top + (imgPosition.bottom-imgPosition.top) / 2;
@@ -24,11 +24,9 @@ document.addEventListener("mousemove", (event) => {
             angleDegrees = 360 + angleRadians * (180 / Math.PI);
         }
         reefArea = Math.floor((angleDegrees)/30) + 1;
-        console.log(reefArea);
         if(reefArea == -1) {
             locationImg.src = `locationSelectorImages/locationSelectorNone.png`;
         } else {
-            console.log(`locationSelectorImages/locationSelector${reefArea}.png`);
             locationImg.src = `locationSelectorImages/locationSelector${reefArea == 1 ? 12 : reefArea-1}.png`;
         }
     }
