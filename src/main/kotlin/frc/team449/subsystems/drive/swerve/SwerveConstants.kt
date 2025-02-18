@@ -48,15 +48,15 @@ object SwerveConstants {
   const val TURN_KD = 0.0
 
   /** Feed forward values for driving each module */
-  const val DRIVE_KS = 0.0
-  const val DRIVE_KV = 2.54 // Estimate based of max speed of 4.724 m/s max speed
-  const val DRIVE_KA = 0.43365 + 0.035 + 0.0185
+  const val DRIVE_KS = 0.15
+  const val DRIVE_KV = 2.54
+  const val DRIVE_KA = 0.47044
 
   // TODO: Figure out this value
   const val STEER_KS = 0.05 / 12.0
 
   /** PID gains for driving each module*/
-  const val DRIVE_KP = 0.475
+  const val DRIVE_KP = 0.75
   const val DRIVE_KI = 0.0
   const val DRIVE_KD = 0.0
 
