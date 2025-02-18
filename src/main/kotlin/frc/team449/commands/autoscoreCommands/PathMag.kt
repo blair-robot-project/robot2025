@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.ChassisSpeeds.fromFieldRelativeSpeeds
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.networktables.*
 import edu.wpi.first.wpilibj.Timer
@@ -69,18 +70,16 @@ class PathMag(val robot: Robot): SubsystemBase() {
           5*2*Math.PI,
           RobotConstants.ROT_RATE_LIMIT
         ),
-        //GoalEndState(0.0, robot.poseSubsystem.pose.rotation)
-        //GoalEndState(0.0, goalPos.rotation)
-        GoalEndState(0.0, Rotation2d(0.0))
-        //GoalEndState(0.0, Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)))
+        GoalEndState(0.0, goalPos.rotation)
+        //GoalEndState(0.0, Rotation2d(0.0))
       )
       if (path != null) {
         println("new path, not null")
         println("new trajectory")
         trajectory = path!!.generateTrajectory(
           robot.drive.currentSpeeds,
-          //Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)),
-          Rotation2d(0.0),
+          Rotation2d(robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI)),
+          //Rotation2d(0.0),
           RobotConfig.fromGUISettings()
         )
         expectedTime = trajectory!!.totalTimeSeconds
@@ -138,7 +137,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
           println("time since start: ${timer.get() - startTime}")
           println("speed now: $currentSpeed")
           val setCommand = RunCommand({
-            robot.poseSubsystem.pathfindingMagnetize(currentSpeed)
+            robot.poseSubsystem.pathfindingMagnetize(fromFieldRelativeSpeeds(currentSpeed,robot.poseSubsystem.pose.rotation))
           }).withTimeout(0.02)
           setCommand.addRequirements(robot.drive)
           setCommand.schedule()
