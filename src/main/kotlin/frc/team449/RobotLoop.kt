@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -22,6 +23,7 @@ import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import frc.team449.subsystems.superstructure.elevator.ElevatorFeedForward.Companion.createElevatorFeedForward
 import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.createPivotFeedForward
+import frc.team449.subsystems.superstructure.wrist.WristFeedForward.Companion.createWristFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import frc.team449.system.encoder.QuadCalibration
 import org.littletonrobotics.urcl.URCL
@@ -59,6 +61,7 @@ class RobotLoop : TimedRobot() {
     // Custom Feedforwards
     robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
     robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
+    robot.wrist.wristFeedForward = createWristFeedForward(robot.pivot)
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
 
@@ -88,6 +91,7 @@ class RobotLoop : TimedRobot() {
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 
@@ -95,9 +99,10 @@ class RobotLoop : TimedRobot() {
       .ignoringDisable(true)
       .schedule()
 
-    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
-      .ignoringDisable(true)
-      .schedule()
+//    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
+//      .ignoringDisable(true)
+//      .schedule()
+    robot.wrist.zero()
   }
 
   override fun driverStationConnected() {

@@ -38,7 +38,7 @@ open class Elevator(
   val elevatorLigament: MechanismLigament2d = rootElevator.append(
     MechanismLigament2d(
       "elevatorLigament",
-      ElevatorConstants.MIN_HEIGHT,
+      ElevatorConstants.SIM_MIN_HEIGHT,
       ElevatorConstants.ANGLE,
       ElevatorConstants.WIDTH,
       ElevatorConstants.COLOR
@@ -48,7 +48,7 @@ open class Elevator(
   val desiredElevatorLigament: MechanismLigament2d = rootElevator.append(
     MechanismLigament2d(
       "elevatorDesiredLigament",
-      ElevatorConstants.MIN_HEIGHT,
+      ElevatorConstants.SIM_MIN_HEIGHT,
       ElevatorConstants.ANGLE,
       ElevatorConstants.DESIRED_WIDTH,
       ElevatorConstants.DESIRED_COLOR
