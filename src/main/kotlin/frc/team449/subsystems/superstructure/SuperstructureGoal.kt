@@ -8,32 +8,35 @@ import frc.team449.subsystems.drive.swerve.SwerveDrive
 
 object SuperstructureGoal {
   /** TODO: All placeholder guesses, need actual values */
+  private const val SCORING_SPEED = 2.6672
+  private const val SCORING_ACCEL = 12.5
+
   val L1 = SuperstructureState(
     Degrees.of(55.0),
     Meters.of(0.0),
     Degrees.of(-105.0),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L2 = SuperstructureState(
     Degrees.of(58.38),
     Inches.of(0.3675),
     Degrees.of(-93.38),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L3 = SuperstructureState(
     Degrees.of(69.5),
     Inches.of(15.75),
     Degrees.of(-104.5),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L4 = SuperstructureState(
     Degrees.of(75.0),
     Inches.of(47.25),
     Degrees.of(-138.5),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val SUBSTATION_INTAKE = SuperstructureState(
