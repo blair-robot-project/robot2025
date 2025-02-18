@@ -5,6 +5,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Hertz
 import edu.wpi.first.units.measure.Frequency
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color8Bit
 import kotlin.math.PI
 
@@ -37,21 +38,21 @@ object ElevatorConstants {
   val PULLEY_RADIUS = Units.inchesToMeters(1.5 / 2)
   val UPR = 2 * PI * PULLEY_RADIUS
   val GEARING_MOTOR_TO_ELEVATOR = 1 / (GEARING_MOTOR_TO_PULLEY * UPR)
-  const val CARRIAGE_MASS = 7.0
+  const val CARRIAGE_MASS = 4.0
 
   const val TOLERANCE = 0.025 // TODO(Adjust tolerance.)
 
   // TODO(Adjust gains.)
-  const val KS = 0.0
-  const val KV = 0.0
-  const val KG = 0.0
+  val KS = if (RobotBase.isReal()) 0.0175 else 0.0
+  const val KV = 6.6546
+  val KG = if (RobotBase.isReal()) 0.25233 else 0.0
   const val BASE_PIVOT_TO_CG_M = 0.1
 
-  const val KP = 10.0
+  const val KP = 10.8532
   const val KI = 0.0
-  const val KD = 0.0
+  const val KD = 0.0015
 
   // Motion Magic
-  const val CRUISE_VEL = 1.0
+  const val CRUISE_VEL = 1.0 // 1.75
   const val MAX_ACCEL = 10.0
 }

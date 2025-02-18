@@ -19,7 +19,7 @@ object WristConstants {
   const val GEARING = 17.0 / 576.0
   const val UPR = 2 * PI
 
-  val INVERTED = InvertedValue.CounterClockwise_Positive
+  val INVERTED = InvertedValue.Clockwise_Positive
   val BRAKE_MODE = NeutralModeValue.Brake
 
   const val STATOR_LIM = 80.0
@@ -28,18 +28,18 @@ object WristConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val KS = 0.070338
-  const val KG = 0.19939
-  const val KV = 5.119
+  const val KS = 0.020
+  const val KG = 0.25
+  const val KV = 0.63027
 
-  const val KP = 1.1119
+  const val KP = 1.5119
   const val KI = 0.0
   const val KD = 0.0096482
 
   val CRUISE_VEL = RadiansPerSecond.of(2 * PI)
   val MAX_ACCEL = RadiansPerSecondPerSecond.of(6 * PI)
 
-  val STARTUP_ANGLE = Degrees.of(-124.436755)
+  val STARTUP_ANGLE = Degrees.of(90.0)
 
   val RESET_ENC_LIMIT = Degrees.of(0.05)
 

@@ -8,9 +8,10 @@ import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.subsystems.superstructure.SuperstructureGoal
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -22,6 +23,10 @@ class Pivot(
   val absoluteEncoder: AbsoluteEncoder,
   val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
+
+  init {
+    SmartDashboard.putNumber("Pivot Test Voltage", 0.0)
+  }
 
   val positionSupplier = Supplier { motor.position.valueAsDouble }
   val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
@@ -43,33 +48,51 @@ class Pivot(
 //  val simPositionSupplier = Supplier { pivotSim.angleRads }
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
-    SuperstructureGoal.STOW.pivot.`in`(Radians)
+    PivotConstants.STARTING_ANGLE.`in`(Radians)
   ).withEnableFOC(false)
 
   private val isReal = RobotBase.isReal()
 
-  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble))
+          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble))
       )
-    }.until(::atSetpoint)
+    }.andThen(
+      WaitUntilCommand(::atSetpoint)
+    )
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-6.0) }
+    return this.runOnce {
+      motor.setVoltage(-2.0)
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(6.0) }
+    return this.runOnce {
+      motor.setVoltage(2.0)
+    }
   }
 
-  fun setVoltage(voltage: Double): Command {
-    return runOnce { motor.setVoltage(voltage) }
+  fun hold(): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withPosition(request.Position)
+          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble))
+      )
+    }
+  }
+
+  fun testVoltage(): Command {
+    return this.runOnce {
+      motor.setVoltage(SmartDashboard.getNumber("Pivot Test Voltage", 0.0))
+    }
   }
 
   fun setVoltageChar(voltage: Double) {
@@ -136,14 +159,19 @@ class Pivot(
       config.Slot0.kI = PivotConstants.KI
       config.Slot0.kD = PivotConstants.KD
 
+      config.Slot0.kS = PivotConstants.KS
+      config.Slot0.kV = PivotConstants.KV
+
       config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond)
       config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCEL.`in`(RadiansPerSecondPerSecond)
 
       val status1 = leadMotor.configurator.apply(config)
-      if (!status1.isOK) println("Error applying configs to Elevator Lead Motor -> Error Code: $status1")
+      if (!status1.isOK) println("Error applying configs to Pivot Lead Motor -> Error Code: $status1")
+
+      config.MotorOutput.Inverted = PivotConstants.FOLLOWER_INVERTED
 
       val status2 = followerMotor.configurator.apply(config)
-      if (!status2.isOK) println("Error applying configs to Elevator Follower Motor -> Error Code: $status2")
+      if (!status2.isOK) println("Error applying configs to Pivot Follower Motor -> Error Code: $status2")
 
       BaseStatusSignal.setUpdateFrequencyForAll(
         PivotConstants.VALUE_UPDATE_RATE,
@@ -152,6 +180,8 @@ class Pivot(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
         leadMotor.deviceTemp
       )
 
@@ -164,6 +194,8 @@ class Pivot(
         followerMotor.motorVoltage,
         followerMotor.supplyCurrent,
         followerMotor.statorCurrent,
+        followerMotor.closedLoopReference,
+        followerMotor.closedLoopReferenceSlope,
         followerMotor.deviceTemp
       )
 

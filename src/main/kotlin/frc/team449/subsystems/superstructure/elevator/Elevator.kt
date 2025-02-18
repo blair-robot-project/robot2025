@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import frc.team449.system.motor.KrakenDogLog
@@ -69,30 +70,44 @@ open class Elevator(
     SuperstructureGoal.STOW.elevator.`in`(Meters)
   ).withEnableFOC(false)
 
-  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(
-            elevatorFeedForward.calculate(positionSupplier.get(), motor.closedLoopReferenceSlope.valueAsDouble)
-          )
+          .withFeedForward(elevatorFeedForward.calculateGravity(positionSupplier.get()))
       )
-    }.until(::atSetpoint)
+    }.andThen(
+      WaitUntilCommand(::atSetpoint)
+    )
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return this.runOnce {
+      motor.setVoltage(-2.0)
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return this.runOnce {
+      motor.setVoltage(2.0)
+    }
   }
 
-  fun setVoltage(voltage: Double): Command {
-    return runOnce { motor.setVoltage(voltage) }
+  fun hold(): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withPosition(request.Position)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(elevatorFeedForward.calculateGravity(motor.closedLoopReference.valueAsDouble))
+      )
+    }
+  }
+
+  fun setVoltage(voltage: Double) {
+    return motor.setVoltage(voltage)
   }
 
   fun stop(): Command {
@@ -140,6 +155,9 @@ open class Elevator(
       config.Slot0.kI = ElevatorConstants.KI
       config.Slot0.kD = ElevatorConstants.KD
 
+      config.Slot0.kS = ElevatorConstants.KS
+      config.Slot0.kV = ElevatorConstants.KV
+
       config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.CRUISE_VEL
       config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL
 
@@ -156,6 +174,8 @@ open class Elevator(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
         leadMotor.deviceTemp
       )
 
@@ -168,6 +188,8 @@ open class Elevator(
         followerMotor.motorVoltage,
         followerMotor.supplyCurrent,
         followerMotor.statorCurrent,
+        followerMotor.closedLoopReference,
+        followerMotor.closedLoopReferenceSlope,
         followerMotor.deviceTemp
       )
 

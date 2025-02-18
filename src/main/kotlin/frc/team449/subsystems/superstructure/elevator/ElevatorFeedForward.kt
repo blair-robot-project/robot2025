@@ -2,15 +2,12 @@ package frc.team449.subsystems.superstructure.elevator
 
 import frc.team449.subsystems.superstructure.pivot.Pivot
 import kotlin.math.pow
-import kotlin.math.sign
 import kotlin.math.sin
 
 // Custom Elevator Feedforward based on Pivot Angle.
 // TODO(Elevator FeedForward!)
 class ElevatorFeedForward(
   private val pivot: Pivot,
-  private val ks: Double,
-  private val kv: Double,
   private val kg: Double
 ) {
   /** FF Model
@@ -29,11 +26,11 @@ class ElevatorFeedForward(
    *      Note: r in this equation is the distance from the pivot point to the center of mass, not to the carriage. The
    *        center of mass is roughly approximated as carriage_position * 0.75 just based off of vibes
    */
-  fun calculate(elevatorPos: Double, velocitySetpoint: Double): Double {
-    return this.ks * sign(velocitySetpoint) + this.kg * (
+  fun calculateGravity(elevatorPos: Double): Double {
+    return this.kg * (
       9.80665 * sin(pivot.positionSupplier.get()) - pivot.velocitySupplier.get()
         .pow(2) * (ElevatorConstants.BASE_PIVOT_TO_CG_M + elevatorPos * 0.75)
-      ) / 9.80665 + this.kv * velocitySetpoint
+      ) / 9.80665
   }
 
   companion object {
@@ -42,8 +39,6 @@ class ElevatorFeedForward(
     ): ElevatorFeedForward {
       return ElevatorFeedForward(
         pivot,
-        ElevatorConstants.KS,
-        ElevatorConstants.KV,
         ElevatorConstants.KG
       )
     }
