@@ -59,7 +59,7 @@ class Pivot(
         request
           .withPosition(position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble))
+          .withFeedForward(pivotFeedForward.calculateWithLength(position))
       )
     }.andThen(
       WaitUntilCommand(::atSetpoint)
@@ -86,7 +86,7 @@ class Pivot(
         request
           .withPosition(request.Position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(pivotFeedForward.calculateWithLength(motor.closedLoopReference.valueAsDouble))
+          .withFeedForward(pivotFeedForward.calculateWithLength(request.Position))
       )
     }
   }

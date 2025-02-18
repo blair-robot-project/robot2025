@@ -76,7 +76,7 @@ open class Elevator(
         request
           .withPosition(position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(elevatorFeedForward.calculateGravity(positionSupplier.get()))
+          .withFeedForward(elevatorFeedForward.calculateGravity())
       )
     }.andThen(
       WaitUntilCommand(::atSetpoint)
@@ -103,7 +103,7 @@ open class Elevator(
         request
           .withPosition(request.Position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(elevatorFeedForward.calculateGravity(motor.closedLoopReference.valueAsDouble))
+          .withFeedForward(elevatorFeedForward.calculateGravity())
       )
     }
   }

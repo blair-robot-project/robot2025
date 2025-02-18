@@ -42,7 +42,7 @@ class Wrist(
         request
           .withPosition(position)
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(wristFeedForward.calculate(motor.closedLoopReference.valueAsDouble))
+          .withFeedForward(wristFeedForward.calculate(position))
       )
     }.andThen(
       WaitUntilCommand(::atSetpoint)
@@ -55,7 +55,7 @@ class Wrist(
         request
           .withPosition(request.Position)
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(wristFeedForward.calculate(motor.closedLoopReference.valueAsDouble))
+          .withFeedForward(wristFeedForward.calculate(request.Position))
       )
     }
   }
