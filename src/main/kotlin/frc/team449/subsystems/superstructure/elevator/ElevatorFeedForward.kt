@@ -26,11 +26,12 @@ class ElevatorFeedForward(
    *      Note: r in this equation is the distance from the pivot point to the center of mass, not to the carriage. The
    *        center of mass is roughly approximated as carriage_position * 0.75 just based off of vibes
    */
-  fun calculateGravity(elevatorPos: Double): Double {
-    return this.kg * (
-      9.80665 * sin(pivot.positionSupplier.get()) - pivot.velocitySupplier.get()
-        .pow(2) * (ElevatorConstants.BASE_PIVOT_TO_CG_M + elevatorPos * 0.75)
-      ) / 9.80665
+  fun calculateGravity(): Double {
+//    return this.kg * (
+//      9.80665 * sin(pivot.positionSupplier.get()) - pivot.velocitySupplier.get()
+//        .pow(2) * (ElevatorConstants.BASE_PIVOT_TO_CG_M + elevatorPos * 0.75)
+//      ) / 9.80665
+    return this.kg * sin(pivot.positionSupplier.get())
   }
 
   companion object {
