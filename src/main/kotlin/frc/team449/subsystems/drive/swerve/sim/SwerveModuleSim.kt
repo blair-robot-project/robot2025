@@ -12,17 +12,20 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
 import org.ironmaple.simulation.motorsims.SimulatedMotorController
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.sign
 
 // MapleSim Swerve Module Sim based on SwerveModuleKraken
 class SwerveModuleSim(
   private val name: String,
   val module: SwerveModuleSimulation,
   val turnController: PIDController,
+  val driveController: PIDController,
   override val location: Translation2d
 ): SwerveModule {
   init {
     turnController.enableContinuousInput(.0, 2 * PI)
     turnController.reset()
+    driveController.reset()
   }
 
   val drive: SimulatedMotorController.GenericMotorController = module
@@ -41,10 +44,7 @@ class SwerveModuleSim(
   /** The module's [SwerveModuleState], containing speed and angle. */
   override var state: SwerveModuleState
     get() {
-      return SwerveModuleState(
-        module.driveEncoderUnGearedSpeed.`in`(RadiansPerSecond),
-        Rotation2d(module.steerRelativeEncoderPosition)
-      )
+      return module.currentState
     }
     set(desState) {
       if (abs(desState.speedMetersPerSecond) < .001) {
@@ -55,22 +55,25 @@ class SwerveModuleSim(
       desState.optimize(Rotation2d(module.steerRelativeEncoderPosition))
 
       turnController.setpoint = desState.angle.radians
+      driveController.setpoint = desState.speedMetersPerSecond
       desiredState.speedMetersPerSecond = desState.speedMetersPerSecond
       desiredState.angle = desState.angle
     }
 
   /** The module's [SwerveModulePosition], containing distance and angle. */
   override val position: SwerveModulePosition
-    get() = SwerveModulePosition(
-      // Calculate distance from drive position
-      Meters.of(module.driveWheelFinalPosition.`in`(Radians) * SwerveConstants.WHEEL_RADIUS),
-      module.steerAbsoluteFacing
-    )
+    get() {
+      return SwerveModulePosition(
+        module.driveWheelFinalPosition.`in`(Rotations),
+        Rotation2d(module.steerRelativeEncoderPosition)
+      )
+    }
 
 
   override fun setVoltage(volts: Double) {
     desiredState.speedMetersPerSecond = 0.0
     turnController.setpoint = 0.0
+    driveController.setpoint = 0.0
 
     turn.requestVoltage(Volts.of(turnController.calculate(module.steerRelativeEncoderPosition.`in`(Radians))))
     drive.requestVoltage(Volts.of(volts))
@@ -83,7 +86,26 @@ class SwerveModuleSim(
   }
 
   override fun update() {
-    // MapleSim handles updating
+
+    /** CONTROL speed of module */
+    val drivePid = driveController.calculate(
+      module.driveWheelFinalSpeed.`in`(RadiansPerSecond)
+    )
+
+    drive.requestVoltage(Volts.of(drivePid))
+
+    /** CONTROL direction of module */
+    val turnPid = turnController.calculate(
+      module.steerRelativeEncoderPosition.`in`(Radians)
+    )
+
+    turn.requestVoltage(
+      Volts.of(
+        turnPid +
+          sign(desiredState.angle.radians - module.steerRelativeEncoderPosition.`in`(Radians)) *
+          SwerveConstants.STEER_KS
+      )
+    )
   }
 
   companion object {
@@ -99,6 +121,11 @@ class SwerveModuleSim(
           SwerveConstants.TURN_KP,
           SwerveConstants.TURN_KI,
           SwerveConstants.TURN_KD
+        ),
+        PIDController(
+          SwerveConstants.DRIVE_KP,
+          SwerveConstants.DRIVE_KI,
+          SwerveConstants.DRIVE_KD
         ),
         location
       )

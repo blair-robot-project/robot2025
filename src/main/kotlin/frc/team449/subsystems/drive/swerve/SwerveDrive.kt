@@ -15,6 +15,7 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
 import frc.team449.subsystems.drive.swerve.sim.SwerveModuleSim.Companion.createModuleSim
+import org.ironmaple.simulation.SimulatedArena
 import org.ironmaple.simulation.drivesims.COTS
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig
@@ -249,6 +250,7 @@ open class SwerveDrive(
           ),
           Pose2d()
         );
+        SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveMapleSim)
         modules = listOf(
           createModuleSim(
             "FLModule",
