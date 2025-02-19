@@ -3,8 +3,7 @@ package frc.team449.subsystems.superstructure.intake
 import edu.wpi.first.units.Units.Amps
 
 object IntakeConstants {
-  const val FRONT_MOTOR_ID = 10 // TODO(Change motor ID.)
-  const val BACK_MOTOR_ID = 11 // TODO(Change motor ID.)
+  const val FRONT_MOTOR_ID = 46
 
   val CURRENT_LIMIT = Amps.of(30.0)
   const val BRAKE_MODE = true

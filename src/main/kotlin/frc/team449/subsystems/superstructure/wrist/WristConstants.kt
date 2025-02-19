@@ -14,7 +14,7 @@ object WristConstants {
   const val WIDTH = 2.0
   val COLOR = Color8Bit(Color.kWhite)
 
-  const val MOTOR_ID = 40 // TODO(Change motor ID.)
+  const val MOTOR_ID = 41
 
   val TOLERANCE = Degrees.of(1.5)
   const val GEARING = 1.0 / 300.0
