@@ -30,12 +30,16 @@ class SuperstructureManager(
         ConditionalCommand(
           // if extending
           Commands.sequence(
+            InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) }),
             Commands.parallel(
               wrist.setPosition(goal.wrist.`in`(Radians)),
               pivot.setPosition(goal.pivot.`in`(Radians))
             ),
             WaitUntilCommand { wrist.elevatorReady() },
             elevator.setPosition(goal.elevator.`in`(Meters)),
+            WaitUntilCommand { wrist.atSetpoint() || pivot.atSetpoint() },
+            pivot.hold().onlyIf { pivot.atSetpoint() },
+            wrist.hold().onlyIf { wrist.atSetpoint() },
             WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() },
             Commands.parallel(pivot.hold(), wrist.hold())
               .repeatedly()
@@ -59,6 +63,7 @@ class SuperstructureManager(
             elevator.hold()
               .repeatedly()
               .until { wrist.atSetpoint() && pivot.atSetpoint() },
+            InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) }),
             holdAll()
           )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
