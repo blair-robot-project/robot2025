@@ -11,7 +11,6 @@ import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
@@ -37,23 +36,20 @@ class Wrist(
   lateinit var wristFeedForward: WristFeedForward
 
   fun setPosition(position: Double): Command {
-    return this.runOnce {
+    return this.run {
       motor.setControl(
         request
           .withPosition(position)
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(wristFeedForward.calculate(position))
       )
-    }.andThen(
-      WaitUntilCommand(::atSetpoint)
-    )
+    }
   }
 
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
         request
-          .withPosition(request.Position)
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(wristFeedForward.calculate(request.Position))
       )
@@ -82,8 +78,12 @@ class Wrist(
     return this.runOnce { motor.stopMotor() }
   }
 
-  private fun atSetpoint(): Boolean {
+  fun atSetpoint(): Boolean {
     return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
+  }
+
+  fun elevatorReady(): Boolean {
+    return positionSupplier.get() < WristConstants.ELEVATOR_READY.`in`(Radians)
   }
 
   fun startupZero() {

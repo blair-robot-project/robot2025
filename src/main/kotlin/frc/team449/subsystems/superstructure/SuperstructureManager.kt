@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.superstructure.elevator.Elevator
 import frc.team449.subsystems.superstructure.pivot.Pivot
 import frc.team449.subsystems.superstructure.wrist.Wrist
+import frc.team449.subsystems.superstructure.wrist.WristConstants
 
 class SuperstructureManager(
   private val elevator: Elevator,
@@ -32,18 +34,31 @@ class SuperstructureManager(
               wrist.setPosition(goal.wrist.`in`(Radians)),
               pivot.setPosition(goal.pivot.`in`(Radians))
             ),
-            holdAll(),
+            WaitUntilCommand { wrist.elevatorReady() },
             elevator.setPosition(goal.elevator.`in`(Meters)),
+            WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() },
+            Commands.parallel(pivot.hold(), wrist.hold())
+              .repeatedly()
+              .until { elevator.atSetpoint() },
             holdAll()
           ),
 
           // if retracting
           Commands.sequence(
             elevator.setPosition(goal.elevator.`in`(Meters)),
+            wrist.hold(),
+            wrist.setPosition(WristConstants.ELEVATOR_READY.`in`(Radians))
+              .onlyIf { goal.wrist > WristConstants.ELEVATOR_READY },
+            pivot.hold()
+              .repeatedly()
+              .until { elevator.atSetpoint() },
             Commands.parallel(
               pivot.setPosition(goal.pivot.`in`(Radians)),
               wrist.setPosition(goal.wrist.`in`(Radians))
             ),
+            elevator.hold()
+              .repeatedly()
+              .until { wrist.atSetpoint() && pivot.atSetpoint() },
             holdAll()
           )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }

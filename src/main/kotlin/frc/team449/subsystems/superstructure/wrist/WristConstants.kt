@@ -16,6 +16,7 @@ object WristConstants {
   const val MOTOR_ID = 41
 
   val TOLERANCE = Degrees.of(5.0)
+  val ELEVATOR_READY = Degrees.of(30.0)
   const val GEARING = 17.0 / 576.0
   const val UPR = 2 * PI
 
