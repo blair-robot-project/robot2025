@@ -157,6 +157,9 @@ class Wrist(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 

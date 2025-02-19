@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -68,14 +69,14 @@ class Pivot(
 
   fun manualDown(): Command {
     return this.run {
-      motor.setVoltage(-2.0)
+      motor.setVoltage(-0.75)
       request.Position = positionSupplier.get()
     }
   }
 
   fun manualUp(): Command {
     return this.run {
-      motor.setVoltage(2.0)
+      motor.setVoltage(0.75)
       request.Position = positionSupplier.get()
     }
   }
@@ -83,8 +84,7 @@ class Pivot(
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        request
-          .withPosition(request.Position)
+        PositionVoltage(request.Position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(request.Position))
       )
@@ -92,7 +92,7 @@ class Pivot(
   }
 
   fun testVoltage(): Command {
-    return this.runOnce {
+    return this.run {
       motor.setVoltage(SmartDashboard.getNumber("Pivot Test Voltage", 0.0))
     }
   }
@@ -145,7 +145,7 @@ class Pivot(
       config.MotorOutput.Inverted = PivotConstants.INVERTED
       config.MotorOutput.NeutralMode = PivotConstants.BRAKE_MODE
       config.MotorOutput.DutyCycleNeutralDeadband = 0.001
-      config.Feedback.SensorToMechanismRatio = 1 / (PivotConstants.GEARING * PivotConstants.UPR)
+      config.Feedback.SensorToMechanismRatio = -1 / (PivotConstants.GEARING * PivotConstants.UPR)
 
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
@@ -170,7 +170,7 @@ class Pivot(
       val status1 = leadMotor.configurator.apply(config)
       if (!status1.isOK) println("Error applying configs to Pivot Lead Motor -> Error Code: $status1")
 
-      config.MotorOutput.Inverted = PivotConstants.FOLLOWER_INVERTED
+//      config.Feedback.SensorToMechanismRatio = -1 / (PivotConstants.GEARING * PivotConstants.UPR)
 
       val status2 = followerMotor.configurator.apply(config)
       if (!status2.isOK) println("Error applying configs to Pivot Follower Motor -> Error Code: $status2")
@@ -184,6 +184,7 @@ class Pivot(
         leadMotor.statorCurrent,
         leadMotor.closedLoopReference,
         leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
@@ -198,6 +199,7 @@ class Pivot(
         followerMotor.statorCurrent,
         followerMotor.closedLoopReference,
         followerMotor.closedLoopReferenceSlope,
+        followerMotor.closedLoopFeedForward,
         followerMotor.deviceTemp
       )
 

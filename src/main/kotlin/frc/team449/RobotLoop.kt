@@ -105,10 +105,10 @@ class RobotLoop : TimedRobot() {
       DogLogOptions()
         .withCaptureDs(true)
         .withCaptureNt(true)
-        .withLogExtras(true)
+//        .withLogExtras(true)
     )
 
-    DogLog.setPdh(robot.powerDistribution)
+//    DogLog.setPdh(robot.powerDistribution)
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)

@@ -23,7 +23,7 @@ object PivotConstants {
 
   val STARTING_ANGLE = Degrees.of(0.0)
 
-  val INVERTED = InvertedValue.CounterClockwise_Positive
+  val INVERTED = InvertedValue.Clockwise_Positive
   val FOLLOWER_INVERTED = InvertedValue.Clockwise_Positive
   const val FOLLOWER_INVERTED_TO_MASTER = true
   val BRAKE_MODE = NeutralModeValue.Brake
@@ -34,21 +34,21 @@ object PivotConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  val TOLERANCE = Degrees.of(2.0) // TODO(Adjust tolerance.)
+  val TOLERANCE = Degrees.of(3.5) // TODO(Adjust tolerance.)
 
-  const val KP = 12.2048
+  const val KP = 6.2048
   const val KI = 0.0
-  const val KD = 0.048099
+  const val KD = 0.48099
 
   // TODO(Adjust gains.)
   const val KS = 0.085813
   const val KV = 4.4941
   const val KG_MIN = 0.17706 // (KG when elevator is fully retracted.)
-  const val KG_MAX = 0.52576 // (KG when elevator is fully extended.)
-  const val KG_MAX_EXTENSION = 1.106934
+  const val KG_MAX = 0.60576 // (KG when elevator is fully extended.)
+  const val KG_MAX_EXTENSION = 1.36934
 
   val CRUISE_VEL = RotationsPerSecond.of(0.35)
-  val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0)
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(1.25) // 5.0
 
   val RESET_ENC_LIMIT = Degrees.of(0.05)
 

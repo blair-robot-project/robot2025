@@ -29,13 +29,13 @@ object SwerveConstants {
 
   /** Offsets for the absolute encoders in rotations. */
   val TURN_ENC_OFFSET_FL = Units.radiansToRotations(-1.9721847889188047) +
-    Units.radiansToRotations(-0.023566500800433245) + 0.5
+    Units.radiansToRotations(-0.023566500800433245)
   val TURN_ENC_OFFSET_FR = Units.radiansToRotations(-1.3803421761481829) +
-    Units.radiansToRotations(-1.4175450743616982)
+    Units.radiansToRotations(-1.4175450743616982) + 0.5
   val TURN_ENC_OFFSET_BL = Units.radiansToRotations(-0.8920550992085665) +
-    Units.radiansToRotations(-1.9177244935091542 + 3.114585873128222) + 0.5
+    Units.radiansToRotations(-1.9177244935091542 + 3.114585873128222)
   val TURN_ENC_OFFSET_BR = Units.radiansToRotations(-1.7617422152440068) +
-    Units.radiansToRotations(-2.2696186936648175 - 0.8904340373587881)
+    Units.radiansToRotations(-2.2696186936648175 - 0.8904340373587881) + 0.5
 
   /** Inverted */
   const val DRIVE_INVERTED = false
@@ -62,12 +62,12 @@ object SwerveConstants {
 
   /** Drive configuration */
   val WHEEL_RADIUS = Units.inchesToMeters(1.895)
-  const val DRIVE_GEARING = (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0)
+  const val DRIVE_GEARING = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)
   val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
   const val TURN_UPR = 2 * PI
   val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.5) // (12 - DRIVE_KS) / DRIVE_KV
 
-  val DRIVE_SUPPLY_LIMIT = Amps.of(0.0)
+  val DRIVE_SUPPLY_LIMIT = Amps.of(40.0)
   val DRIVE_FOC_CURRENT_LIMIT = Amps.of(80.0)
   val DRIVE_SUPPLY_BOOST = Amps.of(55.0)
   val DRIVE_SUPPLY_BOOST_TIME = Seconds.of(0.0)

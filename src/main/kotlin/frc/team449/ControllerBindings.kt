@@ -118,6 +118,8 @@ class ControllerBindings(
   private fun coralOuttake() {
     driveController.rightBumper().onTrue(
       robot.intake.outtakeCoral()
+    ).onFalse(
+      robot.intake.stop()
     )
   }
 

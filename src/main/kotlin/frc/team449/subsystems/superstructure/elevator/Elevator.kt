@@ -178,6 +178,7 @@ open class Elevator(
         leadMotor.statorCurrent,
         leadMotor.closedLoopReference,
         leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
@@ -192,6 +193,7 @@ open class Elevator(
         followerMotor.statorCurrent,
         followerMotor.closedLoopReference,
         followerMotor.closedLoopReferenceSlope,
+        followerMotor.closedLoopFeedForward,
         followerMotor.deviceTemp
       )
 

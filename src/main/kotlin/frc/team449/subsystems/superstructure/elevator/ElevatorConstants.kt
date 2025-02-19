@@ -53,6 +53,6 @@ object ElevatorConstants {
   const val KD = 0.0015
 
   // Motion Magic
-  const val CRUISE_VEL = 1.0 // 1.75
-  const val MAX_ACCEL = 10.0
+  const val CRUISE_VEL = 1.5 // 1.75
+  const val MAX_ACCEL = 5.0 // 10.0
 }

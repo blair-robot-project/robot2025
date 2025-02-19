@@ -1,7 +1,6 @@
 package frc.team449.subsystems.superstructure.elevator
 
 import frc.team449.subsystems.superstructure.pivot.Pivot
-import kotlin.math.pow
 import kotlin.math.sin
 
 // Custom Elevator Feedforward based on Pivot Angle.

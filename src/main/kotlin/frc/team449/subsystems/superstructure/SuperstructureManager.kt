@@ -32,6 +32,7 @@ class SuperstructureManager(
               wrist.setPosition(goal.wrist.`in`(Radians)),
               pivot.setPosition(goal.pivot.`in`(Radians))
             ),
+            holdAll(),
             elevator.setPosition(goal.elevator.`in`(Meters)),
             holdAll()
           ),
