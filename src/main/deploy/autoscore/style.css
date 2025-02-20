@@ -59,12 +59,11 @@ body {
     justify-self: center;
     align-self: center;
     justify-self: center;
-    height: 20%;
-    margin: auto;
+    height: 10%;
 }
 
 .locationContainer {
-    width: 50%;
+    width: 55%;
     text-align: center;
     gap: 1vh;
     align-items: center;
@@ -72,8 +71,8 @@ body {
     flex-direction: column;
 }
 .confirmChoice {
-    width: 100%;
-    height: 20%;
+    width: 20%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -93,17 +92,18 @@ body {
     height: 100%;
     align-self: center;
     vertical-align: middle;
-    rotate: 30deg;
+    rotate: 0deg;
 }
 
 .locationImageContainer {
     display: flex;
     flex-direction: column;
-    width: 70%;
-    height: 70%;
+    width: 80%;
+    height: 80%;
     text-align: center;
     align-items: center;
     justify-content: center;
+    margin: auto;
 }
 
 .buttonContainer {
@@ -133,9 +133,9 @@ body {
     font-size: 1.8vw;
 }
 
-#confirmText {
+#confirmReefButton {
     width: 80%;
-    height: 50%;
+    height: 20%;
 }
 
 .Button:hover, .Level:hover {

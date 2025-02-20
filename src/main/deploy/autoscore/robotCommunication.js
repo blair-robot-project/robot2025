@@ -111,7 +111,7 @@ const resetReefStuff = () => {
   document.getElementById("locationSelect").src = "locationSelectorImages/locationSelectorNone.png";
 }
 
-document.getElementById("confirmText").onclick = async () => {
+document.getElementById("confirmReefButton").onclick = async () => {
   if(reefScoreButtonClickable && coralSelected && areaSelected) {
       reefScoreButtonClickable = false;
       confirmReefButton.innerText = "Scoring...";

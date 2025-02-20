@@ -1,4 +1,5 @@
 const locationImg = document.getElementById("locationSelect");
+const confirmReefButton = document.getElementById("confirmReefButton");
 
 let inPicker = false;
 locationImg.onmouseenter = () => inPicker = true;
@@ -27,7 +28,7 @@ document.addEventListener("mousemove", (event) => {
         if(reefArea == -1) {
             locationImg.src = `locationSelectorImages/locationSelectorNone.png`;
         } else {
-            locationImg.src = `locationSelectorImages/locationSelector${reefArea == 1 ? 12 : reefArea-1}.png`;
+            locationImg.src = `locationSelectorImages/locationSelector${reefArea}.png`;
         }
     }
 });
@@ -40,13 +41,12 @@ locationImg.onclick = () => {
     if(areaSelected) {
         areaText.innerText = `Reef Area: ${reefArea}`;
         areaSelectionText.innerText = "Click again to reselect";
-    }
-    if(coralSelected && areaSelected) {
-        confirmReefButton.innerText = `Score at Level ${coralLevel} and Area ${reefArea}`;
-    }
-    if(!areaSelected) {
+    } else {
         confirmReefButton.innerText = `Choose Robot Alignment`;
         areaText.innerText = `Reef Area: None`;
         areaSelectionText.innerText = "Click the area you want to go to.";
+    }
+    if(coralSelected) {
+        confirmReefButton.innerText = `Score at Level ${coralLevel} and Area ${reefArea}`;
     }
 }
