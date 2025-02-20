@@ -169,7 +169,6 @@ class PoseSubsystem(
 
 
   fun pathfindingMagnetize(desVel: ChassisSpeeds) {
-    println("setting ")
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime
@@ -208,6 +207,7 @@ class PoseSubsystem(
         currentControllerPower -= 0.1
         magMultiply -= 0.05
       }
+      println("set pathmag without controller")
       drive.set(desVel)
     } else {
       // controller stuff
@@ -312,7 +312,7 @@ class PoseSubsystem(
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
       combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
       combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -AutoScoreCommandConstants.MAX_ROT_SPEED, AutoScoreCommandConstants.MAX_ROT_SPEED)
-
+      println("setting pathmag with controller")
       drive.set(combinedChassisSpeeds)
 
     }
