@@ -169,6 +169,7 @@ class PoseSubsystem(
 
 
   fun pathfindingMagnetize(desVel: ChassisSpeeds) {
+    println("setting ")
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime

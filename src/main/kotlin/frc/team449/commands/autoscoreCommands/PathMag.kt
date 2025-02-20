@@ -36,10 +36,12 @@ class PathMag(val robot: Robot): SubsystemBase() {
   private var currentSpeed: ChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
   private var pathRunning = false
   private var pathValid = false
+  private var pathRotDone = true
   private var goalPos: Pose2d = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
   private var trajectory: PathPlannerTrajectory? = null
-  private var thetaController: PIDController = PIDController(2.0, 0.0,0.0)
+  private var thetaController: PIDController = PIDController(4.0, 0.0,0.0)
   private var desRot = (0.0)
+  private var tolerance = 0.005
 //
   init {
     timer.restart()
@@ -50,8 +52,8 @@ class PathMag(val robot: Robot): SubsystemBase() {
   }
 
   override fun periodic() {
-    if (robot.poseSubsystem.pose.translation.x >= goalPos.translation.x - 0.05 &&  robot.poseSubsystem.pose.translation.x <= goalPos.translation.x + 0.05
-      && robot.poseSubsystem.pose.translation.y >= goalPos.translation.y - 0.05 && robot.poseSubsystem.pose.translation.y <= goalPos.translation.y + 0.05
+    if (robot.poseSubsystem.pose.translation.x >= goalPos.translation.x - tolerance &&  robot.poseSubsystem.pose.translation.x <= goalPos.translation.x + tolerance
+      && robot.poseSubsystem.pose.translation.y >= goalPos.translation.y - tolerance && robot.poseSubsystem.pose.translation.y <= goalPos.translation.y + tolerance
       ) {
       println("at translation setpoint!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     }
@@ -84,14 +86,28 @@ class PathMag(val robot: Robot): SubsystemBase() {
         )
         expectedTime = trajectory!!.totalTimeSeconds
         pathPub?.set(path!!.pathPoses.toTypedArray<Pose2d>())
-        pathRunning = (robot.poseSubsystem.pose.translation != goalPos.translation)
-        pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0,0.0)))
+        pathRunning = (robot.poseSubsystem.pose != goalPos)
+        pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
         startTime = timer.get() //
       }
       else{
         println("new path, null ")
+        if (!((robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-tolerance) && (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+tolerance))){
+          pathRotDone = false
+          println("keep moving to setpoint")
+          robot.poseSubsystem.pathfindingMagnetize(ChassisSpeeds(robot.drive.currentSpeeds.vyMetersPerSecond, robot.drive.currentSpeeds.vxMetersPerSecond, desRot))
+        }
         pathRunning=false
         pathValid=false
+      }
+    }
+    if (!pathRotDone) {
+      println("keep moving to setpoint")
+      println("desired rotation: $desRot")
+      robot.poseSubsystem.pathfindingMagnetize(fromFieldRelativeSpeeds(ChassisSpeeds(robot.drive.currentSpeeds.vyMetersPerSecond, robot.drive.currentSpeeds.vxMetersPerSecond, desRot), robot.poseSubsystem.pose.rotation))
+      if (((robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-tolerance) && (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+tolerance))){
+        println("ok now it's at the setpoint")
+        pathRotDone = true
       }
     }
     if (pathRunning && pathValid) {
@@ -108,7 +124,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
           println("path start: $startTime")
           println("expected time: $expectedTime")
 
-          if ((robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-0.05) && (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+0.05)) {
+          if ((robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) >= goalPos.rotation.radians.mod(2*Math.PI)-tolerance) && (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) <= goalPos.rotation.radians.mod(2*Math.PI)+tolerance)) {
             println("at rot setpoint !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
               ChassisSpeeds(
@@ -120,7 +136,9 @@ class PathMag(val robot: Robot): SubsystemBase() {
             } ?: robot.drive.currentSpeeds
           }
 
-          if (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) != goalPos.rotation.radians.mod(2*Math.PI)) {
+          //if (robot.poseSubsystem.pose.rotation.radians.mod(2*Math.PI) != goalPos.rotation.radians.mod(2*Math.PI)) {
+          else {
+            println("not at setpointttttttttttttttttttttttttttttttttttttttttttttttt")
             currentSpeed = trajectory?.sample(timer.get() - startTime)?.fieldSpeeds?.let {
               ChassisSpeeds(
                 it.vxMetersPerSecond,
@@ -140,6 +158,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
             robot.poseSubsystem.pathfindingMagnetize(fromFieldRelativeSpeeds(currentSpeed,robot.poseSubsystem.pose.rotation))
           }).withTimeout(0.02)
           setCommand.addRequirements(robot.drive)
+          setCommand.addRequirements(robot.poseSubsystem)
           setCommand.schedule()
           pathRunning = (robot.poseSubsystem.pose != goalPos)
           pathValid = ((pathSub?.get()?.get(0) ?: Pose2d()) != Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0)))
