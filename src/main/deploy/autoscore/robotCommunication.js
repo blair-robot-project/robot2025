@@ -66,7 +66,7 @@ function onConnect() {
 function onDisconnect() {
   console.log("disconnected from robot");
   //For this example, we simply mark the status as disconnected.
-  noConnection();
+  // noConnection();
   //Since we've disconnected from the server, the connection is no longer valid.
   subscription = null;
 }
@@ -165,5 +165,5 @@ const connection = () => {
   msgDisplay.innerText = "";
 }
 
-noConnection();
+connection();
 

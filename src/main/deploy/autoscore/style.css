@@ -8,20 +8,25 @@ body {
     gap: 5vw;
     justify-content: center;
     height: 10vh;
+    width: 100%;
 }
 
 .reefContainer {
     height: 50vh;
     align-items: center;
-    gap: 3vh;
+    gap: 1vw;
 }
 
 .scoringContainer, .messageContainer {
     display: flex;
     flex-direction: column;
-    gap: 5vh;
-    width: 100vw;
-    height: 100vh;
+    gap: 2vw;
+    width: 90vw;
+    height: 90vh;
+    justify-content: center;
+    align-items: center;
+    margin:auto;
+    margin-top: 5vh;
 }
 
 .levelContainer, .locationContainer {
@@ -32,6 +37,64 @@ body {
 
 .levelContainer {
     gap: 3vh;
+}
+
+.levelContainer, .locationContainer, .coralLevelImage, .confirmChoice {
+    height: inherit;
+}
+
+.levelContainer {
+    width: 25%;
+}
+
+.coralLevelImage {
+    width: 15%;
+}
+
+.reefText {
+    font-size: 2em;
+    justify-self: center;
+}
+
+.locationContainer {
+    width: 35%;
+    text-align: center;
+    gap: 1vh;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+.confirmChoice {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#coral {
+    width: 100%;
+    height: 100%;
+}
+
+#locationSelect {
+    /* width 315 height 274 */
+    width: 92%;
+    height: 100%;
+    align-self: center;
+    vertical-align: middle;
+    rotate: 30deg;
+}
+
+.locationImageContainer {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    height: 70%;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 
 .buttonContainer {
@@ -46,7 +109,7 @@ body {
     width: 25vw;
     height: 10vh;
     color: white;
-    font-size: 28px;
+    font-size: 1.75vw;
     font-weight: bold;
     border-radius: 5vh;
     font-family: 'Orbitron';
@@ -57,18 +120,19 @@ body {
     padding: 0 1vh;
 }
 .Level {
-    width: 10vw;
+    width: 80%;
+    font-size: 1.8vw;
 }
 
 #confirmText {
     width: 20vw;
 }
 
-.Button:hover {
+.Button:hover, .Level:hover {
     background-color: rgb(255, 0, 0);
 }
 
-.Button:active {
+.Button:active, .Level:active {
     background-color: rgb(200, 0, 0);
 }
 
@@ -84,7 +148,7 @@ h1 {
 
 #messageDisplay {
     color: red;
-    font-size: 48px;
+    font-size: 4vw;
 }
 
 .reefText {
@@ -97,10 +161,11 @@ h1 {
 }
 
 #areaSelectionText {
-    width: 15vw;
+    width: 80%;
     text-align: center;
+    font-size: 2em;
 }
 
-#locationSelect {
-    rotate: 30deg;
+h1 {
+    font-size: 1em;
 }
