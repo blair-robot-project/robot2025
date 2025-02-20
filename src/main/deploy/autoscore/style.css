@@ -12,7 +12,7 @@ body {
 }
 
 .reefContainer {
-    height: 50vh;
+    height: 100%;
     align-items: center;
     gap: 1vw;
 }
@@ -37,27 +37,34 @@ body {
 
 .levelContainer {
     gap: 3vh;
+    width: 25%;
+    align-items: center;
+}
+
+.Level {
+    align-self: center;
+    margin: auto;
 }
 
 .levelContainer, .locationContainer, .coralLevelImage, .confirmChoice {
     height: inherit;
 }
 
-.levelContainer {
+.coralLevelImage {
     width: 25%;
 }
 
-.coralLevelImage {
-    width: 15%;
-}
-
 .reefText {
-    font-size: 2em;
+    font-size: 2vw;
     justify-self: center;
+    align-self: center;
+    justify-self: center;
+    height: 20%;
+    margin: auto;
 }
 
 .locationContainer {
-    width: 35%;
+    width: 50%;
     text-align: center;
     gap: 1vh;
     align-items: center;
@@ -65,12 +72,14 @@ body {
     flex-direction: column;
 }
 .confirmChoice {
-    width: 25%;
+    width: 100%;
+    height: 20%;
     display: flex;
     flex-direction: column;
     text-align: center;
     align-items: center;
     justify-content: center;
+    gap: 2vh;
 }
 
 #coral {
@@ -80,7 +89,7 @@ body {
 
 #locationSelect {
     /* width 315 height 274 */
-    width: 92%;
+    width: 100%;
     height: 100%;
     align-self: center;
     vertical-align: middle;
@@ -125,7 +134,8 @@ body {
 }
 
 #confirmText {
-    width: 20vw;
+    width: 80%;
+    height: 50%;
 }
 
 .Button:hover, .Level:hover {
@@ -151,11 +161,6 @@ h1 {
     font-size: 4vw;
 }
 
-.reefText {
-    align-self: center;
-    justify-self: center;
-}
-
 #areaSelectionText, #locationSelect {
     justify-self: center;
 }
@@ -163,9 +168,10 @@ h1 {
 #areaSelectionText {
     width: 80%;
     text-align: center;
-    font-size: 2em;
+    font-size: 2.5vw;
+    margin-bottom: 0;
 }
 
 h1 {
-    font-size: 1em;
+    font-size: 2vw;
 }

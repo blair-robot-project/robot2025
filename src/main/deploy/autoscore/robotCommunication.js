@@ -153,6 +153,11 @@ const scoreReef = async (location, level) => {
 const scoringContainer = document.querySelector(".scoringContainer");
 const messageContainer = document.querySelector(".messageContainer");
 const msgDisplay = document.getElementById("messageDisplay");
+
+const processorContainer = document.querySelector(".processorContainer");
+const netContainer = document.querySelector(".netContainer");
+const coralIntakeContainer = document.querySelector(".coralIntakeContainer");
+
 const noConnection = () => {
   scoringContainer.style.display = "none";
   messageContainer.style.display = "flex";
@@ -164,6 +169,10 @@ const connection = () => {
   scoringContainer.style.display = "flex";
   msgDisplay.innerText = "";
 }
+
+processorContainer.style = "display: none";
+netContainer.style = "display: none";
+coralIntakeContainer.style = "display: none";
 
 connection();
 
