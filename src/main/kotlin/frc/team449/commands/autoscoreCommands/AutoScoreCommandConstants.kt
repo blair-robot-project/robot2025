@@ -1,5 +1,6 @@
 package frc.team449.commands.autoscoreCommands
 
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -96,7 +97,7 @@ class AutoScoreCommandConstants() {
     val reef1Translation2dBlue = Translation2d(4.906, 5.1359)
 
     // RADIANS
-    val reef1Rotation2dBlue = Rotation2d(radians(-118))
+    val reef1Rotation2dBlue = Rotation2d(MathUtil.angleModulus(radians(-118)+Math.PI/2))
     val reef1PoseBlue = Pose2d(reef1Translation2dBlue, reef1Rotation2dBlue)
 
     // reef 2nd pose values
