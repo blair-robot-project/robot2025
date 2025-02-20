@@ -66,6 +66,7 @@ class PathMag(val robot: Robot): SubsystemBase() {
     //println("rotation: ${robot.poseSubsystem.pose.rotation}")
     if (adStar.isNewPathAvailable) {
       println("new path")
+
       path = adStar.getCurrentPath(
         PathConstraints(
           AutoScoreCommandConstants.MAX_LINEAR_SPEED,
