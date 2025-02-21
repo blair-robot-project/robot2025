@@ -96,7 +96,7 @@ class PoseSubsystem(
   private var magDec = 0.0004
   private val maxMagPower = 20.0
   private var lastDistance = 0.0
-  private val agreeVal = 0.75
+  private val agreeVal = 0.15
   val autoDistance = 1
   lateinit var autoscoreCurrentCommand : Command
 
@@ -168,7 +168,7 @@ class PoseSubsystem(
   }
 
 
-  fun pathfindingMagnetize(desVel: ChassisSpeeds) {
+  fun setPathMag(desVel: ChassisSpeeds) {
     val currTime = timer.get()
     dt = currTime - prevTime
     prevTime = currTime
@@ -189,7 +189,7 @@ class PoseSubsystem(
     clampMult()
 
     if(controllerMag > 0.35) {
-      currentControllerPower = MathUtil.clamp(currentControllerPower, 15.0, maxMagPower)
+      currentControllerPower = MathUtil.clamp(currentControllerPower, 17.0, maxMagPower)
       magMultiply += 0.3
     }
 
@@ -284,14 +284,8 @@ class PoseSubsystem(
         currentControllerPower += (abs(controllerSpeeds.vyMetersPerSecond))/20
       }
 
-
-
       controllerSpeeds *= currentControllerPower / 2
       val desVelAdjustedSpeeds = desVel / (20 / ( 1 + exp(-(currentControllerPower-12)/1) ) )
-
-//      println(" x ${
-//        abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0) - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0))
-//      } y ${abs(MathUtil.clamp(controllerSpeeds.vyMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vyMetersPerSecond, -1.0, 1.0))}")
 
       val combinedChassisSpeeds : ChassisSpeeds
       if( abs(MathUtil.clamp(controllerSpeeds.vxMetersPerSecond, -1.0, 1.0)  - MathUtil.clamp(desVel.vxMetersPerSecond, -1.0, 1.0) ) +
@@ -306,7 +300,7 @@ class PoseSubsystem(
         combinedChassisSpeeds = controllerSpeeds
       } else {
         combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
-        combinedChassisSpeeds.omegaRadiansPerSecond = controllerSpeeds.omegaRadiansPerSecond
+        combinedChassisSpeeds.omegaRadiansPerSecond = desVelAdjustedSpeeds.omegaRadiansPerSecond
       }
 
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
