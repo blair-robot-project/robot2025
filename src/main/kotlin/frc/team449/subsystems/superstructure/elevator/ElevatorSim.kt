@@ -12,8 +12,8 @@ class ElevatorSim(
 ) : Elevator(motor) {
 
   override val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
-    DCMotor.getKrakenX60(1),
-    ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
+    DCMotor.getKrakenX60(2),
+    1 / ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
     ElevatorConstants.CARRIAGE_MASS,
     ElevatorConstants.PULLEY_RADIUS,
     ElevatorConstants.SIM_MIN_HEIGHT,

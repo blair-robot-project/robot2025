@@ -10,7 +10,7 @@ class QuadCalibration(
   subsystem: Subsystem,
   private val absolute: AbsoluteEncoder,
   private val encoder: QuadEncoder,
-  private val numSamples: Int = 500,
+  private val numSamples: Int = 250,
   private val name: String = ""
 ) : Command() {
 

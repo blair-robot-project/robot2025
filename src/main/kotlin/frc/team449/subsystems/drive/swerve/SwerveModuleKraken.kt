@@ -1,18 +1,22 @@
 package frc.team449.subsystems.drive.swerve
 
+import com.ctre.phoenix6.StatusCode
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.NeutralModeValue
 import com.revrobotics.spark.SparkMax
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.units.Units.Amps
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.Encoder
-import frc.team449.system.motor.createKraken
 import frc.team449.system.motor.createSparkMax
 import kotlin.math.PI
 import kotlin.math.abs
@@ -122,25 +126,44 @@ open class SwerveModuleKraken(
       turnEncoderInverted: Boolean,
       location: Translation2d
     ): SwerveModuleKraken {
-      val drivingMotor = createKraken(
-        driveID,
-        driveInverted,
-        true,
-        1 / (SwerveConstants.DRIVE_GEARING * SwerveConstants.DRIVE_UPR),
-        SwerveConstants.DUTY_CYCLE_DEADBAND,
-        SwerveConstants.DRIVE_STATOR_LIMIT,
-        SwerveConstants.DRIVE_SUPPLY_BOOST,
-        SwerveConstants.DRIVE_SUPPLY_BOOST_TIME,
-        SwerveConstants.DRIVE_SUPPLY_LIMIT,
-        SwerveConstants.DRIVE_FOC_CURRENT_LIMIT,
-        SwerveConstants.DRIVE_KS,
-        SwerveConstants.DRIVE_KV,
-        SwerveConstants.DRIVE_KA,
-        SwerveConstants.DRIVE_KP,
-        SwerveConstants.DRIVE_KI,
-        SwerveConstants.DRIVE_KD,
-        updateFrequency = SwerveConstants.VALUE_UPDATE_RATE
-      )
+      val drivingMotor = TalonFX(driveID)
+
+      val config = TalonFXConfiguration()
+
+      config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
+      config.MotorOutput.NeutralMode = NeutralModeValue.Brake
+      config.MotorOutput.DutyCycleNeutralDeadband = SwerveConstants.DUTY_CYCLE_DEADBAND
+
+      config.Feedback.SensorToMechanismRatio = 1 / (SwerveConstants.DRIVE_GEARING * SwerveConstants.DRIVE_UPR)
+
+      config.Slot0.kP = SwerveConstants.DRIVE_KP
+      config.Slot0.kI = SwerveConstants.DRIVE_KI
+      config.Slot0.kD = SwerveConstants.DRIVE_KD
+      config.Slot0.kS = SwerveConstants.DRIVE_KS
+      config.Slot0.kV = SwerveConstants.DRIVE_KV
+      config.Slot0.kA = SwerveConstants.DRIVE_KA
+
+      config.CurrentLimits.SupplyCurrentLimitEnable = true
+      config.CurrentLimits.StatorCurrentLimitEnable = true
+      config.CurrentLimits.StatorCurrentLimit = SwerveConstants.DRIVE_STATOR_LIMIT.`in`(Amps)
+      config.CurrentLimits.SupplyCurrentLimit = SwerveConstants.DRIVE_SUPPLY_LIMIT.`in`(Amps)
+
+      var status: StatusCode = StatusCode.StatusCodeNotInitialized
+      for (i in 0..4) {
+        status = drivingMotor.configurator.apply(config)
+        if (status.isOK) break
+      }
+      if (!status.isOK) {
+        println("Could not apply configs, error code: $status")
+      }
+
+      drivingMotor.statorCurrent.setUpdateFrequency(SwerveConstants.KRAKEN_UPDATE_RATE)
+      drivingMotor.supplyCurrent.setUpdateFrequency(SwerveConstants.KRAKEN_UPDATE_RATE)
+      drivingMotor.velocity.setUpdateFrequency(SwerveConstants.KRAKEN_UPDATE_RATE)
+      drivingMotor.motorVoltage.setUpdateFrequency(SwerveConstants.KRAKEN_UPDATE_RATE)
+      drivingMotor.closedLoopError.setUpdateFrequency(SwerveConstants.KRAKEN_UPDATE_RATE)
+      drivingMotor.optimizeBusUtilization()
+
       val turnMotor = createSparkMax(
         turnID,
         turnInverted,
