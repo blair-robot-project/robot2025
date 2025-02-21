@@ -22,9 +22,11 @@ class SuperstructureManager(
 ) {
 
   var lastRequestedGoal = SuperstructureGoal.STOW
+  var ready = false
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
+      .andThen(InstantCommand({ ready = false }))
       .andThen(InstantCommand({ lastRequestedGoal = goal }))
       .andThen(
         ConditionalCommand(
@@ -68,6 +70,11 @@ class SuperstructureManager(
           )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
+      .andThen(InstantCommand({ ready = true }))
+  }
+
+  fun isAtPos(): Boolean {
+    return ready
   }
 
   private fun holdAll(): Command {
