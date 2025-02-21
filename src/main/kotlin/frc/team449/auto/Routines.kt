@@ -17,6 +17,9 @@ import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.math.PI
 import edu.wpi.first.wpilibj.RobotBase
+import frc.team449.commands.driveAlign.SimpleReefAlign
+import java.util.Optional
+import frc.team449.subsystems.FieldConstants
 
 open class Routines(
   val robot: Robot
@@ -64,83 +67,107 @@ open class Routines(
   fun americanRoutine(): AutoRoutine {
     val autoRoutine: AutoRoutine = autoFactory.newRoutine("L4 Routine")
 
-
     val l4fTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To L4F")
-    val rightStationTrajectory:  AutoTrajectory = autoRoutine.trajectory("Go To Right Station(2)")
+    val rightStationTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To Right Station(2)")
     val l1CTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To L1C")
     val rightStationTrajectory2: AutoTrajectory = autoRoutine.trajectory("Go To Right Station(Again)")
-    val l1bTrajectory:AutoTrajectory=autoRoutine.trajectory("Go To L1B")
-    val leftStationTrajectory:AutoTrajectory=autoRoutine.trajectory("Go To Left Station")
-    val l1kTrajectory:AutoTrajectory=autoRoutine.trajectory("Go To L4K")
+    val l1bTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To L1B")
+    val leftStationTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To Left Station")
+    val l1kTrajectory: AutoTrajectory = autoRoutine.trajectory("Go To L4K")
 
     autoRoutine.active().onTrue(
       Commands.sequence(
         l4fTrajectory.resetOdometry(),
-        l4fTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
-        PrintCommand("Traveling to l4"),
+        l4fTrajectory.cmd().alongWith(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE),
+          PrintCommand("Traveling to L4")
+        )
+      )
+    )
 
+    l4fTrajectory.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+          .alongWith(
+            SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
+          )
+          .andThen(robot.intake.outtakeCoral().until { !robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15).onlyIf { RobotBase.isReal() })
+          .andThen(rightStationTrajectory.cmd())
+      )
+    )
 
+    rightStationTrajectory.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+          .andThen(robot.intake.intakeCoral().until { robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15))
+          .andThen(
+            l1CTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE))
+          )
+      )
+    )
 
-      ),
-    ))
-
-    l4fTrajectory.done().onTrue(Commands.sequence(robot.drive.driveStop()
-      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L4)).andThen(robot.intake.outtakeCoral())
-      .until{!robot.intake.coralDetected()}
-      .andThen(WaitCommand(0.15).andThen(rightStationTrajectory.cmd()
-      ))))
-
-
-
-    rightStationTrajectory.done().onTrue(robot.drive.driveStop()
-      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
-      .andThen(robot.intake.intakeCoral()).until { robot.intake.coralDetected() }
-      .andThen(l1CTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE))
-      ))
-
-
-
-
-
-
-    l1CTrajectory.done().onTrue((robot.drive.driveStop())
-      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L1).andThen(robot.intake.outtakeCoral())
-        .until{!robot.intake.coralDetected()}.andThen(WaitCommand(0.15).onlyIf{RobotBase.isReal()}.andThen
-          (rightStationTrajectory2.cmd()))))
-
-
+    l1CTrajectory.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+          .alongWith(
+            SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
+          )
+          .andThen(robot.intake.outtakeCoral().until { !robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15).onlyIf { RobotBase.isReal() })
+          .andThen(rightStationTrajectory2.cmd())
+      )
+    )
 
     rightStationTrajectory2.done().onTrue(
-    (robot.drive.driveStop()).
-    andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)).
-    andThen(robot.intake.intakeCoral()).
-    until{robot.intake.coralDetected()}.
-    andThen(WaitCommand(0.15).onlyIf{RobotBase.isReal()}.andThen(l1bTrajectory.cmd().alongWith(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
-    ))))
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+          .andThen(robot.intake.intakeCoral().until { robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15).onlyIf { RobotBase.isReal() })
+          .andThen(
+            l1bTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE))
+          )
+      )
+    )
 
+    l1bTrajectory.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+          .alongWith(
+            SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+          )
+          .andThen(robot.intake.outtakeCoral().until { !robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15).onlyIf { RobotBase.isReal() })
+          .andThen(leftStationTrajectory.cmd())
+      )
+    )
 
+    leftStationTrajectory.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+          .andThen(robot.intake.intakeCoral().until { robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15).onlyIf { RobotBase.isReal() })
+          .andThen(
+            l1kTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE))
+          )
+      )
+    )
 
-    l1bTrajectory.done().onTrue((robot.drive.driveStop())
-      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L1).andThen(robot.intake.outtakeCoral())
-        .until{!robot.intake.coralDetected()}
-        .andThen(WaitCommand(0.15).onlyIf{RobotBase.isReal()}.
-        andThen(leftStationTrajectory.cmd()))))
-
-    leftStationTrajectory.done().onTrue(robot.drive.driveStop().
-    andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
-      .andThen(robot.intake.intakeCoral()).until{robot.intake.coralDetected()}.andThen(WaitCommand(0.15)).
-      onlyIf{RobotBase.isReal()}
-    .andThen(l1kTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE))))
-
-
-    l1kTrajectory.done().onTrue(robot.drive.driveStop().andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-      .andThen(robot.intake.outtakeCoral()).until{!robot.intake.coralDetected()}
-      .andThen(WaitCommand(0.15))))
-
-
-
-
+    l1kTrajectory.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+          .andThen(robot.intake.outtakeCoral().until { !robot.intake.coralDetected() })
+          .andThen(WaitCommand(0.15)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+      )
+    )
 
     return autoRoutine
   }
@@ -148,7 +175,8 @@ open class Routines(
 
 
 
-    /** link to starting position on the field: https://docs.google.com/document/d/1SOzIJDgJ0GRSVnNTcBhaFfltvHw0IjJTEUsAZbI2hW4/edit?usp=sharing  **/
+
+  /** link to starting position on the field: https://docs.google.com/document/d/1SOzIJDgJ0GRSVnNTcBhaFfltvHw0IjJTEUsAZbI2hW4/edit?usp=sharing  **/
   /** left and right are from the driver's pov **/
 
   // right taxi
