@@ -18,7 +18,7 @@ enum class InterpolatedVisionDataset(red: List<VisionInterpolationData>, blue: L
     listOf(
       VisionInterpolationData(
         Translation2d(1.315, 5.522),
-        Translation2d(1.39, 5.53),
+        Translation2d(1.315, 5.522),
         "BLUE_SUBWOOFER"
       ),
       // continue for more
@@ -36,7 +36,7 @@ enum class InterpolatedVisionDataset(red: List<VisionInterpolationData>, blue: L
     listOf(
       VisionInterpolationData(
         Translation2d(1.315, 5.522),
-        Translation2d(1.39, 5.53),
+        Translation2d(1.315, 5.522),
         "BLUE_SUBWOOFER"
       ),
     )
