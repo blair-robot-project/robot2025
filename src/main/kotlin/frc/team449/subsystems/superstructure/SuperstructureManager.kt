@@ -21,13 +21,13 @@ class SuperstructureManager(
   private val drive: SwerveDrive
 ) {
 
-  var lastRequestedGoal = SuperstructureGoal.STOW
-  var ready = false
+  private var lastGoal = SuperstructureGoal.STOW
+  private var ready = false
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
       .andThen(InstantCommand({ ready = false }))
-      .andThen(InstantCommand({ lastRequestedGoal = goal }))
+      .andThen(InstantCommand({ lastGoal = goal }))
       .andThen(
         ConditionalCommand(
           // if extending
@@ -75,6 +75,10 @@ class SuperstructureManager(
 
   fun isAtPos(): Boolean {
     return ready
+  }
+
+  fun lastRequestedGoal(): SuperstructureGoal.SuperstructureState {
+    return lastGoal
   }
 
   private fun holdAll(): Command {
