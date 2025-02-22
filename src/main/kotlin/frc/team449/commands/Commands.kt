@@ -2,6 +2,7 @@ package frc.team449.commands
 
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
 import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.FieldConstants
@@ -13,10 +14,21 @@ object Commands {
 
   fun ScoreL4(robot: Robot, leftOrRight: FieldConstants.ReefSide): Command {
     return Commands.sequence(
-      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(leftOrRight)).alongWith(
+      Commands.parallel(
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(leftOrRight)),
         robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
       ),
-      robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+      robot.drive.driveStop(),
+      robot.intake.outtakeCoral(),
+      WaitUntilCommand(robot.intake::coralNotDetected),
+    )
+  }
+
+  fun Intake(robot: Robot): Command {
+    return Commands.sequence(
+      robot.intake.intakeCoral(),
+      WaitUntilCommand(robot.intake::coralDetected),
+      robot.intake.holdCoral()
     )
   }
 }
