@@ -1,4 +1,5 @@
 const locationImg = document.getElementById("locationSelect");
+const confirmReefButton = document.getElementById("confirmReefButton");
 
 let inPicker = false;
 locationImg.onmouseenter = () => inPicker = true;
@@ -10,7 +11,7 @@ locationImg.onmouseleave = () => {
 }
 
 document.addEventListener("mousemove", (event) => {
-    if(menu == "reef" && inPicker && !areaSelected) {
+    if(inPicker && !areaSelected) {
         let imgPosition = locationImg.getBoundingClientRect();
         let imageCenterX = imgPosition.left + (imgPosition.right-imgPosition.left) / 2;
         let imageCenterY = imgPosition.top + (imgPosition.bottom-imgPosition.top) / 2;
@@ -24,12 +25,10 @@ document.addEventListener("mousemove", (event) => {
             angleDegrees = 360 + angleRadians * (180 / Math.PI);
         }
         reefArea = Math.floor((angleDegrees)/30) + 1;
-        console.log(reefArea);
         if(reefArea == -1) {
             locationImg.src = `locationSelectorImages/locationSelectorNone.png`;
         } else {
-            console.log(`locationSelectorImages/locationSelector${reefArea}.png`);
-            locationImg.src = `locationSelectorImages/locationSelector${reefArea == 1 ? 12 : reefArea-1}.png`;
+            locationImg.src = `locationSelectorImages/locationSelector${reefArea}.png`;
         }
     }
 });
@@ -42,13 +41,12 @@ locationImg.onclick = () => {
     if(areaSelected) {
         areaText.innerText = `Reef Area: ${reefArea}`;
         areaSelectionText.innerText = "Click again to reselect";
-    }
-    if(coralSelected && areaSelected) {
-        confirmReefButton.innerText = `Score at Level ${coralLevel} and Area ${reefArea}`;
-    }
-    if(!areaSelected) {
+    } else {
         confirmReefButton.innerText = `Choose Robot Alignment`;
         areaText.innerText = `Reef Area: None`;
         areaSelectionText.innerText = "Click the area you want to go to.";
+    }
+    if(coralSelected) {
+        confirmReefButton.innerText = `Score at Level ${coralLevel} and Area ${reefArea}`;
     }
 }

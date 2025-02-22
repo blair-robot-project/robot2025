@@ -11,7 +11,6 @@ const coralIntakeBottom = document.getElementById("coralIntakeBottom");
             await intakeCoral(button.id == "coralIntakeTop");
             button.innerText = `Intaking Coral ${button.id == "coralIntakeTop" ? " Top" : " Bottom"}`;
             coralIntakeClickable = true;
-            changeMenu("choice");
         }
     }
 })

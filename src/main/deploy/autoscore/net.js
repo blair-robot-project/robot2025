@@ -10,7 +10,6 @@ let netClickable = true;
             await scoreNet(button.id == "netScoreRed");
             button.innerText = `Score Net ${button.id == "netScoreRed" ? " on Red Side" : " on Blue Side"}`;
             netClickable = true;
-            changeMenu("choice");
         }
     }
 })

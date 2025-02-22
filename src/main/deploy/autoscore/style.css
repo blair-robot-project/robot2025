@@ -3,85 +3,162 @@ body {
     background: rgb(114, 114, 138);
 }
 
-.reefContainer, .processorContainer, .locationContainer, .screenChangeContainer, .netContainer, .coralIntakeContainer, .choiceContainer {
+.reefContainer, .processorContainer, .netContainer, .coralIntakeContainer {
     display: flex;
-    gap: 50px;
+    gap: 5vw;
     justify-content: center;
-    margin-top: 50px;
-    height: 500px;
+    height: 10vh;
+    width: 100%;
+}
+
+.reefContainer {
+    height: 100%;
+    align-items: center;
+    gap: 1vw;
+}
+
+.scoringContainer, .messageContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2vw;
+    width: 90vw;
+    height: 90vh;
+    justify-content: center;
+    align-items: center;
+    margin:auto;
+    margin-top: 5vh;
 }
 
 .levelContainer, .locationContainer {
     display: flex;
     flex-direction: column;
-    gap: 50px;
     align-items: center;
+}
+
+.levelContainer {
+    gap: 3vh;
+    width: 25%;
+    align-items: center;
+}
+
+.Level {
+    align-self: center;
+    margin: auto;
+}
+
+.levelContainer, .locationContainer, .coralLevelImage, .confirmChoice {
+    height: inherit;
+}
+
+.coralLevelImage {
+    width: 25%;
+}
+
+.reefText {
+    font-size: 2vw;
+    justify-self: center;
+    align-self: center;
+    justify-self: center;
+    height: 10%;
+}
+
+.locationContainer {
+    width: 55%;
+    text-align: center;
+    gap: 1vh;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+.confirmChoice {
+    width: 20%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    gap: 2vh;
+}
+
+#coral {
+    width: 100%;
+    height: 100%;
+}
+
+#locationSelect {
+    /* width 315 height 274 */
+    width: 100%;
+    height: 100%;
+    align-self: center;
+    vertical-align: middle;
+    rotate: 0deg;
+}
+
+.locationImageContainer {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: 80%;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
 }
 
 .buttonContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 50px;
-}
-
-.reefContainer {
-    align-items: center;
-    margin-top: 60px;
+    gap: 5vw;
 }
 
 .Button, .Level {
-    background-color: red;
-    width: 250px;
-    height: 100px;
+    background-color: #DD0000;
+    width: 25vw;
+    height: 10vh;
     color: white;
-    font-size: 28px;
+    font-size: 1.75vw;
     font-weight: bold;
-    border-radius: 50px;
+    border-radius: 5vh;
     font-family: 'Orbitron';
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 10px;
+    padding: 0 1vh;
 }
 .Level {
-    width: 150px;
+    width: 80%;
+    font-size: 1.8vw;
 }
 
-#confirmText {
-    width: 300px;
+#confirmReefButton {
+    width: 80%;
+    height: 20%;
 }
 
-.Button:hover {
-    background-color: rgb(255, 100, 100);
+.Button:hover, .Level:hover {
+    background-color: rgb(255, 0, 0);
 }
 
-.Button:active {
+.Button:active, .Level:active {
     background-color: rgb(200, 0, 0);
-}
-
-#locationSelect {
-    margin-top: 50px;
 }
 
 h1 {
     color: white;
 }
 
-#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice, #msgDisplayer {
+#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice, #messageDisplay {
     align-self: center;
     justify-self: center;
+    align-items: center;
 }
 
-#msgDisplayer {
+#messageDisplay {
     color: red;
-    font-size: 48px;
-}
-
-.reefText {
-    align-self: center;
-    justify-self: center;
+    font-size: 4vw;
 }
 
 #areaSelectionText, #locationSelect {
@@ -89,10 +166,12 @@ h1 {
 }
 
 #areaSelectionText {
-    width: 315px;
+    width: 80%;
     text-align: center;
+    font-size: 2.5vw;
+    margin-bottom: 0;
 }
 
-#locationSelect {
-    rotate: 30deg;
+h1 {
+    font-size: 2vw;
 }
