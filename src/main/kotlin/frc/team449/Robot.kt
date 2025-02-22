@@ -57,6 +57,4 @@ class Robot : RobotBase() {
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
-
-  val pathfinder: PathMag = PathMag(this)
 }

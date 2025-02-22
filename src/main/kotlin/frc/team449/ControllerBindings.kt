@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
-import frc.team449.commands.autoscoreCommands.AutoScoreCommands
+import frc.team449.commands.autoscoreCommands.AutoScorePathfinder
+import frc.team449.commands.autoscoreCommands.AutoscoreWrapperCommand
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import kotlin.jvm.optionals.getOrNull
@@ -25,15 +26,12 @@ class ControllerBindings(
   private val mechanismController: CommandXboxController,
   private val robot: Robot
 ) {
-
-  private val autoScore = AutoScoreCommands(robot.poseSubsystem, robot)
-
   private fun robotBindings() {
     AutoBuilder.configure(
       robot.poseSubsystem::getPosea,
       robot.poseSubsystem::resetOdometry,
       robot.drive::currentSpeeds,
-      robot.poseSubsystem::pathfindingMagnetize,
+      robot.poseSubsystem::setPathMag,
       PPHolonomicDriveController(
         PIDConstants(5.0, 0.0, 0.0),
         PIDConstants(5.0, 0.0, 0.0)
@@ -42,63 +40,10 @@ class ControllerBindings(
       { DriverStation.getAlliance().get() == Alliance.Red },
       robot.drive
     )
-
-    // these testing commands are just temp, wont be on controller
-//    robot.driveController.x().onTrue(
-//      runOnce({
-//        autoScore.currentCommand = autoScore.reef(AutoScoreCommandConstants.ReefLocation.Location2, AutoScoreCommandConstants.ReefLevel.L1)
-//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
-//        autoScore.currentCommand.schedule()
-//      })
-//    )
-//    robot.driveController.a().onTrue(
-//      runOnce({
-//        autoScore.currentCommand = autoScore.processor()
-//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
-//        autoScore.currentCommand.schedule()
-//      })
-//    )
-//    // on red alliance side passed in by webapp, this is temp
-//    robot.driveController.b().onTrue(
-//      runOnce({
-//        autoScore.currentCommand = autoScore.net(true)
-//        autoScore.poseSubsystem.autoscoreCurrentCommand = autoScore.currentCommand
-//        autoScore.currentCommand.schedule()
-//      })
-//    )
-//    robot.driveController.y().onTrue(
-//      runOnce({
-//        autoScore.currentCommand.cancel()
-//      })
-//    )
-//    var reefPose = AutoScoreCommandConstants.testPose
-//    val constraints = PathConstraints(
-//      3.0,
-//      4.0,
-//      Units.degreesToRadians(540.0),
-//      Units.degreesToRadians(720.0)
-//    )
-//    robot.driveController.x().onTrue(
-//      AutoBuilder.pathfindToPose(
-//        reefPose,
-//        constraints,
-//        0.0,
-//        // Goal end velocity in meters/sec
-//      )
-//    )
-    robot.driveController.x().onTrue(robot.pathfinder.getPath(AutoScoreCommandConstants.reef1PoseBlue))
-//    robot.driveController.x().onTrue(autoscore.magnetizeToTestCommand())
-
-//    robot.driveController.x().onTrue(autoscore.moveToReefCommand(AutoScoreCommandConstants.ReefLocation.Location1))
-
-    /** Call robot functions you create below */
-//    driveController.a().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
-//    )
-//
-//    driveController.b().onTrue(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
-//    )
+    robot.driveController.y().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed)))
+    robot.driveController.x().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue)))
+    robot.driveController.a().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef5PoseBlue)))
+    robot.driveController.b().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef8PoseRed)))
   }
 
   private fun nonRobotBindings() {
