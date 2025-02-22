@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.team449.Robot
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.math.PI
 import kotlin.math.abs
 
@@ -52,7 +53,7 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
   private lateinit var trajectory: PathPlannerTrajectory
   private var pathNull = true
   private var trajectoryNull = true
-  private var thetaController: PIDController = PIDController(5.0, 0.1, 0.0)
+  private var thetaController: PIDController = PIDController(0.5, 0.1, 0.0)
 
   init {
     timer.restart()
@@ -205,13 +206,16 @@ class EmptyDrive(private val drive: SwerveDrive) : Command() {
     return true
   }
 }
-
-class AutoscoreWrapperCommand(val robot: Robot, command: AutoScorePathfinder) : Command() {
+//goal should be a premove state
+class AutoscoreWrapperCommand(
+  val robot: Robot,
+  command: AutoScorePathfinder,
+  private val goal: SuperstructureGoal.SuperstructureState)
+  : Command() {
 
   private val currentCommand = command
-  private val waitTime = 1.5;
-  private var waitTimer = waitTime
-  private var waitStart = 0.0;
+  private var setpointReached = false
+  private var adReached = false
 
   override fun initialize() {
     currentCommand.addRequirements(robot.drive)
@@ -220,6 +224,8 @@ class AutoscoreWrapperCommand(val robot: Robot, command: AutoScorePathfinder) : 
     robot.drive.defaultCommand = EmptyDrive(robot.drive)
     robot.drive.defaultCommand.initialize()
     currentCommand.initialize()
+    setpointReached = false
+    adReached = false
   }
 
   override fun execute() {
@@ -227,21 +233,20 @@ class AutoscoreWrapperCommand(val robot: Robot, command: AutoScorePathfinder) : 
   }
 
   private fun resetAndEndCommand() {
-    waitTimer = waitTime
     currentCommand.end(true)
     currentCommand.cancel()
+    setpointReached = false
+    adReached = false
   }
 
   override fun isFinished(): Boolean {
-    if (waitTimer < 0) {
+    if (currentCommand.atSetpoint) {
       println("autoscore command finished")
       resetAndEndCommand()
       return true
     }
-    if (currentCommand.atSetpoint) {
-      waitTimer -= 0.05
-    } else {
-      waitTimer = waitTime
+    if(currentCommand.inAutodistanceTolerance && !adReached) {
+      robot.superstructureManager.requestGoal(goal)
     }
     return false
   }

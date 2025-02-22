@@ -17,6 +17,7 @@ import frc.team449.commands.autoscoreCommands.AutoScorePathfinder
 import frc.team449.commands.autoscoreCommands.AutoscoreWrapperCommand
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -40,10 +41,18 @@ class ControllerBindings(
       { DriverStation.getAlliance().get() == Alliance.Red },
       robot.drive
     )
-    robot.driveController.y().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed)))
-    robot.driveController.x().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue)))
-    robot.driveController.a().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef5PoseBlue)))
-    robot.driveController.b().onTrue(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef8PoseRed)))
+    robot.driveController.y().onTrue(
+      AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed),
+        SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+    robot.driveController.x().onTrue(AutoscoreWrapperCommand(
+      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue),
+      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+    robot.driveController.a().onTrue(AutoscoreWrapperCommand(
+      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef5PoseBlue),
+      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+    robot.driveController.b().onTrue(AutoscoreWrapperCommand(
+      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef8PoseRed),
+      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
   }
 
   private fun nonRobotBindings() {

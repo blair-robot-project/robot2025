@@ -41,7 +41,7 @@ class RobotLoop : TimedRobot() {
 
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
 
 //  private val characChooser = SendableChooser<String>()
 
