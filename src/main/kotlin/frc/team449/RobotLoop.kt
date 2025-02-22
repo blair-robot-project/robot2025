@@ -39,8 +39,6 @@ class RobotLoop : TimedRobot() {
   val routines = Routines(robot)
   private val field = robot.field
 
-//  private val characChooser = SendableChooser<String>()
-
   private var componentStorage: Array<Pose3d> = arrayOf(
     Pose3d(),
     Pose3d(),
@@ -53,6 +51,8 @@ class RobotLoop : TimedRobot() {
       Rotation3d(0.0, 0.0, 0.0)
     )
   )
+
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -90,7 +90,7 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-    // controllerBinder.bindButtons()
+    controllerBinder.bindButtons()
 //
 //    characChooser.addOption("Elevator", "elevator")
 //    characChooser.addOption("Pivot", "pivot")
@@ -103,14 +103,10 @@ class RobotLoop : TimedRobot() {
       DogLogOptions()
         .withCaptureDs(true)
         .withCaptureNt(true)
-//        .withLogExtras(true)
     )
-
-//    DogLog.setPdh(robot.powerDistribution)
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
-//    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 
@@ -220,7 +216,7 @@ class RobotLoop : TimedRobot() {
       )
     )
     componentStorage = arrayOf(
-//      pivot/base stage
+//       pivot/base stage
       Pose3d(
         -0.136,
         0.0,

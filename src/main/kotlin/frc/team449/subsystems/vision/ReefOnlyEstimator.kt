@@ -152,7 +152,7 @@ class ReefOnlyEstimator(
       EstimatedRobotPose(
         visionPose,
         result.timestampSeconds,
-        result.getTargets(),
+        mutableListOf(lowestAmbiguityTarget),
         PoseStrategy.LOWEST_AMBIGUITY
       )
     )

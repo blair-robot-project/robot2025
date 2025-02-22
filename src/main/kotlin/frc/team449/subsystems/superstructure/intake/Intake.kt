@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.createSparkMax
-import kotlin.math.log
 
 // TODO(the entire class bru)
 class Intake(
@@ -26,43 +25,19 @@ class Intake(
     }
   }
 
-  fun coralDetected(): Boolean {
-    return !infrared.get()
-  }
-
-//  fun intakeAlgae(): Command {
-//    return runOnce {
-//      frontMotor.setVoltage(-IntakeConstants.ALGAE_INTAKE_VOLTAGE)
-//      backMotor.setVoltage(IntakeConstants.ALGAE_INTAKE_VOLTAGE)
-//    }
-//  }
-//
-//  fun outtakeAlgae(): Command {
-//    return runOnce {
-//      frontMotor.setVoltage(-IntakeConstants.ALGAE_OUTTAKE_VOLTAGE)
-//      backMotor.setVoltage(IntakeConstants.ALGAE_OUTTAKE_VOLTAGE)
-//    }
-//  }
-
   fun outtakeCoral(): Command {
     return runOnce {
       motor.setVoltage(IntakeConstants.CORAL_OUTTAKE_VOLTAGE)
     }
   }
 
-//  fun intakeAlgae(): Command {
-//    return runOnce {
-//      frontMotor.setVoltage(-IntakeConstants.ALGAE_INTAKE_VOLTAGE)
-//      backMotor.setVoltage(IntakeConstants.ALGAE_INTAKE_VOLTAGE)
-//    }
-//  }
-//
-//  fun outtakeAlgae(): Command {
-//    return runOnce {
-//      frontMotor.setVoltage(-IntakeConstants.ALGAE_OUTTAKE_VOLTAGE)
-//      backMotor.setVoltage(IntakeConstants.ALGAE_OUTTAKE_VOLTAGE)
-//    }
-//  }
+  fun coralDetected(): Boolean {
+    return !infrared.get()
+  }
+
+  fun coralNotDetected(): Boolean {
+    return infrared.get()
+  }
 
   fun stop(): Command {
     return runOnce {
@@ -82,8 +57,8 @@ class Intake(
   companion object {
     fun createIntake(): Intake {
       val motor = createSparkMax(
-        id = IntakeConstants.FRONT_MOTOR_ID,
-        inverted = IntakeConstants.FRONT_MOTOR_INVERTED,
+        id = IntakeConstants.MOTOR_ID,
+        inverted = IntakeConstants.MOTOR_INVERTED,
         brakeMode = IntakeConstants.BRAKE_MODE,
         currentLimit = IntakeConstants.CURRENT_LIMIT
       )

@@ -34,7 +34,7 @@ object ElevatorConstants {
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
   // Physical Constants TODO(Adjust all of these.)
-  const val GEARING_MOTOR_TO_PULLEY = 1.0 / 6.0
+  const val GEARING_MOTOR_TO_PULLEY = 1.0 / 4.5
   val PULLEY_RADIUS = Units.inchesToMeters(1.5 / 2)
   val UPR = 2 * PI * PULLEY_RADIUS
   val GEARING_MOTOR_TO_ELEVATOR = 1 / (GEARING_MOTOR_TO_PULLEY * UPR)
@@ -44,15 +44,14 @@ object ElevatorConstants {
 
   // TODO(Adjust gains.)
   val KS = if (RobotBase.isReal()) 0.0175 else 0.0
-  const val KV = 6.6546
-  val KG = if (RobotBase.isReal()) 0.25233 else 0.0
-  const val BASE_PIVOT_TO_CG_M = 0.1
+  const val KV = 4.5112 // theoretical 4.5112
+  val KG = if (RobotBase.isReal()) 0.26233 else 0.0
 
   const val KP = 10.8532
   const val KI = 0.0
   const val KD = 0.0015
 
   // Motion Magic
-  const val CRUISE_VEL = 1.5 // 1.75
-  const val MAX_ACCEL = 5.0 // 10.0
+  const val CRUISE_VEL = 2.425 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
+  const val MAX_ACCEL = 5.0 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
 }
