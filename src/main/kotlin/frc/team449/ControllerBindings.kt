@@ -11,10 +11,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScorePathfinder
 import frc.team449.commands.autoscoreCommands.AutoscoreWrapperCommand
+import frc.team449.commands.autoscoreCommands.getToRot
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -43,16 +45,19 @@ class ControllerBindings(
     )
     robot.driveController.y().onTrue(
       AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed),
-        SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+        SuperstructureGoal.L3_PREMOVE).andThen(getToRot(robot, AutoScoreCommandConstants.reef12PoseRed)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)).andThen(PrintCommand("done with path")))
+
     robot.driveController.x().onTrue(AutoscoreWrapperCommand(
       robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue),
-      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+      SuperstructureGoal.L3_PREMOVE).andThen(getToRot(robot, AutoScoreCommandConstants.reef1PoseBlue)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)).andThen(PrintCommand("done with path")))
+
     robot.driveController.a().onTrue(AutoscoreWrapperCommand(
       robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef5PoseBlue),
-      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+      SuperstructureGoal.L3_PREMOVE).andThen(getToRot(robot, AutoScoreCommandConstants.reef5PoseBlue)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)).andThen(PrintCommand("done with path")))
+
     robot.driveController.b().onTrue(AutoscoreWrapperCommand(
       robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef8PoseRed),
-      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+      SuperstructureGoal.L3_PREMOVE).andThen(getToRot(robot, AutoScoreCommandConstants.reef5PoseBlue)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)).andThen(PrintCommand("done with path")))
   }
 
   private fun nonRobotBindings() {
