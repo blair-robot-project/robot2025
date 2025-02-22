@@ -293,7 +293,7 @@ open class Routines(
 
         // to reef
         Commands.deadline(stationToKTrajectory.cmd(), robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
-        frc.team449.commands.Commands.ScoreL4(robot, FieldConstants.ReefSide.RIGHT),
+        frc.team449.commands.Commands.ScoreL4(robot, FieldConstants.ReefSide.LEFT),
 
         // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
@@ -302,7 +302,7 @@ open class Routines(
 
         // to reef
         Commands.deadline(stationToLTrajectory.cmd(),robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+        frc.team449.commands.Commands.ScoreL4(robot, FieldConstants.ReefSide.RIGHT)
       )
     )
 
