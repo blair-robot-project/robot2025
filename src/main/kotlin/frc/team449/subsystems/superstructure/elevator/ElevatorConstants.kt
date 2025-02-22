@@ -45,9 +45,9 @@ object ElevatorConstants {
   // TODO(Adjust gains.)
   val KS = if (RobotBase.isReal()) 0.0175 else 0.0
   const val KV = 4.5112 // theoretical 4.5112
-  val KG = if (RobotBase.isReal()) 0.26233 else 0.0
+  val KG = if (RobotBase.isReal()) 0.30451 else 0.0 // was 0.26233
 
-  const val KP = 10.8532
+  const val KP = 9.8532
   const val KI = 0.0
   const val KD = 0.0015
 
