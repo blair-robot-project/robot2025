@@ -52,6 +52,9 @@ class RobotLoop : TimedRobot() {
     )
   )
 
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
+
+
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
     println("Started robotInit.")
@@ -88,7 +91,7 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-    // controllerBinder.bindButtons()
+    controllerBinder.bindButtons()
 //
 //    characChooser.addOption("Elevator", "elevator")
 //    characChooser.addOption("Pivot", "pivot")
@@ -96,7 +99,6 @@ class RobotLoop : TimedRobot() {
 //    characChooser.addOption("Drive", "drive")
 //
 //    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
-    controllerBinder.bindButtons()
 
     DogLog.setOptions(
       DogLogOptions()
