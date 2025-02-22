@@ -96,7 +96,6 @@ class RobotLoop : TimedRobot() {
 //    characChooser.addOption("Drive", "drive")
 //
 //    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
-    controllerBinder.bindButtons()
 
     DogLog.setOptions(
       DogLogOptions()
@@ -215,7 +214,7 @@ class RobotLoop : TimedRobot() {
       )
     )
     componentStorage = arrayOf(
-//      pivot/base stage
+//       pivot/base stage
       Pose3d(
         -0.136,
         0.0,
