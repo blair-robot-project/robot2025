@@ -10,14 +10,17 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism
 import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
+import frc.team449.subsystems.drive.swerve.WheelRadiusCharacterization
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
@@ -31,7 +34,7 @@ class ControllerBindings(
   private val robot: Robot
 ) {
 
-  var selectedChar: String = "drive"
+  var STOW_AFTER_AUTOSCORE = false
 
   private fun robotBindings() {
     /** Call robot functions you create below */
@@ -45,16 +48,20 @@ class ControllerBindings(
 
     autoScoreLeft()
     autoScoreRight()
+    autoScoreStowTrigger()
 
     substationIntake()
     coralOuttake()
 
-    premove_l1()
-    premove_l2()
-    premove_l3()
-    premove_l4()
+//    premove_l1()
+//    premove_l2()
+//    premove_l3()
+//    premove_l4()
 
     stow()
+    climb()
+    algaeDescoreL2()
+    algaeDescoreL3()
   }
 
   private fun characterizationBindings() {
@@ -64,10 +71,6 @@ class ControllerBindings(
     testVoltagePivot()
 
     pivotCharacterizaton()
-  }
-
-  fun updateSelectedCharacterization(selected: String) {
-    selectedChar = selected
   }
 
   private fun nonRobotBindings() {
@@ -81,8 +84,30 @@ class ControllerBindings(
     resetGyro()
   }
 
-  private fun stow() {
+  private fun climb() {
     mechanismController.rightBumper().onTrue(
+      robot.climb.runClimbWheels()
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.CLIMB))
+        .andThen(WaitUntilCommand { robot.climb.isClimbEngaged() })
+        .andThen(WaitCommand(0.15))
+        .andThen(robot.pivot.climbDown())
+    )
+  }
+
+  private fun algaeDescoreL2() {
+    mechanismController.x().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L2_ALGAE_DESCORE)
+    )
+  }
+
+  private fun algaeDescoreL3() {
+    mechanismController.y().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_DESCORE)
+    )
+  }
+
+  private fun stow() {
+    mechanismController.a().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
     )
   }
@@ -90,10 +115,29 @@ class ControllerBindings(
   private fun autoScoreLeft() {
     driveController.leftTrigger().onTrue(
       SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+        .andThen(
+          WaitUntilCommand {
+            (
+              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
+              ) &&
+              robot.superstructureManager.isAtPos()
+          }
+        )
+        .andThen(PrintCommand("boutta outtake this coral"))
         .andThen(robot.intake.outtakeCoral())
-        .andThen(WaitUntilCommand { false })
-        .until { !robot.intake.coralDetected() && RobotBase.isReal() }
+        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
+        .andThen(WaitCommand(0.25))
         .andThen(robot.intake.stop())
+        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
+    )
+  }
+
+  private fun autoScoreStowTrigger() {
+    Trigger { STOW_AFTER_AUTOSCORE }.onTrue(
+      InstantCommand({ STOW_AFTER_AUTOSCORE = false })
         .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
     )
   }
@@ -101,6 +145,23 @@ class ControllerBindings(
   private fun autoScoreRight() {
     driveController.rightTrigger().onTrue(
       SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
+        .andThen(
+          WaitUntilCommand {
+            (
+              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
+              ) &&
+              robot.superstructureManager.isAtPos()
+          }
+        )
+        .andThen(PrintCommand("boutta outtake this coral"))
+        .andThen(robot.intake.outtakeCoral())
+        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
+        .andThen(WaitCommand(0.25))
+        .andThen(robot.intake.stop())
+        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
     )
   }
 
@@ -118,8 +179,10 @@ class ControllerBindings(
   private fun coralOuttake() {
     driveController.rightBumper().onTrue(
       robot.intake.outtakeCoral()
-    ).onFalse(
-      robot.intake.stop()
+        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
+        .andThen(WaitCommand(0.15))
+        .andThen(robot.intake.stop())
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
     )
   }
 
@@ -176,6 +239,12 @@ class ControllerBindings(
       robot.pivot.testVoltage()
     ).onFalse(
       robot.pivot.hold()
+    )
+  }
+
+  private fun wheelRadiusCharacterization() {
+    characterizationController.leftTrigger().onTrue(
+      WheelRadiusCharacterization(robot.drive, robot.poseSubsystem)
     )
   }
 
