@@ -4,14 +4,14 @@ import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.config.PIDConstants
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj2.command.ConditionalCommand
-import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
+import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.autoscoreCommands.AutoScorePathfinder
@@ -29,6 +29,13 @@ class ControllerBindings(
   private val mechanismController: CommandXboxController,
   private val robot: Robot
 ) {
+  var commandRunning = false
+  fun setCommandRunning(running: Boolean): Command {
+    return RunCommand({
+      println("setting command run thingy")
+            commandRunning = running
+          })
+  }
   private fun robotBindings() {
     AutoBuilder.configure(
       robot.poseSubsystem::getPosea,
@@ -43,13 +50,33 @@ class ControllerBindings(
       { DriverStation.getAlliance().get() == Alliance.Red },
       robot.drive
     )
-    robot.driveController.y().onTrue(
-      AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed),
-        SuperstructureGoal.L3_PREMOVE).andThen(getToRot(robot, AutoScoreCommandConstants.reef12PoseRed)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)).andThen(PrintCommand("done with path")))
 
-    robot.driveController.x().onTrue(AutoscoreWrapperCommand(
-      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue),
-      SuperstructureGoal.L3_PREMOVE).andThen(getToRot(robot, AutoScoreCommandConstants.reef1PoseBlue)).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)).andThen(PrintCommand("done with path")))
+    robot.driveController.y().onTrue(
+      PrintCommand("y pressed")
+        .andThen(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed),
+        SuperstructureGoal.L3_PREMOVE)).andThen(PrintCommand("done with moving to setpoint"))
+        .andThen(getToRot(robot, AutoScoreCommandConstants.reef12PoseRed))
+//        .until {
+//          (MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) > MathUtil.angleModulus(AutoScoreCommandConstants.reef12PoseRed.rotation.radians - 0.07) && MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) < MathUtil.angleModulus(
+//            AutoScoreCommandConstants.reef12PoseRed.rotation.radians + 0.07
+//          ))
+//        }
+        .andThen(PrintCommand("done with rot")).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3))
+        .andThen(PrintCommand("done with path")))
+
+    robot.driveController.x().onTrue(
+      PrintCommand("x pressed")
+        .andThen(AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue), SuperstructureGoal.L3_PREMOVE))
+        .andThen(PrintCommand("done with moving to setpoint"))
+        .andThen(getToRot(robot, AutoScoreCommandConstants.reef1PoseBlue))
+//        .until {
+//          (MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) > MathUtil.angleModulus(AutoScoreCommandConstants.reef1PoseBlue.rotation.radians - 0.07) && MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) < MathUtil.angleModulus(
+//            AutoScoreCommandConstants.reef1PoseBlue.rotation.radians + 0.07
+//          ))
+//        }
+        .andThen(PrintCommand("done with rot"))
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3))
+        .andThen(PrintCommand("done with path")))
 
     robot.driveController.a().onTrue(AutoscoreWrapperCommand(
       robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef5PoseBlue),
