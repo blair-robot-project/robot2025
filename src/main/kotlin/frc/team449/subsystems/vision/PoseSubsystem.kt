@@ -104,6 +104,18 @@ class PoseSubsystem(
     }
   }
 
+  fun resetOdometry(newPose: Pose2d) {
+    this.poseEstimator.resetPose(newPose)
+  }
+
+  fun resetPoseChoreo(newPose: Pose2d) {
+    this.poseEstimator.resetPose(newPose)
+//    this.heading += if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
+//      Rotation2d(-PI)
+//    } else {
+//      Rotation2d(0.0)
+  }
+
   override fun periodic() {
     if (isReal) {
       this.poseEstimator.update(
@@ -218,6 +230,8 @@ class PoseSubsystem(
 
   private fun setRobotPose() {
     this.field.robotPose = this.pose
+
+    drive.pose = this.pose
 
     this.field.getObject("FL").pose = this.pose.plus(
       Transform2d(

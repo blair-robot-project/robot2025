@@ -1,6 +1,7 @@
 package frc.team449.subsystems.drive.swerve
 
 import dev.doglog.DogLog
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -8,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
@@ -31,6 +33,8 @@ open class SwerveDrive(
   val maxModuleSpeed: Double
 ) : SubsystemBase() {
 
+  var pose: Pose2d = Pose2d()
+
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
@@ -43,18 +47,15 @@ open class SwerveDrive(
 
   fun set(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
-
     // Converts the desired [ChassisSpeeds] into an array of [SwerveModuleState].
     val desiredModuleStates =
       this.kinematics.toSwerveModuleStates(this.desiredSpeeds)
-
     // Scale down module speed if a module is going faster than the max speed, and prevent early desaturation.
 //    normalizeDrive(desiredModuleStates, desiredSpeeds)
     SwerveDriveKinematics.desaturateWheelSpeeds(
       desiredModuleStates,
       maxModuleSpeed
     )
-
     for (i in this.modules.indices) {
       this.modules[i].state = desiredModuleStates[i]
     }
@@ -73,6 +74,13 @@ open class SwerveDrive(
     var totalVel = 0.0
     modules.forEach { totalVel += it.state.speedMetersPerSecond }
     return totalVel / modules.size
+  }
+
+  /** Stops the robot's drive. */
+  fun driveStop(): Command {
+    return runOnce {
+      set(ChassisSpeeds(0.0, 0.0, 0.0))
+    }
   }
 
   override fun periodic() {
