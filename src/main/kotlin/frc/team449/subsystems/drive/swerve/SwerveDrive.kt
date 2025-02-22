@@ -42,9 +42,7 @@ open class SwerveDrive(
   var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
   fun set(desiredSpeeds: ChassisSpeeds) {
-    println("normal setting")
     this.desiredSpeeds = desiredSpeeds
-
     // Converts the desired [ChassisSpeeds] into an array of [SwerveModuleState].
     val desiredModuleStates =
       this.kinematics.toSwerveModuleStates(this.desiredSpeeds)

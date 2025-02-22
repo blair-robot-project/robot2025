@@ -207,7 +207,6 @@ class PoseSubsystem(
         currentControllerPower -= 0.1
         magMultiply -= 0.05
       }
-      println("set pathmag without controller")
       drive.set(desVel)
     } else {
       // controller stuff
@@ -293,14 +292,15 @@ class PoseSubsystem(
         < agreeVal
         ) {
         combinedChassisSpeeds = desVel
-        currentControllerPower = MathUtil.clamp(currentControllerPower, 0.1, 5.0)
         currentControllerPower -= 0.3
+        magMultiply -= 0.05
 //        println("agree")
       } else if(controllerMag > 0.95 || currentControllerPower > 16) {
         combinedChassisSpeeds = controllerSpeeds
+        combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond
       } else {
         combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
-        combinedChassisSpeeds.omegaRadiansPerSecond = desVelAdjustedSpeeds.omegaRadiansPerSecond
+        combinedChassisSpeeds.omegaRadiansPerSecond = desVel.omegaRadiansPerSecond + controllerSpeeds.omegaRadiansPerSecond
       }
 
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
