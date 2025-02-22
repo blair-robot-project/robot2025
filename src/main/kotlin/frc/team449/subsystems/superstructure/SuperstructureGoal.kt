@@ -42,7 +42,7 @@ object SuperstructureGoal {
   val SUBSTATION_INTAKE = SuperstructureState(
     Degrees.of(64.5),
     Meters.of(0.0),
-    Radians.of(1.345),
+    Degrees.of(77.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
@@ -50,6 +50,28 @@ object SuperstructureGoal {
     Degrees.of(40.0),
     Meters.of(0.0),
     Degrees.of(90.0),
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  val CLIMB = SuperstructureState(
+    Degrees.of(60.0),
+    Meters.of(0.0),
+    Degrees.of(-90.0),
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  /** Actually find these positions*/
+  val L2_ALGAE_DESCORE = SuperstructureState(
+    Degrees.of(60.0),
+    Meters.of(0.0),
+    Degrees.of(-90.0),
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  val L3_ALGAE_DESCORE = SuperstructureState(
+    Degrees.of(60.0),
+    Meters.of(0.0),
+    Degrees.of(-90.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
@@ -77,7 +99,7 @@ object SuperstructureGoal {
   val L4_PREMOVE = SuperstructureState(
     L4.pivot,
     STOW.elevator,
-    SUBSTATION_INTAKE.wrist,
+    STOW.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

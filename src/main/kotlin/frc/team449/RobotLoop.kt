@@ -39,8 +39,6 @@ class RobotLoop : TimedRobot() {
   val routines = Routines(robot)
   private val field = robot.field
 
-//  private val characChooser = SendableChooser<String>()
-
   private var componentStorage: Array<Pose3d> = arrayOf(
     Pose3d(),
     Pose3d(),
@@ -98,19 +96,16 @@ class RobotLoop : TimedRobot() {
 //    characChooser.addOption("Drive", "drive")
 //
 //    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
+    controllerBinder.bindButtons()
 
     DogLog.setOptions(
       DogLogOptions()
         .withCaptureDs(true)
         .withCaptureNt(true)
-//        .withLogExtras(true)
     )
-
-//    DogLog.setPdh(robot.powerDistribution)
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
-//    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 

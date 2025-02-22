@@ -21,21 +21,27 @@ class SuperstructureManager(
   private val drive: SwerveDrive
 ) {
 
-  var lastRequestedGoal = SuperstructureGoal.STOW
+  private var lastGoal = SuperstructureGoal.STOW
+  private var ready = false
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
-      .andThen(InstantCommand({ lastRequestedGoal = goal }))
+      .andThen(InstantCommand({ ready = false }))
+      .andThen(InstantCommand({ lastGoal = goal }))
       .andThen(
         ConditionalCommand(
           // if extending
           Commands.sequence(
+            InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) }),
             Commands.parallel(
               wrist.setPosition(goal.wrist.`in`(Radians)),
               pivot.setPosition(goal.pivot.`in`(Radians))
             ),
             WaitUntilCommand { wrist.elevatorReady() },
             elevator.setPosition(goal.elevator.`in`(Meters)),
+            WaitUntilCommand { wrist.atSetpoint() || pivot.atSetpoint() },
+            pivot.hold().onlyIf { pivot.atSetpoint() },
+            wrist.hold().onlyIf { wrist.atSetpoint() },
             WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() },
             Commands.parallel(pivot.hold(), wrist.hold())
               .repeatedly()
@@ -59,10 +65,20 @@ class SuperstructureManager(
             elevator.hold()
               .repeatedly()
               .until { wrist.atSetpoint() && pivot.atSetpoint() },
+            InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) }),
             holdAll()
           )
         ) { goal.elevator.`in`(Meters) >= elevator.positionSupplier.get() }
       )
+      .andThen(InstantCommand({ ready = true }))
+  }
+
+  fun isAtPos(): Boolean {
+    return ready
+  }
+
+  fun lastRequestedGoal(): SuperstructureGoal.SuperstructureState {
+    return lastGoal
   }
 
   private fun holdAll(): Command {
