@@ -36,7 +36,7 @@ import kotlin.math.*
 class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
-
+  val routines = Routines(robot)
   private val field = robot.field
 
 //  private val characChooser = SendableChooser<String>()
@@ -78,7 +78,6 @@ class RobotLoop : TimedRobot() {
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
 
-    val routines = Routines(robot)
     routines.addOptions(robot.autoChooser)
 
     println("Putting the thing on the other thing")
@@ -91,7 +90,7 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-   // controllerBinder.bindButtons()
+    // controllerBinder.bindButtons()
 //
 //    characChooser.addOption("Elevator", "elevator")
 //    characChooser.addOption("Pivot", "pivot")
@@ -137,6 +136,8 @@ class RobotLoop : TimedRobot() {
     // Robot Drive Logging
     robot.field.robotPose = robot.poseSubsystem.pose
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
+
+    routines.logData()
 
     logAdvScopeComponents()
   }
