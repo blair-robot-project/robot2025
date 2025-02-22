@@ -45,8 +45,7 @@ open class Routines(
       sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
       sample.omega + headingController.calculate(
         robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(sample.heading))).radians
-      ) // + if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) PI else 0.0, // Needs testing //0-2pi
-// poseSubsystem  -pi- pi
+      )
     )
     val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
       speeds,
