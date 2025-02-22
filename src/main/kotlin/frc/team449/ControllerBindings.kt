@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
+import frc.team449.commands.autoscoreCommands.AutoScoreCommands
 import frc.team449.commands.autoscoreCommands.AutoScorePathfinder
 import frc.team449.commands.autoscoreCommands.AutoscoreWrapperCommand
 import frc.team449.subsystems.RobotConstants
@@ -41,18 +42,24 @@ class ControllerBindings(
       { DriverStation.getAlliance().get() == Alliance.Red },
       robot.drive
     )
-    robot.driveController.y().onTrue(
-      AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef12PoseRed),
-        SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
-    robot.driveController.x().onTrue(AutoscoreWrapperCommand(
-      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef1PoseBlue),
-      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
-    robot.driveController.a().onTrue(AutoscoreWrapperCommand(
-      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef5PoseBlue),
-      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
-    robot.driveController.b().onTrue(AutoscoreWrapperCommand(
-      robot, AutoScorePathfinder(robot, AutoScoreCommandConstants.reef8PoseRed),
-      SuperstructureGoal.L3_PREMOVE).andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.L3)))
+    val autoScore = AutoScoreCommands(robot)
+    robot.driveController.y().onTrue(autoScore.getReefCommand(
+      AutoScoreCommandConstants.ReefLocation.Location1,
+      AutoScoreCommandConstants.CoralLevel.L1
+    ))
+    robot.driveController.x().onTrue(autoScore.getReefCommand(
+      AutoScoreCommandConstants.ReefLocation.Location3,
+      AutoScoreCommandConstants.CoralLevel.L2
+    ))
+    robot.driveController.a().onTrue(autoScore.getReefCommand(
+      AutoScoreCommandConstants.ReefLocation.Location10,
+      AutoScoreCommandConstants.CoralLevel.L3
+    ))
+    robot.driveController.b().onTrue(autoScore.getReefCommand(
+      AutoScoreCommandConstants.ReefLocation.Location6,
+      AutoScoreCommandConstants.CoralLevel.L4
+    ))
+
   }
 
   private fun nonRobotBindings() {

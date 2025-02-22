@@ -53,7 +53,7 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
   private lateinit var trajectory: PathPlannerTrajectory
   private var pathNull = true
   private var trajectoryNull = true
-  private var thetaController: PIDController = PIDController(0.5, 0.1, 0.0)
+  private var thetaController: PIDController = PIDController(3.0, 0.1, 0.0)
 
   init {
     timer.restart()
@@ -74,6 +74,8 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
         .subscribe(arrayOf(zeroPose, zeroPose))
     PathPlannerPath.clearCache()
     thetaController.enableContinuousInput(-PI, PI)
+    thetaController.setTolerance(0.01)
+    thetaController.setpoint = endPose.rotation.radians
   }
 
   private fun resetVelocities() {
@@ -105,6 +107,7 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
 
   override fun execute() {
     val currentTime = timer.get()
+    ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
     if(!atSetpoint) {
       atSetpoint = false
       inAutodistanceTolerance = false
@@ -116,7 +119,6 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
               atSetpoint = true
             } } } }
       if (ADStar.isNewPathAvailable) {
-        ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
         val newPath: PathPlannerPath? = ADStar.getCurrentPath(
           PathConstraints(
             AutoScoreCommandConstants.MAX_LINEAR_SPEED,
@@ -126,6 +128,9 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
           ),
           GoalEndState(0.0, endPose.rotation)
         )
+        if (newPath != null) {
+          println("new path, first pose: ${newPath.pathPoses[0]}")
+        }
         if(newPath == null) {
           pathNull = true
         } else {
@@ -148,13 +153,8 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
           if(!trajectoryNull) {
             expectedTime = trajectory.totalTimeSeconds
             pathPub.set(pathList)
-            trajValid = pathList[0] !=
-              zeroPose
+            trajValid = (pathList[0] != endPose)
             startTime = currentTime //
-          }
-        } else {
-          if(inAutodistanceTolerance) {
-            atSetpoint = true
           }
         }
       }
@@ -170,12 +170,12 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
           velocityY = trajSpeeds.vyMetersPerSecond
           rotation = 0.0
         }
-//        if(inAutodistanceTolerance) {
-          rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians), MathUtil.angleModulus(endPose.rotation.radians))
-//        }
+        rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))
+        if(thetaController.atSetpoint()) {
+          rotation = 0.0
+        }
         val fieldRelative = fromFieldRelativeSpeeds(ChassisSpeeds(velocityX, velocityY, rotation),robot.poseSubsystem.pose.rotation)
         robot.poseSubsystem.setPathMag(fieldRelative)
-        trajValid = ((pathSub.get()[0]) != endPose)
       } else {
         expectedTime = 0.0
       }
@@ -214,8 +214,9 @@ class AutoscoreWrapperCommand(
   : Command() {
 
   private val currentCommand = command
-  private var setpointReached = false
-  private var adReached = false
+  private val waitTime = 0.4
+  private var waitTimer = waitTime
+  private var reachedAD = false
 
   override fun initialize() {
     currentCommand.addRequirements(robot.drive)
@@ -224,35 +225,32 @@ class AutoscoreWrapperCommand(
     robot.drive.defaultCommand = EmptyDrive(robot.drive)
     robot.drive.defaultCommand.initialize()
     currentCommand.initialize()
-    setpointReached = false
-    adReached = false
+    waitTimer = waitTime
+    reachedAD = false
   }
 
   override fun execute() {
     currentCommand.execute()
   }
 
-  private fun resetAndEndCommand() {
-    currentCommand.end(true)
-    currentCommand.cancel()
-    setpointReached = false
-    adReached = false
-  }
-
   override fun isFinished(): Boolean {
-    if (currentCommand.atSetpoint) {
-      println("autoscore command finished")
-      resetAndEndCommand()
-      return true
+    if(reachedAD) {
+      if(waitTimer < 0) {
+        return true
+      }
+      waitTimer -= 0.02
+    } else {
+      waitTimer = waitTime
     }
-    if(currentCommand.inAutodistanceTolerance && !adReached) {
+    if (currentCommand.inAutodistanceTolerance && !reachedAD) {
+      println("ad reached")
       robot.superstructureManager.requestGoal(goal)
+      reachedAD = true
     }
     return false
   }
 
   override fun end(interrupted: Boolean) {
     currentCommand.end(interrupted)
-    robot.drive.defaultCommand = robot.driveCommand
   }
 }

@@ -1,6 +1,5 @@
 package frc.team449.commands.autoscoreCommands
 
-import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -25,7 +24,7 @@ class AutoScoreCommandConstants() {
     Location12
   }
 
-  enum class ReefLevel {
+  enum class CoralLevel {
     L1,
     L2,
     L3,
