@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -13,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
+import frc.team449.subsystems.RobotConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -67,22 +67,30 @@ class Pivot(
 
   fun manualDown(): Command {
     return this.run {
-      motor.setVoltage(-0.75)
-      request.Position = positionSupplier.get()
+      motor.setControl(
+        request
+          .withPosition(request.Position - PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5)
+          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(pivotFeedForward.calculateWithLength(request.Position - PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5))
+      )
     }
   }
 
   fun manualUp(): Command {
     return this.run {
-      motor.setVoltage(0.75)
-      request.Position = positionSupplier.get()
+      motor.setControl(
+        request
+          .withPosition(request.Position + PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5)
+          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(pivotFeedForward.calculateWithLength(request.Position + PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5))
+      )
     }
   }
 
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        PositionVoltage(request.Position)
+        request
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(request.Position))
       )

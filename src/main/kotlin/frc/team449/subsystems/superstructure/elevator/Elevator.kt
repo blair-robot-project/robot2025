@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
 import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import frc.team449.system.motor.KrakenDogLog
@@ -83,22 +83,30 @@ open class Elevator(
 
   fun manualDown(): Command {
     return this.run {
-      motor.setVoltage(-2.0)
-      request.Position = positionSupplier.get()
+      motor.setControl(
+        request
+          .withPosition(request.Position - ElevatorConstants.CRUISE_VEL * RobotConstants.LOOP_TIME / 5)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(elevatorFeedForward.calculateGravity())
+      )
     }
   }
 
   fun manualUp(): Command {
     return this.run {
-      motor.setVoltage(2.0)
-      request.Position = positionSupplier.get()
+      motor.setControl(
+        request
+          .withPosition(request.Position + ElevatorConstants.CRUISE_VEL * RobotConstants.LOOP_TIME / 5)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(elevatorFeedForward.calculateGravity())
+      )
     }
   }
 
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        PositionVoltage(request.Position)
+        request
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(elevatorFeedForward.calculateGravity())
       )
