@@ -222,8 +222,7 @@ open class Routines(
   fun l1reefG(): AutoRoutine {
     val g: AutoRoutine = autoFactory.newRoutine("L1 reef G")
     val reefGTrajectory: AutoTrajectory = g.trajectory("middle_G")
-    g.active().onTrue(
-      Commands.sequence(
+    g.active().onTrue(Commands.sequence(
         reefGTrajectory.resetOdometry(),
         reefGTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
