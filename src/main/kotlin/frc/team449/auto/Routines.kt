@@ -204,9 +204,10 @@ open class Routines(
     l1E.active().onTrue(
       Commands.sequence(
         reefETrajectory.resetOdometry(),
-            reefETrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)),
-            SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-              robot.superstructureManager.requestGoal(SuperstructureGoal.L1)),
+        reefETrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)),
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+        ),
         robot.drive.driveStop(),
         robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }
       )
@@ -224,8 +225,10 @@ open class Routines(
         reefETrajectory.resetOdometry(),
         reefETrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }))
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) })
+      )
     )
     return l1E
   }
@@ -239,8 +242,10 @@ open class Routines(
         reefFTrajectory.resetOdometry(),
         reefFTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(
+          robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }
         )
       )
     )
@@ -254,14 +259,15 @@ open class Routines(
     g.active().onTrue(
       Commands.sequence(
         reefGTrajectory.resetOdometry(),
-            reefGTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
-            SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-              robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) })
-    ))
+        reefGTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) })
+      )
+    )
     return g
   }
-
 
   // l1 coral at reef J
   fun l1reefJ(): AutoRoutine {
@@ -272,9 +278,11 @@ open class Routines(
         reefJTrajectory.resetOdometry(),
         reefJTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L1)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) })
-      ))
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) })
+      )
+    )
     return J
   }
 
@@ -289,22 +297,24 @@ open class Routines(
 
         reefETrajectory.resetOdometry(),
 
-        //to reef
+        // to reef
         reefETrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefEtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-        //to reef
+        // to reef
         stationToDTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
       )
     )
     return E_D
@@ -321,27 +331,28 @@ open class Routines(
 
         reefJTrajectory.resetOdometry(),
 
-        //to reef
+        // to reef
         reefJTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefJtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-        //to reef
+        // to reef
         stationToLTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
       )
     )
     return J_L
   }
-
 
   // l4 at reef J, K, L
   fun reefJKL(): AutoRoutine {
@@ -356,35 +367,36 @@ open class Routines(
 
         reefJTrajectory.resetOdometry(),
 
-        //to reef
+        // to reef
         reefJTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefJtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-        //to reef
+        // to reef
         stationToKTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefKtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-
-        //to reef
+        // to reef
         stationToLTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
       )
     )
     return J_K_L
@@ -400,48 +412,50 @@ open class Routines(
     J_fullK.active().onTrue(
       Commands.sequence(
 
-        //to reef
+        // to reef
         reefJTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefJtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-        //to reef
+        // to reef
         stationToKTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
         robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefKtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-
-        //to reef
+        // to reef
         stationToKTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L3)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
         robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
-
-        //to coral station
+        // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
         reefKtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         robot.intake.intakeCoral().until { robot.intake.coralDetected() },
 
-        //to reef
+        // to reef
         stationToKTrajectory.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PREMOVE)),
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT)).alongWith(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L2)),
-        robot.drive.driveStop().alongWith( robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
+          robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
+        ),
+        robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
         robot.drive.driveStop().alongWith(robot.intake.outtakeCoral().until { (!robot.intake.coralDetected()) }),
 
       )
