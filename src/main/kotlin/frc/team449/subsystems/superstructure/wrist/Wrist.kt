@@ -5,21 +5,20 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.sim.ChassisReference
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.system.encoder.AbsoluteEncoder
-import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
 // TODO(the entire class bru)
 class Wrist(
-  private val motor: TalonFX,
+  private val motor: TalonFX
 //  val absoluteEncoder: AbsoluteEncoder,
 //  val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
@@ -36,22 +35,25 @@ class Wrist(
 
   lateinit var wristFeedForward: WristFeedForward
 
-  // last request is sticky
   fun setPosition(position: Double): Command {
     return this.run {
       motor.setControl(
         request
           .withPosition(position)
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(
-            wristFeedForward.calculate(motor.closedLoopReference.valueAsDouble, motor.closedLoopReferenceSlope.valueAsDouble)
-          )
+          .withFeedForward(wristFeedForward.calculate(position))
       )
-    }.until(::atSetpoint)
+    }
   }
 
-  fun setVoltage(volts: Double): Command {
-    return this.run { motor.setControl(VoltageOut(volts)) }
+  fun hold(): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(wristFeedForward.calculate(request.Position))
+      )
+    }
   }
 
   fun setVoltageChar(volts: Double) {
@@ -59,25 +61,34 @@ class Wrist(
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return run {
+      motor.setVoltage(-1.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return runOnce {
+      motor.setVoltage(1.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
 
-  private fun atSetpoint(): Boolean {
+  fun atSetpoint(): Boolean {
     return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
   }
 
-  fun zero() {
-    motor.setPosition(0.0);
+  fun elevatorReady(): Boolean {
+    return positionSupplier.get() < WristConstants.ELEVATOR_READY.`in`(Radians)
   }
 
+  fun startupZero() {
+    motor.setPosition(WristConstants.STARTUP_ANGLE.`in`(Radians))
+  }
 
   override fun periodic() {
     logData()
@@ -90,7 +101,7 @@ class Wrist(
 
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
-
+    motorSimState.Orientation = ChassisReference.Clockwise_Positive
     motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (WristConstants.GEARING * WristConstants.UPR))
   }
 
@@ -130,6 +141,9 @@ class Wrist(
       config.Slot0.kI = WristConstants.KI
       config.Slot0.kD = WristConstants.KD
 
+      config.Slot0.kS = WristConstants.KS
+      config.Slot0.kV = WristConstants.KV
+
       config.MotionMagic.MotionMagicCruiseVelocity = WristConstants.CRUISE_VEL.`in`(RadiansPerSecond)
       config.MotionMagic.MotionMagicAcceleration = WristConstants.MAX_ACCEL.`in`(RadiansPerSecondPerSecond)
 
@@ -143,6 +157,9 @@ class Wrist(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
@@ -166,7 +183,7 @@ class Wrist(
 //        WristConstants.SAMPLES_TO_AVERAGE
 //      )
 
-      return Wrist(leadMotor)//, absEnc)//, quadEnc)
+      return Wrist(leadMotor) // , absEnc)//, quadEnc)
     }
   }
 }
