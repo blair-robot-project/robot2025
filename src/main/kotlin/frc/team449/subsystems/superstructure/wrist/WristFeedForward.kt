@@ -2,27 +2,21 @@ package frc.team449.subsystems.superstructure.wrist
 
 import frc.team449.subsystems.superstructure.pivot.Pivot
 import kotlin.math.cos
-import kotlin.math.sign
 
-// Custom Pivot Feedforward based on Elevator Length.
-// TODO(Pivot FeedForward)
+// Custom Wrist Feedforward based on pivot position.
 class WristFeedForward(
   private val pivot: Pivot,
-  private val ks: Double,
-  private val kv: Double,
   private val kg: Double
 ) {
 
-  fun calculate(positionRadians: Double, velocityRadPerSec: Double): Double {
-    return this.ks * sign(velocityRadPerSec) + kg * cos(pivot.positionSupplier.get() + positionRadians) + this.kv * velocityRadPerSec
+  fun calculate(positionRadians: Double): Double {
+    return kg * cos(pivot.positionSupplier.get() + positionRadians)
   }
 
   companion object {
     fun createWristFeedForward(pivot: Pivot): WristFeedForward {
       return WristFeedForward(
         pivot,
-        WristConstants.KS,
-        WristConstants.KV,
         WristConstants.KG,
       )
     }

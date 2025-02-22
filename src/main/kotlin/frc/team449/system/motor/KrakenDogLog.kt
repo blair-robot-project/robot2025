@@ -11,5 +11,8 @@ object KrakenDogLog : DogLog() {
     log("$key/Position", motor.position.valueAsDouble)
     log("$key/Velocity", motor.velocity.valueAsDouble)
     log("$key/Voltage", motor.motorVoltage.valueAsDouble)
+    log("$key/Closed Loop Pos", motor.closedLoopReference.valueAsDouble)
+    log("$key/Closed Loop Vel", motor.closedLoopReferenceSlope.valueAsDouble)
+    log("$key/Closed Loop Feedforward", motor.closedLoopFeedForward.valueAsDouble)
   }
 }

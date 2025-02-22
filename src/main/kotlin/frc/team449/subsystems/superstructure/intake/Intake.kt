@@ -44,14 +44,11 @@ class Intake(
 //    }
 //  }
 
-
   fun outtakeCoral(): Command {
     return runOnce {
-      motor.setVoltage(-IntakeConstants.CORAL_OUTTAKE_VOLTAGE)
+      motor.setVoltage(IntakeConstants.CORAL_OUTTAKE_VOLTAGE)
     }
   }
-
-
 
 //  fun intakeAlgae(): Command {
 //    return runOnce {

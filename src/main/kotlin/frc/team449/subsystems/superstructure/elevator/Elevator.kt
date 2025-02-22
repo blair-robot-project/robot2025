@@ -67,39 +67,52 @@ open class Elevator(
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
     SuperstructureGoal.STOW.elevator.`in`(Meters)
-  )
+  ).withEnableFOC(false)
 
-  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(
-            elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
-          )
+          .withFeedForward(elevatorFeedForward.calculateGravity())
       )
-    }.until(::atSetpoint)
+    }
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return this.run {
+      motor.setVoltage(-2.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return this.run {
+      motor.setVoltage(2.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
-  fun setVoltage(voltage: Double): Command {
-    return runOnce { motor.setVoltage(voltage) }
+  fun hold(): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(elevatorFeedForward.calculateGravity())
+      )
+    }
+  }
+
+  fun setVoltage(voltage: Double) {
+    return motor.setVoltage(voltage)
   }
 
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
 
-  private fun atSetpoint(): Boolean {
+  fun atSetpoint(): Boolean {
     return (abs(positionSupplier.get() - request.Position) < ElevatorConstants.TOLERANCE)
   }
 
@@ -140,6 +153,9 @@ open class Elevator(
       config.Slot0.kI = ElevatorConstants.KI
       config.Slot0.kD = ElevatorConstants.KD
 
+      config.Slot0.kS = ElevatorConstants.KS
+      config.Slot0.kV = ElevatorConstants.KV
+
       config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.CRUISE_VEL
       config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL
 
@@ -156,6 +172,9 @@ open class Elevator(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
@@ -168,6 +187,9 @@ open class Elevator(
         followerMotor.motorVoltage,
         followerMotor.supplyCurrent,
         followerMotor.statorCurrent,
+        followerMotor.closedLoopReference,
+        followerMotor.closedLoopReferenceSlope,
+        followerMotor.closedLoopFeedForward,
         followerMotor.deviceTemp
       )
 

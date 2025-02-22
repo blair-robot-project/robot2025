@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -36,9 +36,23 @@ import kotlin.math.*
 class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
-
+  val routines = Routines(robot)
   private val field = robot.field
 
+//  private val characChooser = SendableChooser<String>()
+
+  private var componentStorage: Array<Pose3d> = arrayOf(
+    Pose3d(),
+    Pose3d(),
+    Pose3d(),
+    Pose3d(),
+    Pose3d(
+      0.0,
+      0.0,
+      0.0,
+      Rotation3d(0.0, 0.0, 0.0)
+    )
+  )
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -49,13 +63,13 @@ class RobotLoop : TimedRobot() {
 
     HAL.report(FRCNetComm.tResourceType.kResourceType_Language, FRCNetComm.tInstances.kLanguage_Kotlin)
 
-    if (isSimulation()) {
-      // Don't complain about joysticks if there aren't going to be any
-      DriverStation.silenceJoystickConnectionWarning(true)
+//    if (isSimulation()) {
+    // Don't complain about joysticks if there aren't going to be any
+    DriverStation.silenceJoystickConnectionWarning(true)
 //      val instance = NetworkTableInstance.getDefault()
 //      instance.stopServer()
 //      instance.startClient4("localhost")
-    }
+//    }
 
     // Custom Feedforwards
     robot.elevator.elevatorFeedForward = createElevatorFeedForward(robot.pivot)
@@ -64,7 +78,6 @@ class RobotLoop : TimedRobot() {
 
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
 
-    val routines = Routines(robot)
     routines.addOptions(robot.autoChooser)
 
     println("Putting the thing on the other thing")
@@ -77,18 +90,27 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
+    // controllerBinder.bindButtons()
+//
+//    characChooser.addOption("Elevator", "elevator")
+//    characChooser.addOption("Pivot", "pivot")
+//    characChooser.addOption("Wrist", "wrist")
+//    characChooser.addOption("Drive", "drive")
+//
+//    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
 
     DogLog.setOptions(
       DogLogOptions()
         .withCaptureDs(true)
         .withCaptureNt(true)
-        .withLogExtras(true)
+//        .withLogExtras(true)
     )
 
-    DogLog.setPdh(robot.powerDistribution)
+//    DogLog.setPdh(robot.powerDistribution)
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
+//    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 
@@ -99,7 +121,9 @@ class RobotLoop : TimedRobot() {
 //    QuadCalibration(robot.wrist, robot.wrist.absoluteEncoder, robot.wrist.quadEncoder, name = "Wrist")
 //      .ignoringDisable(true)
 //      .schedule()
-    robot.wrist.zero()
+    if (RobotBase.isReal()) {
+      robot.wrist.startupZero()
+    }
   }
 
   override fun driverStationConnected() {
@@ -112,6 +136,8 @@ class RobotLoop : TimedRobot() {
     // Robot Drive Logging
     robot.field.robotPose = robot.poseSubsystem.pose
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
+
+    routines.logData()
 
     logAdvScopeComponents()
   }
