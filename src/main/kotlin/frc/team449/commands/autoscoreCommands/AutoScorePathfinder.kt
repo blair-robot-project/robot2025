@@ -22,6 +22,7 @@ import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.hypot
 
 class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Command() {
   var ADStar = LocalADStar()
@@ -170,9 +171,14 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
           velocityY = trajSpeeds.vyMetersPerSecond
           rotation = 0.0
         }
+
         rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))
         if(thetaController.atSetpoint()) {
           rotation = 0.0
+        }
+
+        if (!(robot.driveController.rightX>-0.05 && robot.driveController.rightX<0.05)) {
+          rotation = ((rotation + robot.driveController.rightX * 2.0*(hypot(endPose.x-robot.poseSubsystem.pose.x, endPose.y-robot.poseSubsystem.pose.y))) / 2)
         }
         val fieldRelative = fromFieldRelativeSpeeds(ChassisSpeeds(velocityX, velocityY, rotation),robot.poseSubsystem.pose.rotation)
         robot.poseSubsystem.setPathMag(fieldRelative)
