@@ -56,10 +56,9 @@ class AutoScoreCommands(private val robot : Robot) {
       AutoScoreCommandConstants.CoralLevel.L4 -> SuperstructureGoal.L4
     }
     robot.poseSubsystem.autoscoreCommandPose = reefLocationPose
-    return AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, reefLocationPose), premoveGoal)
-      .andThen(getToRot(robot, reefLocationPose))
+    return AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, reefLocationPose), premoveGoal, reefLocationPose)
       .andThen(PrintCommand("rotation done"))
-      .andThen(SimpleReefAlign(robot.drive, robot.poseSubsystem))
+      //.andThen(SimpleReefAlign(robot.drive, robot.poseSubsystem))
       .andThen(PrintCommand("movement done"))
 //      .andThen(robot.superstructureManager.requestGoal(scoreGoal))
       .andThen(runOnce({ robot.drive.defaultCommand = robot.driveCommand }))

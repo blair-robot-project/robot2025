@@ -246,8 +246,9 @@ class EmptyDrive(private val drive: SwerveDrive) : Command() {
 class AutoscoreWrapperCommand(
   val robot: Robot,
   command: AutoScorePathfinder,
-  private val goal: SuperstructureGoal.SuperstructureState)
-  : Command() {
+  private val goal: SuperstructureGoal.SuperstructureState,
+  private val setpoint: Pose2d)
+: Command() {
 
   private val currentCommand = command
   private val waitTime = 0.4
@@ -280,7 +281,7 @@ class AutoscoreWrapperCommand(
     }
     if (currentCommand.inAutodistanceTolerance && !reachedAD) {
       println("ad reached")
-      robot.superstructureManager.requestGoal(goal)
+      getToRot(robot, setpoint).andThen(robot.superstructureManager.requestGoal(goal))
       reachedAD = true
     }
     return false
@@ -307,11 +308,7 @@ class getToRot(
 //    atRotSetpoint = false
   }
   override fun execute() {
-//    atRotSetpoint = ((MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) > MathUtil.angleModulus(endPose.rotation.radians - 0.07) && MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) < MathUtil.angleModulus(
-//      endPose.rotation.radians + 0.07)))
-    println("getting to rot")
-    //if (!(abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<rotTol)) {
-    if (!(abs(angleDistance(endPose.rotation.radians, robot.poseSubsystem.pose.rotation.radians))<rotTol)) {
+    if (!(abs(angleDistance(endPose.rotation.radians, robot.poseSubsystem.pose.rotation.radians)) < rotTol)) {
       println("not at rot setpoint")
       println("rotation now: ${(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))}")
       println("des rotation: ${endPose.rotation.radians}")
@@ -323,8 +320,7 @@ class getToRot(
     }
   }
   override fun isFinished(): Boolean {
-//    return (abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<rotTol)
-    return (angleDistance(endPose.rotation.radians, robot.poseSubsystem.pose.rotation.radians)<rotTol)
+    return (angleDistance(endPose.rotation.radians, robot.poseSubsystem.pose.rotation.radians) < rotTol)
   }
   override fun end(interrupted: Boolean) {
     robot.drive.set(ChassisSpeeds(robot.drive.currentSpeeds.vxMetersPerSecond,robot.drive.currentSpeeds.vyMetersPerSecond,0.0))
