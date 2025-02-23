@@ -279,7 +279,7 @@ class getToRot(
       println("rotation now: ${(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))}")
       println("des rotation: ${endPose.rotation.radians}")
       val rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians), MathUtil.angleModulus(endPose.rotation.radians))
-      robot.drive.set(ChassisSpeeds(0.0, 0.0, rotation))
+      robot.drive.set(ChassisSpeeds(robot.drive.currentSpeeds.vxMetersPerSecond, robot.drive.currentSpeeds.vyMetersPerSecond, rotation))
     }
     else {
       this.end(true)
@@ -289,6 +289,6 @@ class getToRot(
     return (abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<0.07)
   }
   override fun end(interrupted: Boolean) {
-    robot.drive.set(ChassisSpeeds(0.0,0.0,0.0))
+    robot.drive.set(ChassisSpeeds(robot.drive.currentSpeeds.vxMetersPerSecond,robot.drive.currentSpeeds.vyMetersPerSecond,0.0))
   }
 }
