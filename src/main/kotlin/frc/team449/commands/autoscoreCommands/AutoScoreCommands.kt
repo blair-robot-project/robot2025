@@ -57,6 +57,8 @@ class AutoScoreCommands(private val robot : Robot) {
     }
     robot.poseSubsystem.autoscoreCommandPose = reefLocationPose
     return AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, reefLocationPose), premoveGoal)
+      .andThen(getToRot(robot, reefLocationPose))
+      .andThen(PrintCommand("rotation done"))
       .andThen(SimpleReefAlign(robot.drive, robot.poseSubsystem))
       .andThen(PrintCommand("movement done"))
 //      .andThen(robot.superstructureManager.requestGoal(scoreGoal))

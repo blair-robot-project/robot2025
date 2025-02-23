@@ -176,7 +176,7 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
         if(thetaController.atSetpoint()) {
           rotation = 0.0
         }
-
+//
         if (!(robot.driveController.rightX>-0.05 && robot.driveController.rightX<0.05)) {
           rotation = ((rotation + robot.driveController.rightX * 2.0*(hypot(endPose.x-robot.poseSubsystem.pose.x, endPose.y-robot.poseSubsystem.pose.y))) / 2)
         }
@@ -258,5 +258,37 @@ class AutoscoreWrapperCommand(
 
   override fun end(interrupted: Boolean) {
     currentCommand.end(interrupted)
+  }
+}
+class getToRot(
+  val robot: Robot,
+  private val endPose: Pose2d,
+  private var thetaController: PIDController = PIDController(3.5, 0.0, 0.0)
+)
+  : Command() {
+//  private var atRotSetpoint = false
+  override fun initialize() {
+//    atRotSetpoint = false
+  }
+  override fun execute() {
+//    atRotSetpoint = ((MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) > MathUtil.angleModulus(endPose.rotation.radians - 0.07) && MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) < MathUtil.angleModulus(
+//      endPose.rotation.radians + 0.07)))
+    println("getting to rot")
+    if (!(abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<0.07)) {
+      println("not at rot setpoint")
+      println("rotation now: ${(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))}")
+      println("des rotation: ${endPose.rotation.radians}")
+      val rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians), MathUtil.angleModulus(endPose.rotation.radians))
+      robot.drive.set(ChassisSpeeds(0.0, 0.0, rotation))
+    }
+    else {
+      this.end(true)
+    }
+  }
+  override fun isFinished(): Boolean {
+    return (abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<0.07)
+  }
+  override fun end(interrupted: Boolean) {
+    robot.drive.set(ChassisSpeeds(0.0,0.0,0.0))
   }
 }
