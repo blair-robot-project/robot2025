@@ -44,35 +44,40 @@ class TwoAndHalfL4(
     )
 
   private fun premoveL4(robot: Robot): Command {
-    return robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+    return robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)//robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)
   }
 
   private fun premoveSubstation(robot: Robot): Command {
-    return robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
-      .alongWith(robot.intake.intakeCoral())
+    return InstantCommand()//robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
+      //.alongWith(robot.intake.intakeCoral())
   }
 
   private fun scoreL4(robot: Robot, reefSide: FieldConstants.ReefSide): Command {
-    return robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-      .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide)))
-      .andThen(robot.intake.outtakeCoral())
-      .andThen(
-        WaitUntilCommand { !robot.intake.coralDetected() }
-          .onlyIf { RobotBase.isReal() }
-      )
-      .andThen(WaitCommand(0.15))
+//    return robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
+//      .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide)))
+//      .andThen(robot.intake.outtakeCoral())
+//      .andThen(
+//        WaitUntilCommand { !robot.intake.coralDetected() }
+//          .onlyIf { RobotBase.isReal() }
+//      )
+//      .andThen(WaitCommand(0.15))
+    return SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 1.5)
+      .andThen(WaitCommand(1.0))
   }
 
   private fun intakeSubstation(robot: Robot): Command {
-    return InstantCommand(robot.drive::stop)
-      .andThen(robot.intake.intakeCoral())
-      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
-      .andThen(
-        WaitUntilCommand { robot.intake.coralDetected() }
-          .onlyIf { RobotBase.isReal() }
-      )
-      .andThen(WaitCommand(0.15))
-      .andThen(robot.intake.stop())
+//    return InstantCommand(robot.drive::stop)
+//      .andThen(robot.intake.intakeCoral())
+//      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
+//      .andThen(
+//        WaitUntilCommand { robot.intake.coralDetected() }
+//          .onlyIf { RobotBase.isReal() }
+//      )
+//      .andThen(WaitCommand(0.15))
+//      .andThen(robot.intake.stop())
+    return InstantCommand(robot.drive::stop).andThen(
+      WaitCommand(1.5)
+    )
   }
 
   override val trajectory: MutableList<ChoreoTrajectory> =

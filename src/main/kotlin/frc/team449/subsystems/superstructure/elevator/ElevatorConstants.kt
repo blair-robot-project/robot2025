@@ -40,12 +40,12 @@ object ElevatorConstants {
   val GEARING_MOTOR_TO_ELEVATOR = 1 / (GEARING_MOTOR_TO_PULLEY * UPR)
   const val CARRIAGE_MASS = 4.0
 
-  const val TOLERANCE = 0.025 // TODO(Adjust tolerance.)
+  const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
 
   // TODO(Adjust gains.)
   val KS = if (RobotBase.isReal()) 0.0175 else 0.0
   const val KV = 4.5112 // theoretical 4.5112
-  val KG = if (RobotBase.isReal()) 0.30451 else 0.0 // was 0.26233
+  val KG = if (RobotBase.isReal()) 0.26851 else 0.0 // was 0.26233
 
   const val KP = 9.8532
   const val KI = 0.0

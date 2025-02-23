@@ -83,23 +83,15 @@ open class Elevator(
 
   fun manualDown(): Command {
     return this.run {
-      motor.setControl(
-        request
-          .withPosition(request.Position - ElevatorConstants.CRUISE_VEL * RobotConstants.LOOP_TIME / 5)
-          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(elevatorFeedForward.calculateGravity())
-      )
+      motor.setVoltage(-2.0)
+      request.Position = positionSupplier.get()
     }
   }
 
   fun manualUp(): Command {
     return this.run {
-      motor.setControl(
-        request
-          .withPosition(request.Position + ElevatorConstants.CRUISE_VEL * RobotConstants.LOOP_TIME / 5)
-          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(elevatorFeedForward.calculateGravity())
-      )
+      motor.setVoltage(2.0)
+      request.Position = positionSupplier.get()
     }
   }
 

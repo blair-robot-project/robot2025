@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -67,30 +68,22 @@ class Pivot(
 
   fun manualDown(): Command {
     return this.run {
-      motor.setControl(
-        request
-          .withPosition(request.Position - PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5)
-          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(pivotFeedForward.calculateWithLength(request.Position - PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5))
-      )
+      motor.setVoltage(-0.75)
+      request.Position = positionSupplier.get()
     }
   }
 
   fun manualUp(): Command {
     return this.run {
-      motor.setControl(
-        request
-          .withPosition(request.Position + PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5)
-          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(pivotFeedForward.calculateWithLength(request.Position + PivotConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5))
-      )
+      motor.setVoltage(0.75)
+      request.Position = positionSupplier.get()
     }
   }
 
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        request
+        PositionVoltage(request.Position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(request.Position))
       )
@@ -213,6 +206,7 @@ class Pivot(
         followerMotor.closedLoopReference,
         followerMotor.closedLoopReferenceSlope,
         followerMotor.closedLoopFeedForward,
+        followerMotor.closedLoopOutput,
         followerMotor.deviceTemp
       )
 

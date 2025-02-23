@@ -48,7 +48,7 @@ class ControllerBindings(
 
     autoScoreLeft()
     autoScoreRight()
-    autoScoreStowTrigger()
+//    autoScoreStowTrigger()
 
     substationIntake()
     coralOuttake()
@@ -115,23 +115,23 @@ class ControllerBindings(
   private fun autoScoreLeft() {
     driveController.leftTrigger().onTrue(
       SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
-        .andThen(
-          WaitUntilCommand {
-            (
-              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
-                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
-                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
-                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
-              ) &&
-              robot.superstructureManager.isAtPos()
-          }
-        )
-        .andThen(PrintCommand("boutta outtake this coral"))
-        .andThen(robot.intake.outtakeCoral())
-        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
-        .andThen(WaitCommand(0.25))
-        .andThen(robot.intake.stop())
-        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
+//        .andThen(
+//          WaitUntilCommand {
+//            (
+//              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
+//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
+//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
+//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
+//              ) &&
+//              robot.superstructureManager.isAtPos()
+//          }
+//        )
+//        .andThen(PrintCommand("boutta outtake this coral"))
+//        .andThen(robot.intake.outtakeCoral())
+//        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
+//        .andThen(WaitCommand(0.25))
+//        .andThen(robot.intake.stop())
+//        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
     )
   }
 
@@ -145,23 +145,23 @@ class ControllerBindings(
   private fun autoScoreRight() {
     driveController.rightTrigger().onTrue(
       SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
-        .andThen(
-          WaitUntilCommand {
-            (
-              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
-                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
-                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
-                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
-              ) &&
-              robot.superstructureManager.isAtPos()
-          }
-        )
-        .andThen(PrintCommand("boutta outtake this coral"))
-        .andThen(robot.intake.outtakeCoral())
-        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
-        .andThen(WaitCommand(0.25))
-        .andThen(robot.intake.stop())
-        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
+//        .andThen(
+//          WaitUntilCommand {
+//            (
+//              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
+//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
+//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
+//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
+//              ) &&
+//              robot.superstructureManager.isAtPos()
+//          }
+//        )
+//        .andThen(PrintCommand("boutta outtake this coral"))
+//        .andThen(robot.intake.outtakeCoral())
+//        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
+//        .andThen(WaitCommand(0.25))
+//        .andThen(robot.intake.stop())
+//        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
     )
   }
 
@@ -171,8 +171,8 @@ class ControllerBindings(
         .alongWith(robot.intake.intakeCoral())
         .andThen(WaitUntilCommand { false })
         .until { robot.intake.coralDetected() && RobotBase.isReal() }
-        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
         .andThen(robot.intake.holdCoral())
+        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
     )
   }
 

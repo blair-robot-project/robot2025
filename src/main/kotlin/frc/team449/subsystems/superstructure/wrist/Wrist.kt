@@ -62,24 +62,16 @@ class Wrist(
   }
 
   fun manualDown(): Command {
-    return this.run {
-      motor.setControl(
-        request
-          .withPosition(request.Position - WristConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5)
-          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(wristFeedForward.calculate(request.Position - WristConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5))
-      )
+    return run {
+      motor.setVoltage(-1.0)
+      request.Position = positionSupplier.get()
     }
   }
 
   fun manualUp(): Command {
-    return this.run {
-      motor.setControl(
-        request
-          .withPosition(request.Position + WristConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5)
-          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(wristFeedForward.calculate(request.Position + WristConstants.CRUISE_VEL.`in`(RadiansPerSecond) * RobotConstants.LOOP_TIME / 5))
-      )
+    return runOnce {
+      motor.setVoltage(1.0)
+      request.Position = positionSupplier.get()
     }
   }
 
