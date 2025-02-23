@@ -66,7 +66,7 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
   private var xPIDSpeed = 0.0
   private var yPIDSpeed = 0.0
   private var xController = PIDController(0.45,0.0,0.0)
-  private var yController = PIDController(0.5,0.0,0.0)
+  private var yController = PIDController(0.45,0.0,0.0)
 
   init {
     timer.restart()
@@ -297,6 +297,11 @@ class getToRot(
   private var rotTol: Double = 0.01
 )
   : Command() {
+
+  private fun angleDistance(currAngle: Double, endAngle: Double): Double {
+    val distance = (currAngle - endAngle + PI) % (2 * PI) - PI
+    return if (distance < -PI) distance + 2 * PI else distance
+  }
 //  private var atRotSetpoint = false
   override fun initialize() {
 //    atRotSetpoint = false
@@ -305,7 +310,8 @@ class getToRot(
 //    atRotSetpoint = ((MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) > MathUtil.angleModulus(endPose.rotation.radians - 0.07) && MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) < MathUtil.angleModulus(
 //      endPose.rotation.radians + 0.07)))
     println("getting to rot")
-    if (!(abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<rotTol)) {
+    //if (!(abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<rotTol)) {
+    if (!(abs(angleDistance(endPose.rotation.radians, robot.poseSubsystem.pose.rotation.radians))<rotTol)) {
       println("not at rot setpoint")
       println("rotation now: ${(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))}")
       println("des rotation: ${endPose.rotation.radians}")
@@ -317,7 +323,8 @@ class getToRot(
     }
   }
   override fun isFinished(): Boolean {
-    return (abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<rotTol)
+//    return (abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<rotTol)
+    return (angleDistance(endPose.rotation.radians, robot.poseSubsystem.pose.rotation.radians)<rotTol)
   }
   override fun end(interrupted: Boolean) {
     robot.drive.set(ChassisSpeeds(robot.drive.currentSpeeds.vxMetersPerSecond,robot.drive.currentSpeeds.vyMetersPerSecond,0.0))
