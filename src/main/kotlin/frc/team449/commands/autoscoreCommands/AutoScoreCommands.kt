@@ -1,5 +1,6 @@
 package frc.team449.commands.autoscoreCommands
 
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj2.command.Command
@@ -7,11 +8,11 @@ import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
 import edu.wpi.first.wpilibj.RobotBase
-import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 
 class AutoScoreCommands(private val robot : Robot) {
   var currentCommand : Command = InstantCommand()
+
   fun getReefCommand(rl : AutoScoreCommandConstants.ReefLocation, cl : AutoScoreCommandConstants.CoralLevel) : Command {
     return runOnce({
     val reefLocationPose =
@@ -67,6 +68,36 @@ class AutoScoreCommands(private val robot : Robot) {
       }))
       .andThen(runOnce({ robot.drive.defaultCommand = robot.driveCommand }))
     currentCommand.schedule()
+    })
+  }
+
+  fun getProcessorCommand() : Command {
+    //set to stow because there is no processor goal
+    return runOnce({
+      val reefLocationPose = if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) AutoScoreCommandConstants.processorPoseRed else AutoScoreCommandConstants.processorPoseBlue
+      robot.poseSubsystem.autoscoreCommandPose = reefLocationPose
+      currentCommand = AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, reefLocationPose), SuperstructureGoal.STOW)
+        .andThen(runOnce({
+          if(!RobotBase.isSimulation()) {
+            robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+          }
+        }))
+        .andThen(runOnce({ robot.drive.defaultCommand = robot.driveCommand }))
+    })
+  }
+
+  fun getNetCommand(atRedSide: Boolean) : Command {
+    //set to stow because there is no processor goal
+    return runOnce({
+      val reefLocationPose = Pose2d(AutoScoreCommandConstants.centerOfField + AutoScoreCommandConstants.centerOfField * if (atRedSide) 1 else -1, robot.poseSubsystem.pose.translation.y, if (atRedSide) AutoScoreCommandConstants.netRotation2dRed else AutoScoreCommandConstants.netRotation2dBlue )
+      robot.poseSubsystem.autoscoreCommandPose = reefLocationPose
+      currentCommand = AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, reefLocationPose), SuperstructureGoal.STOW)
+        .andThen(runOnce({
+          if(!RobotBase.isSimulation()) {
+            robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+          }
+        }))
+        .andThen(runOnce({ robot.drive.defaultCommand = robot.driveCommand }))
     })
   }
 

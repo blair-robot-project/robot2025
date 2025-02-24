@@ -45,7 +45,7 @@ function topicUnannounceHandler( removedTopic ) {
 function valueUpdateHandler( topic, timestamp_us, value ) {
   console.log("value updated: " + topic.name);
   if(topic.name == "/webcom/Alliance") {
-      setAlliance(value);
+    setAlliance(value);
   }
 }
 
@@ -66,7 +66,7 @@ function onConnect() {
 function onDisconnect() {
   console.log("disconnected from robot");
   //For this example, we simply mark the status as disconnected.
-  // noConnection();
+  noConnection();
   //Since we've disconnected from the server, the connection is no longer valid.
   subscription = null;
 }
@@ -76,7 +76,6 @@ function parameterChange(changeObject) {
 }
 
 const setAlliance = (alliance) => {
-  console.log(alliance);
   if(alliance == "Red") {
       document.body.style.background = "radial-gradient(circle at 50% 50%, pink, rgb(114, 114, 138))";
   } else if(alliance == "Blue") {
@@ -174,5 +173,5 @@ processorContainer.style = "display: none";
 netContainer.style = "display: none";
 coralIntakeContainer.style = "display: none";
 
-connection();
+noConnection();
 
