@@ -15,7 +15,7 @@ import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import java.util.Optional
 
-class ThreeL4(
+class TwoAndHalfL4(
   robot: Robot,
   isRedAlliance: Boolean,
   isRedStage: Boolean
@@ -30,15 +30,13 @@ class ThreeL4(
         1 to premoveSubstation(robot),
         2 to premoveL4(robot),
         3 to premoveSubstation(robot),
-        4 to premoveL4(robot),
       ),
       stopEventMap = hashMapOf(
         1 to scoreL4(robot, if (isRedAlliance && isRedStage || !isRedAlliance && !isRedStage) FieldConstants.ReefSide.RIGHT else FieldConstants.ReefSide.LEFT),
         2 to intakeSubstation(robot),
         3 to scoreL4(robot, if (isRedAlliance && isRedStage || !isRedAlliance && !isRedStage) FieldConstants.ReefSide.LEFT else FieldConstants.ReefSide.RIGHT),
-        4 to intakeSubstation(robot),
-        5 to scoreL4(robot, if (isRedAlliance && isRedStage || !isRedAlliance && !isRedStage) FieldConstants.ReefSide.RIGHT else FieldConstants.ReefSide.LEFT)
-          .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)),
+        4 to intakeSubstation(robot)
+          .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
       ),
       debug = false,
       timeout = 0.0,
@@ -56,15 +54,17 @@ class ThreeL4(
 
   private fun scoreL4(robot: Robot, reefSide: FieldConstants.ReefSide): Command {
     return robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-      .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 2.0))
+      .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 1.5, translationAccelLim = 1.5))
+      .andThen(WaitCommand(0.75))
       .andThen(robot.intake.outtakeCoral())
       .andThen(
         WaitUntilCommand { !robot.intake.coralDetected() }
           .onlyIf { RobotBase.isReal() }
       )
-      .andThen(WaitCommand(0.15))
+      .andThen(WaitCommand(0.10))
       .andThen(robot.intake.stop())
-//    return SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 2.0)
+      .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE))
+//    return SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 1.5)
 //      .andThen(WaitCommand(1.0))
   }
 
@@ -87,21 +87,21 @@ class ThreeL4(
     if (isRedAlliance) {
       if (isRedStage) {
         AutoUtil.transformForRedAlliance(
-          ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4", "5"), "ThreeL4")
+          ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4"), "TwoAndHalfL4")
         )
       } else {
         AutoUtil.transformForBlueStage(
           AutoUtil.transformForRedAlliance(
-            ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4", "5"), "ThreeL4")
+            ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4"), "TwoAndHalfL4")
           )
         )
       }
     } else {
       if (isRedStage) {
-        ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4", "5"), "ThreeL4")
+        ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4"), "TwoAndHalfL4")
       } else {
         AutoUtil.transformForBlueStage(
-          ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4", "5"), "ThreeL4")
+          ChoreoTrajectory.createTrajectory(arrayListOf("1", "2", "3", "4"), "TwoAndHalfL4")
         )
       }
     }

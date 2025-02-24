@@ -1,5 +1,5 @@
 {
- "name":"ThreeL4",
+ "name":"TwoAndHalfL4",
  "version":1,
  "type":"Swerve",
  "variables":{
@@ -48,8 +48,8 @@
    "val":502.6548245743669
   },
   "tmax":{
-   "exp":"0.7 N * m",
-   "val":0.7
+   "exp":"0.45 N * m",
+   "val":0.45
   },
   "cof":{
    "exp":"0.8",

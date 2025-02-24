@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -80,7 +82,7 @@ class Pivot(
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        request
+        PositionVoltage(request.Position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(request.Position))
       )
@@ -91,6 +93,13 @@ class Pivot(
     return this.run {
       motor.setVoltage(SmartDashboard.getNumber("Pivot Test Voltage", 0.0))
     }
+  }
+
+  fun climbDown(): Command {
+    return this.runOnce { motor.setVoltage(PivotConstants.CLIMB_VOLTAGE.`in`(Volt)) }
+      .andThen(WaitUntilCommand { positionSupplier.get() < PivotConstants.CLIMB_MIN_ANGLE.`in`(Radians) })
+      .andThen(runOnce { request.Position = positionSupplier.get() })
+      .andThen(hold())
   }
 
   fun setVoltageChar(voltage: Double) {
@@ -196,6 +205,7 @@ class Pivot(
         followerMotor.closedLoopReference,
         followerMotor.closedLoopReferenceSlope,
         followerMotor.closedLoopFeedForward,
+        followerMotor.closedLoopOutput,
         followerMotor.deviceTemp
       )
 

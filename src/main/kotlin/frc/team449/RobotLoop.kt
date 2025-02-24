@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.auto.RoutineChooser
-import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
@@ -42,9 +41,7 @@ class RobotLoop : TimedRobot() {
 
   private var autoCommand: Command? = null
   private var routineMap = hashMapOf<String, Command>()
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot)
-
-//  private val characChooser = SendableChooser<String>()
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
 
   private var componentStorage: Array<Pose3d> = arrayOf(
     Pose3d(),
@@ -93,26 +90,16 @@ class RobotLoop : TimedRobot() {
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
-//
-//    characChooser.addOption("Elevator", "elevator")
-//    characChooser.addOption("Pivot", "pivot")
-//    characChooser.addOption("Wrist", "wrist")
-//    characChooser.addOption("Drive", "drive")
-//
-//    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
+    controllerBinder.bindButtons()
 
     DogLog.setOptions(
       DogLogOptions()
         .withCaptureDs(true)
         .withCaptureNt(true)
-//        .withLogExtras(true)
     )
-
-//    DogLog.setPdh(robot.powerDistribution)
 
     SmartDashboard.putData("Field", robot.field)
     SmartDashboard.putData("Elevator + Pivot Visual", robot.elevator.mech)
-//    SmartDashboard.putData("Characterization", characChooser)
 
     URCL.start()
 
@@ -129,7 +116,6 @@ class RobotLoop : TimedRobot() {
   }
 
   override fun driverStationConnected() {
-    controllerBinder.bindButtons()
     FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
   }
 
@@ -209,57 +195,6 @@ class RobotLoop : TimedRobot() {
 
     // change elevator angle according to pivot position
     robot.elevator.elevatorSim?.changeAngle(robot.pivot.positionSupplier.get())
-
-    /*
-    webCom?.command = webCom?.commandSubscriber?.get().toString()
-
-    if (webCom?.command != "none" && DriverStation.isDSAttached()) {
-      println("command received")
-      webCom?.isDonePublish?.set(false)
-
-      val command : Command
-      //get the value
-      when (webCom?.command) {
-        "processor" -> command = autoScore.processor()
-        "intakeCoralTop" -> command = autoScore.coral(true)
-        "intakeCoralBottom" -> command = autoScore.coral(false)
-        "netRed" -> command = autoScore.net(true)
-        "netBlue" -> command = autoScore.net(false)
-        else -> {
-          //format will be l_ location__
-          val level = webCom?.command?.slice(0..1)
-          val location = webCom?.command?.slice(3..<webCom?.command!!.length)
-          var reefLocation = AutoScoreCommandConstants.ReefLocation.Location1
-          var reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
-          when (location) {
-            "location1" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location1)
-            "location2" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location2)
-            "location3" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location3)
-            "location4" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location4)
-            "location5" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location5)
-            "location6" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location6)
-            "location7" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location7)
-            "location8" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location8)
-            "location9" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location9)
-            "location10" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location10)
-            "location11" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location11)
-            "location12" -> reefLocation = (AutoScoreCommandConstants.ReefLocation.Location12)
-          }
-          when (level) {
-            "l1" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L1)
-            "l2" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L2)
-            "l3" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L3)
-            "l4" -> reefLevel = (AutoScoreCommandConstants.ReefLevel.L4)
-          }
-          command = autoScore.reef(reefLocation, reefLevel)
-        }
-      }
-      autoScore.currentCommand = command
-      autoScore.poseSubsystem.autoscoreCurrentCommand = command
-      command.schedule()
-      webCom?.isDonePublish?.set(true)
-      webCom?.commandPublisher?.set("none")
-    * */
   }
 
   private fun logAdvScopeComponents() {

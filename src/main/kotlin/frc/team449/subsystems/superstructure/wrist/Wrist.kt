@@ -36,7 +36,7 @@ class Wrist(
   lateinit var wristFeedForward: WristFeedForward
 
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)

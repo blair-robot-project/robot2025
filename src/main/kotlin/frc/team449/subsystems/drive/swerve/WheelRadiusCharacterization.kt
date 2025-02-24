@@ -19,8 +19,6 @@ class WheelRadiusCharacterization(
     addRequirements(drive)
   }
 
-  private var gyroDelta = 0.0
-  private var wheelPosDelta = 0.0
   private var currentEffectiveWheelRadius = 0.0
 
   private var lastGyroYawRads = 0.0
