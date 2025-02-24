@@ -5,14 +5,15 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import frc.team449.Robot
+import edu.wpi.first.wpilibj.RobotBase
 import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 
 class AutoScoreCommands(private val robot : Robot) {
   var currentCommand : Command = InstantCommand()
   fun getReefCommand(rl : AutoScoreCommandConstants.ReefLocation, cl : AutoScoreCommandConstants.CoralLevel) : Command {
+    return runOnce({
     val reefLocationPose =
       if(DriverStation.getAlliance().get() == Alliance.Red) {
         when(rl) {
@@ -59,12 +60,13 @@ class AutoScoreCommands(private val robot : Robot) {
     }
     robot.poseSubsystem.autoscoreCommandPose = reefLocationPose
     currentCommand = AutoscoreWrapperCommand(robot, AutoScorePathfinder(robot, reefLocationPose), premoveGoal)
-      .andThen(getToRot(robot, reefLocationPose))
-      .andThen(SimpleReefAlign(robot.drive, robot.poseSubsystem))
-//      .andThen(robot.superstructureManager.requestGoal(scoreGoal))
+      .andThen(runOnce({
+        if(!RobotBase.isSimulation()) {
+          robot.superstructureManager.requestGoal(scoreGoal)
+        }
+      }))
       .andThen(runOnce({ robot.drive.defaultCommand = robot.driveCommand }))
-    return runOnce({
-      currentCommand.schedule()
+    currentCommand.schedule()
     })
   }
 

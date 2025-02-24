@@ -17,7 +17,6 @@ import edu.wpi.first.networktables.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import frc.team449.Robot
-import frc.team449.commands.driveAlign.PIDPoseAlign
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -26,7 +25,7 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.hypot
 
-class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Command() {
+class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) : Command() {
   var ADStar = LocalADStar()
   private var pathPub: StructArrayPublisher<Pose2d>
   private var velXPub: DoublePublisher
@@ -247,7 +246,7 @@ class AutoscoreWrapperCommand(
   val robot: Robot,
   command: AutoScorePathfinder,
   private val goal: SuperstructureGoal.SuperstructureState,
-  private val setpoint: Pose2d)
+)
 : Command() {
 
   private val currentCommand = command
@@ -281,7 +280,7 @@ class AutoscoreWrapperCommand(
     }
     if (currentCommand.inAutodistanceTolerance && !reachedAD) {
       println("ad reached")
-      getToRot(robot, setpoint).andThen(robot.superstructureManager.requestGoal(goal))
+      PathfindingRotationCommand(robot, currentCommand.endPose).andThen(robot.superstructureManager.requestGoal(goal))
       reachedAD = true
     }
     return false
@@ -291,7 +290,7 @@ class AutoscoreWrapperCommand(
     currentCommand.end(interrupted)
   }
 }
-class getToRot(
+class PathfindingRotationCommand(
   val robot: Robot,
   private val endPose: Pose2d,
   private var thetaController: PIDController = PIDController(3.5, 0.0, 0.0) ,

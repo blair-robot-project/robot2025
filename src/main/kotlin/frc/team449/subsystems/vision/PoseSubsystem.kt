@@ -202,7 +202,7 @@ class PoseSubsystem(
     if(controllerMag > 0.35) {
       currentControllerPower = MathUtil.clamp(currentControllerPower, 5.0, maxMagPower)
     }
-    if(distance <= autoDistance || controllerMag < 0.1 || currentControllerPower < 3) {
+    if(distance <= autoDistance || controllerMag < 0.1) {
       if(distance <= autoDistance) {
         resetMagVars()
       } else {
