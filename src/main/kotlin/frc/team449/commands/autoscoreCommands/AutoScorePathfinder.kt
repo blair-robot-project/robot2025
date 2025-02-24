@@ -103,7 +103,6 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
     resetVars()
     ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
     ADStar.setGoalPosition(endPose.translation)
-    println("new command started")
   }
 
   override fun execute() {
@@ -129,9 +128,6 @@ class AutoScorePathfinder(val robot: Robot, private val endPose: Pose2d) : Comma
           ),
           GoalEndState(0.0, endPose.rotation)
         )
-        if (newPath != null) {
-          println("new path, first pose: ${newPath.pathPoses[0]}")
-        }
         if(newPath == null) {
           pathNull = true
         } else {
@@ -249,7 +245,6 @@ class AutoscoreWrapperCommand(
       waitTimer = waitTime
     }
     if (currentCommand.inAutodistanceTolerance && !reachedAD) {
-      println("ad reached")
       robot.superstructureManager.requestGoal(goal)
       reachedAD = true
     }
@@ -273,11 +268,7 @@ class getToRot(
   override fun execute() {
 //    atRotSetpoint = ((MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) > MathUtil.angleModulus(endPose.rotation.radians - 0.07) && MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians) < MathUtil.angleModulus(
 //      endPose.rotation.radians + 0.07)))
-    println("getting to rot")
     if (!(abs(endPose.rotation.radians-robot.poseSubsystem.pose.rotation.radians)<0.07)) {
-      println("not at rot setpoint")
-      println("rotation now: ${(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))}")
-      println("des rotation: ${endPose.rotation.radians}")
       val rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians), MathUtil.angleModulus(endPose.rotation.radians))
       robot.drive.set(ChassisSpeeds(robot.drive.currentSpeeds.vxMetersPerSecond, robot.drive.currentSpeeds.vyMetersPerSecond, rotation))
     }

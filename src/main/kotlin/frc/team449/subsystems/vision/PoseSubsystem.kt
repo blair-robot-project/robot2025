@@ -199,14 +199,18 @@ class PoseSubsystem(
     currentControllerPower *= magMultiply
 
     clampCP()
+    if(controllerMag > 0.35) {
+      currentControllerPower = MathUtil.clamp(currentControllerPower, 5.0, maxMagPower)
+    }
     if(distance <= autoDistance || controllerMag < 0.1 || currentControllerPower < 3) {
       if(distance <= autoDistance) {
         resetMagVars()
       } else {
-        currentControllerPower -= 0.1
-        magMultiply -= 0.05
+        currentControllerPower -= 0.3
+        magMultiply -= 0.1
       }
       drive.set(desVel)
+      println("drive: $controllerMag")
     } else {
       // controller stuff
       val ctrlRadius = MathUtil.applyDeadband(
@@ -228,7 +232,6 @@ class PoseSubsystem(
         dy = yScaled - prevY
         magAcc = hypot(dx / dt, dy / dt)
         magAccClamped = MathUtil.clamp(magAcc, -drive.accel, drive.accel)
-
 
         val factor = if (magAcc == 0.0) 0.0 else magAccClamped / magAcc
         val dxClamped = dx * factor
@@ -283,18 +286,19 @@ class PoseSubsystem(
         combinedChassisSpeeds = desVel
         currentControllerPower -= 0.3
         magMultiply -= 0.05
-//        println("agree")
+        println("agree")
       } else if(controllerMag > 0.35 || currentControllerPower > 16) {
         combinedChassisSpeeds = controllerSpeeds * 8.0
+        println("driver")
       } else {
         controllerSpeeds *= currentControllerPower / 2
         combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
+        println("combine")
       }
 
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
       combinedChassisSpeeds.vyMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vyMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)
       combinedChassisSpeeds.omegaRadiansPerSecond = MathUtil.clamp(combinedChassisSpeeds.omegaRadiansPerSecond, -AutoScoreCommandConstants.MAX_ROT_SPEED, AutoScoreCommandConstants.MAX_ROT_SPEED)
-      println(desVel)
       drive.set(combinedChassisSpeeds)
     }
     lastDistance = distance
