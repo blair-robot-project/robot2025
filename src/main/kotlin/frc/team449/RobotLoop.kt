@@ -80,7 +80,6 @@ class RobotLoop : TimedRobot() {
 
     routines.addOptions(robot.autoChooser)
 
-    println("Putting the thing on the other thing")
     SmartDashboard.putData("Auto Chooser", robot.autoChooser)
 
     RobotModeTriggers.autonomous().whileTrue(robot.autoChooser.selectedCommandScheduler())
@@ -132,8 +131,6 @@ class RobotLoop : TimedRobot() {
     // Robot Drive Logging
     robot.field.robotPose = robot.poseSubsystem.pose
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
-
-    routines.logData()
 
     logAdvScopeComponents()
   }

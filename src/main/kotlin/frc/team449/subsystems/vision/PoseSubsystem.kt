@@ -108,14 +108,6 @@ class PoseSubsystem(
     this.poseEstimator.resetPose(newPose)
   }
 
-  fun resetPoseChoreo(newPose: Pose2d) {
-    this.poseEstimator.resetPose(newPose)
-//    this.heading += if (DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
-//      Rotation2d(-PI)
-//    } else {
-//      Rotation2d(0.0)
-  }
-
   override fun periodic() {
     if (isReal) {
       this.poseEstimator.update(

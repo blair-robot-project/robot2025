@@ -5,11 +5,6 @@ import choreo.auto.AutoFactory
 import choreo.auto.AutoRoutine
 import choreo.auto.AutoTrajectory
 import choreo.trajectory.SwerveSample
-import dev.doglog.DogLog
-import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
@@ -19,50 +14,16 @@ import frc.team449.Robot
 import frc.team449.commands.driveAlign.SimpleReefAlign
 import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import kotlin.jvm.optionals.getOrDefault
-import kotlin.math.PI
 import java.util.Optional
 
 open class Routines(
   val robot: Robot
 ) {
-  // Removed magic numbers
-  private val xController: PIDController
-    get() = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
-  private val yController: PIDController
-    get() = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
-  private val headingController: PIDController
-    get() = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
-
-  init {
-    headingController.enableContinuousInput(-Math.PI, Math.PI)
-  }
-  var desiredAngle = 0.0
-  var desiredOmega = 0.0
-
-  private fun followTrajectory(sample: SwerveSample) {
-    desiredAngle = MathUtil.angleModulus(sample.heading)
-    desiredOmega = sample.omega
-    val speeds = ChassisSpeeds(
-      sample.vx + xController.calculate(robot.poseSubsystem.pose.x, sample.x),
-      sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
-      sample.omega + headingController.calculate(
-        robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(sample.heading))).radians
-      )
-    )
-    val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-      speeds,
-      robot.poseSubsystem.heading
-    )
-
-    // Apply the generated speeds
-    robot.drive.set(newSpeeds)
-  }
 
   val autoFactory = AutoFactory(
     robot.poseSubsystem::pose,
-    robot.poseSubsystem::resetPoseChoreo,
-    { sample: SwerveSample -> followTrajectory(sample) },
+    robot.poseSubsystem::resetOdometry,
+    { sample: SwerveSample -> robot.drive.followTrajectory(robot, sample) },
     true,
     robot.drive
   )
@@ -175,12 +136,6 @@ open class Routines(
     return autoRoutine
   }
 
-
-
-
-
-
-
   /** link to starting position on the field: https://docs.google.com/document/d/1SOzIJDgJ0GRSVnNTcBhaFfltvHw0IjJTEUsAZbI2hW4/edit?usp=sharing  **/
   /** left and right are from the driver's pov **/
 
@@ -229,7 +184,7 @@ open class Routines(
         reefETrajectory.resetOdometry(),
 
         // to reef
-        Commands.deadline(reefETrajectory.cmd(),robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE) ),
+        Commands.deadline(reefETrajectory.cmd(), robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         frc.team449.commands.Commands.ScoreL4(robot, FieldConstants.ReefSide.LEFT),
 
         // to coral station
@@ -295,11 +250,9 @@ open class Routines(
         reefJtoStationTrajectory.cmd().andThen(robot.drive.driveStop()),
         frc.team449.commands.Commands.Intake(robot),
 
-
         // to reef
         Commands.deadline(stationToKTrajectory.cmd(), robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         frc.team449.commands.Commands.ScoreL4(robot, FieldConstants.ReefSide.LEFT),
-
 
         // to coral station
         robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE),
@@ -307,26 +260,13 @@ open class Routines(
         frc.team449.commands.Commands.Intake(robot),
 
         // to reef
-        Commands.deadline(stationToLTrajectory.cmd(),robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
+        Commands.deadline(stationToLTrajectory.cmd(), robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)),
         frc.team449.commands.Commands.ScoreL4(robot, FieldConstants.ReefSide.RIGHT),
 
-        )
+      )
     )
 
     return J_K_L
-  }
-
-  fun logData() {
-    DogLog.log("Autos/Current rotation:", robot.poseSubsystem.pose.rotation.radians)
-    DogLog.log("Autos/Desired rotation:", desiredAngle)
-    DogLog.log("Autos/Rotation Closed Loop Error:", robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(desiredAngle))).radians)
-    DogLog.log("Autos/Path Omega:", desiredOmega)
-    DogLog.log(
-      "Autos/Controller Effort:",
-      headingController.calculate(
-        robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(desiredAngle))).radians
-      )
-    )
   }
 
   // autoChooser that will be displayed on dashboard

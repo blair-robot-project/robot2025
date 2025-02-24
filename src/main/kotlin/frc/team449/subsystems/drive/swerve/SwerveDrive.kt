@@ -1,7 +1,11 @@
 package frc.team449.subsystems.drive.swerve
 
+import choreo.trajectory.SwerveSample
 import dev.doglog.DogLog
+import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -11,6 +15,8 @@ import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
+import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
@@ -44,6 +50,42 @@ open class SwerveDrive(
   var currentSpeeds = ChassisSpeeds()
 
   var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
+
+  var desiredAngle = 0.0
+  var desiredOmega = 0.0
+
+  // Removed magic numbers
+  private val xController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
+  private val yController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
+  private val headingController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
+
+  init {
+    headingController.enableContinuousInput(-Math.PI, Math.PI)
+  }
+  fun followTrajectory(
+    robot: Robot,
+    sample: SwerveSample
+  ) {
+    desiredAngle = MathUtil.angleModulus(sample.heading)
+    desiredOmega = sample.omega
+    val speeds = ChassisSpeeds(
+      sample.vx + xController.calculate(robot.poseSubsystem.pose.x, sample.x),
+      sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
+      sample.omega + headingController.calculate(
+        robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(sample.heading))).radians
+      )
+    )
+    val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      speeds,
+      robot.poseSubsystem.heading
+    )
+
+    // Apply the generated speeds
+    robot.drive.set(newSpeeds)
+  }
 
   fun set(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
