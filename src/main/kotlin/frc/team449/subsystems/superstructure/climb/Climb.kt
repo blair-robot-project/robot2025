@@ -58,7 +58,6 @@ class Climb(
       val sensor = DigitalInput(ClimbConstants.SENSOR_DIO_PORT)
       val sensor2 = DigitalInput(ClimbConstants.SENSOR2_DIO_PORT)
 
-
       return Climb(motor, sensor, sensor2)
     }
   }
