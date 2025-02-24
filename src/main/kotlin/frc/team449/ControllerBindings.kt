@@ -169,8 +169,7 @@ class ControllerBindings(
     driveController.leftBumper().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE)
         .alongWith(robot.intake.intakeCoral())
-        .andThen(WaitUntilCommand { false })
-        .until { robot.intake.coralDetected() && RobotBase.isReal() }
+        .andThen(WaitUntilCommand { robot.intake.coralDetected() && RobotBase.isReal() })
         .andThen(robot.intake.holdCoral())
         .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
     )
