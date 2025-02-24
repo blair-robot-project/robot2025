@@ -53,5 +53,5 @@ object ElevatorConstants {
 
   // Motion Magic
   const val CRUISE_VEL = 2.425 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
-  const val MAX_ACCEL = 5.0 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
+  const val MAX_ACCEL = 7.5 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
 }
