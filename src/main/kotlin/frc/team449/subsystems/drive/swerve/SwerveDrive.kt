@@ -84,7 +84,7 @@ open class SwerveDrive(
     )
 
     // Apply the generated speeds
-     set(newSpeeds)
+    set(newSpeeds)
   }
 
   fun set(desiredSpeeds: ChassisSpeeds) {
