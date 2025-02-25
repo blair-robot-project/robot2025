@@ -205,7 +205,6 @@ class Pivot(
         followerMotor.closedLoopReference,
         followerMotor.closedLoopReferenceSlope,
         followerMotor.closedLoopFeedForward,
-        followerMotor.closedLoopOutput,
         followerMotor.deviceTemp
       )
 
