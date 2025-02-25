@@ -35,10 +35,6 @@ class Intake(
     return !infrared.get()
   }
 
-  fun coralNotDetected(): Boolean {
-    return infrared.get()
-  }
-
   fun stop(): Command {
     return runOnce {
       motor.stopMotor()

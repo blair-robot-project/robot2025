@@ -39,13 +39,14 @@ class SuperstructureManager(
             ),
             WaitUntilCommand { wrist.elevatorReady() },
             elevator.setPosition(goal.elevator.`in`(Meters)),
-            WaitUntilCommand { wrist.atSetpoint() || pivot.atSetpoint() },
-            pivot.hold().onlyIf { pivot.atSetpoint() },
-            wrist.hold().onlyIf { wrist.atSetpoint() },
-            WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() },
-            Commands.parallel(pivot.hold(), wrist.hold())
-              .repeatedly()
-              .until { elevator.atSetpoint() },
+            WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() && elevator.atSetpoint() },
+//            WaitUntilCommand { wrist.atSetpoint() || pivot.atSetpoint() },
+//            pivot.hold().onlyIf { pivot.atSetpoint() },
+//            wrist.hold().onlyIf { wrist.atSetpoint() },
+//            WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() },
+//            Commands.parallel(pivot.hold(), wrist.hold())
+//              .repeatedly()
+//              .until { elevator.atSetpoint() },
             holdAll()
           ),
 
@@ -55,16 +56,18 @@ class SuperstructureManager(
             wrist.hold(),
             wrist.setPosition(WristConstants.ELEVATOR_READY.`in`(Radians))
               .onlyIf { goal.wrist > WristConstants.ELEVATOR_READY },
-            pivot.hold()
-              .repeatedly()
-              .until { elevator.atSetpoint() },
+            WaitUntilCommand { elevator.atSetpoint() },
+//            pivot.hold()
+//              .repeatedly()
+//              .until { elevator.atSetpoint() },
             Commands.parallel(
               pivot.setPosition(goal.pivot.`in`(Radians)),
               wrist.setPosition(goal.wrist.`in`(Radians))
             ),
-            elevator.hold()
-              .repeatedly()
-              .until { wrist.atSetpoint() && pivot.atSetpoint() },
+            WaitUntilCommand { wrist.atSetpoint() && pivot.atSetpoint() },
+//            elevator.hold()
+//              .repeatedly()
+//              .until { wrist.atSetpoint() && pivot.atSetpoint() },
             InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) }),
             holdAll()
           )

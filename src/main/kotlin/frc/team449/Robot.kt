@@ -1,6 +1,5 @@
 package frc.team449
 
-import choreo.auto.AutoChooser
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -42,8 +41,6 @@ class Robot : RobotBase() {
   )
 
   override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
-
-  val autoChooser = AutoChooser()
 
   override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
 

@@ -11,10 +11,10 @@ import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
-import frc.team449.auto.Routines
+import frc.team449.auto.RoutineChooser
 import frc.team449.commands.light.BlairChasing
 import frc.team449.commands.light.BreatheHue
 import frc.team449.commands.light.Rainbow
@@ -36,8 +36,12 @@ import kotlin.math.*
 class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
-  val routines = Routines(robot)
-  private val field = robot.field
+
+  private val routineChooser: RoutineChooser = RoutineChooser(robot)
+
+  private var autoCommand: Command? = null
+  private var routineMap = hashMapOf<String, Command>()
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
 
   private var componentStorage: Array<Pose3d> = arrayOf(
     Pose3d(),
@@ -51,8 +55,6 @@ class RobotLoop : TimedRobot() {
       Rotation3d(0.0, 0.0, 0.0)
     )
   )
-
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot)
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
@@ -76,27 +78,19 @@ class RobotLoop : TimedRobot() {
     robot.pivot.pivotFeedForward = createPivotFeedForward(robot.elevator)
     robot.wrist.wristFeedForward = createWristFeedForward(robot.pivot)
 
+    // Generate Auto Routines
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
-
-    routines.addOptions(robot.autoChooser)
-
-    SmartDashboard.putData("Auto Chooser", robot.autoChooser)
-
-    RobotModeTriggers.autonomous().whileTrue(robot.autoChooser.selectedCommandScheduler())
+    routineMap = routineChooser.routineMap()
     println("DONE Generating Auto Routines : ${Timer.getFPGATimestamp()}")
 
+    routineChooser.createOptions()
+
+    SmartDashboard.putData("Routine Chooser", routineChooser)
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance())
 
     robot.light.defaultCommand = BlairChasing(robot.light)
 
     controllerBinder.bindButtons()
-//
-//    characChooser.addOption("Elevator", "elevator")
-//    characChooser.addOption("Pivot", "pivot")
-//    characChooser.addOption("Wrist", "wrist")
-//    characChooser.addOption("Drive", "drive")
-//
-//    characChooser.onChange(controllerBinder::updateSelectedCharacterization)
 
     DogLog.setOptions(
       DogLogOptions()
@@ -137,6 +131,8 @@ class RobotLoop : TimedRobot() {
 
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
+    this.autoCommand = routineMap[if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) "Red" + routineChooser.selected else "Blue" + routineChooser.selected]
+    CommandScheduler.getInstance().schedule(this.autoCommand)
 
     if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) {
       BreatheHue(robot.light, 0).schedule()
@@ -148,6 +144,10 @@ class RobotLoop : TimedRobot() {
   override fun autonomousPeriodic() {}
 
   override fun teleopInit() {
+    if (autoCommand != null) {
+      CommandScheduler.getInstance().cancel(autoCommand)
+    }
+
     (robot.light.currentCommand ?: InstantCommand()).cancel()
 
     robot.drive.defaultCommand = robot.driveCommand
@@ -165,7 +165,11 @@ class RobotLoop : TimedRobot() {
 
   override fun disabledPeriodic() {}
 
-  override fun testInit() {}
+  override fun testInit() {
+    if (autoCommand != null) {
+      CommandScheduler.getInstance().cancel(autoCommand)
+    }
+  }
 
   override fun testPeriodic() {}
 
@@ -200,18 +204,6 @@ class RobotLoop : TimedRobot() {
 
     val elevatorPos = robot.elevator.positionSupplier.get()
 
-    var componentStorage: Array<Pose3d> = arrayOf(
-      Pose3d(),
-      Pose3d(),
-      Pose3d(),
-      Pose3d(),
-      Pose3d(
-        0.0,
-        0.0,
-        0.0,
-        Rotation3d(0.0, 0.0, 0.0)
-      )
-    )
     componentStorage = arrayOf(
 //       pivot/base stage
       Pose3d(
