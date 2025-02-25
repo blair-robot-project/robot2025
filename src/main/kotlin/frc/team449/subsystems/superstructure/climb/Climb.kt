@@ -37,7 +37,8 @@ class Climb(
 
   private fun logData() {
     DogLog.log("Climb/Motor Voltage", motor.appliedOutput * 12.0)
-    DogLog.log("Climb/IR sensor", !infrared.get())
+    DogLog.log("Climb/IR sensor 1", !infrared.get())
+    DogLog.log("Climb/IR sensor 2", !infrared2.get())
   }
 
   companion object {

@@ -61,7 +61,6 @@ class ControllerBindings(
     stow()
     climb()
     algaeDescoreL2()
-    algaeDescoreL3()
   }
 
   private fun characterizationBindings() {
@@ -69,6 +68,7 @@ class ControllerBindings(
     manualPivot()
     manualWrist()
     testVoltagePivot()
+    runClimbWheels()
 
     pivotCharacterizaton()
   }
@@ -97,12 +97,6 @@ class ControllerBindings(
   private fun algaeDescoreL2() {
     mechanismController.x().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L2_ALGAE_DESCORE)
-    )
-  }
-
-  private fun algaeDescoreL3() {
-    mechanismController.y().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_DESCORE)
     )
   }
 
@@ -177,11 +171,15 @@ class ControllerBindings(
 
   private fun coralOuttake() {
     driveController.rightBumper().onTrue(
-      robot.intake.outtakeCoral()
-        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
-        .andThen(WaitCommand(0.15))
-        .andThen(robot.intake.stop())
-        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+      ConditionalCommand(
+        robot.intake.outtakeCoral()
+          .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
+          .andThen(WaitCommand(0.10))
+          .andThen(robot.intake.stop())
+          .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)),
+        WaitCommand(0.15)
+          .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+      ) { RobotBase.isReal() }
     )
   }
 
@@ -238,6 +236,14 @@ class ControllerBindings(
       robot.pivot.testVoltage()
     ).onFalse(
       robot.pivot.hold()
+    )
+  }
+
+  private fun runClimbWheels() {
+    characterizationController.leftTrigger().onTrue(
+      robot.climb.runClimbWheels()
+    ).onFalse(
+      robot.climb.stop()
     )
   }
 

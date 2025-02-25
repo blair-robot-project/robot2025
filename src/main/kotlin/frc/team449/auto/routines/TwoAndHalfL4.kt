@@ -54,8 +54,8 @@ class TwoAndHalfL4(
 
   private fun scoreL4(robot: Robot, reefSide: FieldConstants.ReefSide): Command {
     return robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-      .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 1.5, translationAccelLim = 1.5))
-      .andThen(WaitCommand(0.75))
+      .alongWith(SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide), translationSpeedLim = 2.0, translationAccelLim = 1.85))
+      .andThen(WaitCommand(0.50))
       .andThen(robot.intake.outtakeCoral())
       .andThen(
         WaitUntilCommand { !robot.intake.coralDetected() }

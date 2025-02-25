@@ -12,10 +12,10 @@ object SuperstructureGoal {
   private const val SCORING_ACCEL = 12.5
 
   val L1 = SuperstructureState(
-    Degrees.of(55.0),
+    Degrees.of(40.0),
     Meters.of(0.0),
-    Degrees.of(-105.0),
-    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    Degrees.of(-60.0),
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L2 = SuperstructureState(
@@ -62,13 +62,6 @@ object SuperstructureGoal {
 
   /** Actually find these positions*/
   val L2_ALGAE_DESCORE = SuperstructureState(
-    Degrees.of(60.0),
-    Meters.of(0.0),
-    Degrees.of(-90.0),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
-  )
-
-  val L3_ALGAE_DESCORE = SuperstructureState(
     Degrees.of(60.0),
     Meters.of(0.0),
     Degrees.of(-90.0),
