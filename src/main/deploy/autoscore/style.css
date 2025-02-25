@@ -92,14 +92,14 @@ body {
     height: 100%;
     align-self: center;
     vertical-align: middle;
-    rotate: 0deg;
+    rotate: 120deg;
 }
 
 .locationImageContainer {
     display: flex;
     flex-direction: column;
-    width: 80%;
     height: 80%;
+    aspect-ratio: 473/411;
     text-align: center;
     align-items: center;
     justify-content: center;
@@ -139,7 +139,7 @@ body {
 }
 
 .Button:hover, .Level:hover {
-    background-color: rgb(255, 0, 0);
+    background-color: rgb(255, 20, 20);
 }
 
 .Button:active, .Level:active {

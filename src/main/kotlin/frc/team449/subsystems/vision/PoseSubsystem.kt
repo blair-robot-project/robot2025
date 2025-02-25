@@ -210,7 +210,6 @@ class PoseSubsystem(
         magMultiply -= 0.1
       }
       drive.set(desVel)
-      println("drive: $controllerMag")
     } else {
       // controller stuff
       val ctrlRadius = MathUtil.applyDeadband(
@@ -286,14 +285,11 @@ class PoseSubsystem(
         combinedChassisSpeeds = desVel
         currentControllerPower -= 0.3
         magMultiply -= 0.05
-        println("agree")
       } else if(controllerMag > 0.35 || currentControllerPower > 16) {
         combinedChassisSpeeds = controllerSpeeds * 8.0
-        println("driver")
       } else {
         controllerSpeeds *= currentControllerPower / 2
         combinedChassisSpeeds = controllerSpeeds + desVelAdjustedSpeeds
-        println("combine")
       }
 
       combinedChassisSpeeds.vxMetersPerSecond = MathUtil.clamp(combinedChassisSpeeds.vxMetersPerSecond , -AutoScoreCommandConstants.MAX_LINEAR_SPEED, AutoScoreCommandConstants.MAX_LINEAR_SPEED)

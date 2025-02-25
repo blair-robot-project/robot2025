@@ -87,12 +87,11 @@ class AutoScoreCommandConstants() {
     // Reef pose translations are in meters (round to 3 decimal places)
     // Reef pose angles are in radians
     // BLUE
-
-    // reef 1st pose values
+// reef 1st pose values
     val reef1Translation2dBlue = Translation2d(5.032, 5.2831)
 
     // RADIANS
-    val reef1Rotation2dBlue = Rotation2d(radians(-120))//
+    val reef1Rotation2dBlue = Rotation2d(radians(-120))
     val reef1PoseBlue = Pose2d(reef1Translation2dBlue, reef1Rotation2dBlue)
 
     // reef 2nd pose values
@@ -255,7 +254,7 @@ class AutoScoreCommandConstants() {
     val reef12Translation2dRed = Translation2d(12.5037, 5.3271)
 
     // RADIANS
-    val reef12Rotation2dRed = Rotation2d(radians(-60))//
+    val reef12Rotation2dRed = Rotation2d(radians(-60))
     val reef12PoseRed = Pose2d(reef12Translation2dRed, reef12Rotation2dRed)
 
     const val ROT_MAX_ACCEL = 2 * PI

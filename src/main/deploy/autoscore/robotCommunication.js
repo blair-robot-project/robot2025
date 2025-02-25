@@ -145,8 +145,8 @@ const intakeCoral = async (isAtTopSide) => {
 }
 
 const scoreReef = async (location, level) => {
-  console.log(`Scoring on level: ${level} and location: ${location}`);
-  setCommand(`l${level} location${location}`);
+  console.log(`Scoring on level: ${level} and location: ${location}`)
+  setCommand(`l${level} location${location > 3 ? location-3 : location+9}`);
 }
 
 const scoringContainer = document.querySelector(".scoringContainer");
@@ -161,6 +161,7 @@ const noConnection = () => {
   scoringContainer.style.display = "none";
   messageContainer.style.display = "flex";
   msgDisplay.innerText = "NO ROBOT CONNECTION";
+  document.body.style.background = "rgb(114, 114, 138)";
 }
 
 const connection = () => {

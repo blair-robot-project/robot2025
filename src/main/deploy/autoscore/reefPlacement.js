@@ -24,11 +24,13 @@ document.addEventListener("mousemove", (event) => {
         if(angleRadians < 0) {
             angleDegrees = 360 + angleRadians * (180 / Math.PI);
         }
-        reefArea = Math.floor((angleDegrees)/30) + 1;
+        reefArea = Math.floor(((angleDegrees-120) % 360)/30) + 5;
         if(reefArea == -1) {
             locationImg.src = `locationSelectorImages/locationSelectorNone.png`;
         } else {
-            locationImg.src = `locationSelectorImages/locationSelector${reefArea}.png`;
+            locationImg.src = `locationSelectorImages/locationSelector${
+                reefArea < 5 ? reefArea+8 : reefArea-4
+            }.png`;
         }
     }
 });
