@@ -1,6 +1,7 @@
 body {
     background-attachment: fixed;
     background: rgb(114, 114, 138);
+    font-family: 'Orbitron';
 }
 
 .reefContainer, .processorContainer, .netContainer, .coralIntakeContainer {
