@@ -3,7 +3,6 @@ package frc.team449.subsystems.superstructure.wrist
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.ChassisReference
@@ -50,7 +49,7 @@ class Wrist(
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        PositionVoltage(request.Position)
+        request
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(wristFeedForward.calculate(request.Position))
       )

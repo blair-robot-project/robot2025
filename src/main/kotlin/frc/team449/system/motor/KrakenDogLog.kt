@@ -14,5 +14,6 @@ object KrakenDogLog : DogLog() {
     log("$key/Closed Loop Pos", motor.closedLoopReference.valueAsDouble)
     log("$key/Closed Loop Vel", motor.closedLoopReferenceSlope.valueAsDouble)
     log("$key/Closed Loop Feedforward", motor.closedLoopFeedForward.valueAsDouble)
+    log("$key/Closed Loop PID Output", motor.closedLoopOutput.valueAsDouble)
   }
 }

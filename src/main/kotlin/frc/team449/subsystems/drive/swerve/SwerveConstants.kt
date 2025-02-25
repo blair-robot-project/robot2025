@@ -61,7 +61,7 @@ object SwerveConstants {
   const val DRIVE_KD = 0.0
 
   /** Drive configuration */
-  val WHEEL_RADIUS = Units.inchesToMeters(1.895)
+  val WHEEL_RADIUS = Units.inchesToMeters(1.935)
   const val DRIVE_GEARING = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)
   val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
   const val TURN_UPR = 2 * PI

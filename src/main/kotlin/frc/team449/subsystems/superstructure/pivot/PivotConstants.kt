@@ -36,21 +36,21 @@ object PivotConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  val TOLERANCE = Degrees.of(3.5) // TODO(Adjust tolerance.)
+  val TOLERANCE = Degrees.of(5.0) // TODO(Adjust tolerance.)
 
-  const val KP = 6.2048
+  const val KP = 10.4048
   const val KI = 0.0
-  const val KD = 0.48099
+  const val KD = 0.048099
 
   // TODO(Adjust gains.)
   const val KS = 0.085813
   const val KV = 4.4941
-  const val KG_MIN = 0.17706 // (KG when elevator is fully retracted.)
-  const val KG_MAX = 0.60576 // (KG when elevator is fully extended.)
+  const val KG_MIN = 0.13706 // (KG when elevator is fully retracted.)
+  const val KG_MAX = 0.52576 // (KG when elevator is fully extended.)
   const val KG_MAX_EXTENSION = 1.36934
 
-  val CRUISE_VEL = RotationsPerSecond.of(0.35) // max theoretical 0.392
-  val MAX_ACCEL = RotationsPerSecondPerSecond.of(1.25) // 5.0, heavily limited by robot tipping
+  val CRUISE_VEL = RotationsPerSecond.of(0.325) // max theoretical 0.392
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(0.75) // 5.0, heavily limited by robot tipping
 
   val RESET_ENC_LIMIT = Degrees.of(0.05)
 
