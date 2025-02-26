@@ -170,6 +170,10 @@ const connection = () => {
   msgDisplay.innerText = "";
 }
 
+document.getElementById("cancelCommand").onclick = () => {
+  setCommand("cancel");
+}
+
 processorContainer.style = "display: none";
 netContainer.style = "display: none";
 coralIntakeContainer.style = "display: none";

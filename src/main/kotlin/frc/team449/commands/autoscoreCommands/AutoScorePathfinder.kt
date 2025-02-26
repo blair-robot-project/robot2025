@@ -23,18 +23,19 @@ import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.math.PI
 import kotlin.math.floor
 
-class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) : Command() {
+class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) {
   private var ADStar = LocalADStar()
 
-  private var pathPub: StructArrayPublisher<Pose2d>
-  private var velXPub: DoublePublisher
-  private var velYPub: DoublePublisher
-  private var velRotationPub: DoublePublisher
-  private var setpointPub: BooleanPublisher
-  private var rotPub: BooleanPublisher
-  private var autodistancePub: BooleanPublisher
-  private var pathSub: StructArraySubscriber<Pose2d>
-  private var admagpub: DoublePublisher
+  private val pathPub: StructArrayPublisher<Pose2d>
+  private val velXPub: DoublePublisher
+  private val velYPub: DoublePublisher
+  private val velRotationPub: DoublePublisher
+  private val setpointPub: BooleanPublisher
+  private val rotPub: BooleanPublisher
+  private val autodistancePub: BooleanPublisher
+  private val pathSub: StructArraySubscriber<Pose2d>
+  private val admagpub: DoublePublisher
+  private val distpub: DoublePublisher
   private lateinit var path: PathPlannerPath
 
   private var velocityX = 0.0
@@ -42,9 +43,9 @@ class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) : Command() {
   private var rotation = 0.0
   private val timer = Timer()
   private val zeroPose = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
-  var inPIDDistance = false
+  private var inPIDDistance = false
   private var tolerance = 0.0254
-  private var pidDistance = 0.25
+  private var pidDistance = 1.0
   var atSetpoint = false
 
   private var trajValid = true
@@ -54,19 +55,15 @@ class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) : Command() {
   private var pathNull = true
   private var trajectoryNull = true
 
-  private var pathIndex = 0
-  private var alongPath = 0.0
-  private var prevPose: Pose2d? = robot.poseSubsystem.pose
-  private var nextPose: Pose2d? = Pose2d(Translation2d(0.0, 0.0), Rotation2d(0.0))
   private var xPIDSpeed = 0.0
   private var yPIDSpeed = 0.0
+  private val pidOffsetTime = 0.5
 
   var thetaController: PIDController = PIDController(7.0, 0.3, 0.1)
-  private var xController = PIDController(4.5, 0.1, 0.0)
-  private var yController = PIDController(4.5, 0.1, 0.0)
+  private var xController = PIDController(10.0, 0.7, 0.5)
+  private var yController = PIDController(10.0, 0.7, 0.5)
   private var adMag = 1.0
   private val rotTol = 0.01
-  var wrapperDone = false
 
   init {
     timer.restart()
@@ -77,7 +74,7 @@ class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) : Command() {
     rotPub = NetworkTableInstance.getDefault().getBooleanTopic("/atRotSetpoint").publish()
     autodistancePub = NetworkTableInstance.getDefault().getBooleanTopic("/inPIDDistance").publish()
     pathPub = NetworkTableInstance.getDefault().getStructArrayTopic("/zactivePath", Pose2d.struct).publish(*arrayOf<PubSubOption>())
-
+    distpub = NetworkTableInstance.getDefault().getDoubleTopic("/distance").publish()
     pathSub =
       NetworkTableInstance.getDefault().getStructArrayTopic("/zactivePath", Pose2d.struct)
         .subscribe(arrayOf(zeroPose, zeroPose))
@@ -94,139 +91,128 @@ class AutoScorePathfinder(val robot: Robot, val endPose: Pose2d) : Command() {
     yController.setTolerance(tolerance)
     adMag = 1.0
     admagpub = NetworkTableInstance.getDefault().getDoubleTopic("/admag").publish()
+
   }
 
-  private fun resetVelocities() {
-    velocityX = 0.0
-    velocityY = 0.0
-    rotation = 0.0
+  fun runSetup() {
+    timer.restart()
+    ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
+    ADStar.setGoalPosition(endPose.translation)
     velXPub.set(velocityX)
     velYPub.set(velocityY)
     velRotationPub.set(rotation)
-  }
-
-  fun initializeCommand() {
-    timer.restart()
-    resetVelocities()
-    ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
-    ADStar.setGoalPosition(endPose.translation)
     println("new command started")
   }
 
-  override fun execute() {
-    if(!wrapperDone) {
-      val currentTime = timer.get()
-      ADStar.setStartPosition(robot.poseSubsystem.pose.translation)
-      if (!atSetpoint) {
-        val distance = robot.poseSubsystem.pose.translation.getDistance(endPose.translation)
-        if (distance < pidDistance) {
-          inPIDDistance = true
-          adMag = 0.0
-          xController.setpoint = endPose.translation.x
-          yController.setpoint = endPose.translation.y
-          if (distance < tolerance) {
-            atSetpoint = true
-          }
-        }
-        if (ADStar.isNewPathAvailable) {
-          val newPath: PathPlannerPath? = ADStar.getCurrentPath(
-            PathConstraints(
-              AutoScoreCommandConstants.MAX_LINEAR_SPEED,
-              AutoScoreCommandConstants.MAX_ACCEL,
-              5 * 2 * Math.PI,
-              RobotConstants.ROT_RATE_LIMIT
-            ),
-            GoalEndState(0.1, endPose.rotation)
-          )
-          if (newPath == null) {
-            pathNull = true
-          } else {
-            path = newPath
-            pathNull = false
-          }
-          if (!pathNull) {
-            val pathList = path.pathPoses.toTypedArray<Pose2d>()
-            val newTraj: PathPlannerTrajectory? = path.generateTrajectory(
-              robot.drive.currentSpeeds,
-              Rotation2d(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians)),
-              RobotConfig.fromGUISettings()
-            )
-            if (newTraj == null) {
-              trajectoryNull = true
-            } else {
-              trajectory = newTraj
-              trajectoryNull = false
-            }
-            if (!trajectoryNull) {
-              expectedTime = trajectory.totalTimeSeconds
-              pathPub.set(pathList)
-              trajValid = (pathList[0] != endPose)
-              startTime = currentTime
-            }
-          }
-        }
-        if (!trajectoryNull && trajValid) {
-          if (inPIDDistance) {
-            xPIDSpeed = xController.calculate(robot.poseSubsystem.pose.translation.x)
-            yPIDSpeed = yController.calculate(robot.poseSubsystem.pose.translation.y)
-          } else {
-            expectedTime = trajectory.totalTimeSeconds
-            alongPath = (timer.get() - startTime) / expectedTime
-            val numSections = pathSub.get()!!.size - 1
-            pathIndex = (floor(alongPath * numSections)).toInt() + 1
-            if (pathIndex < numSections - 1) {
-              prevPose = pathSub.get()!![pathIndex - 1]
-              nextPose = pathSub.get()!![pathIndex] //
-              if (prevPose != null && nextPose != null) {
-                xPIDSpeed = xController.calculate(robot.poseSubsystem.pose.x, nextPose!!.x)
-                yPIDSpeed = yController.calculate(robot.poseSubsystem.pose.y, nextPose!!.y)
-              } else {
-                xPIDSpeed = 0.0
-                yPIDSpeed = 0.0
-              }
-            }
-            expectedTime = trajectory.totalTimeSeconds
-            trajectory.sample(currentTime - startTime).fieldSpeeds.let {
-              val trajSpeeds = ChassisSpeeds(
-                it.vxMetersPerSecond,
-                it.vyMetersPerSecond,
-                it.omegaRadiansPerSecond
-              )
-              velocityX = trajSpeeds.vxMetersPerSecond * adMag
-              velocityY = trajSpeeds.vyMetersPerSecond * adMag
-              rotation = 0.0
-            }
-
-            velocityX += xPIDSpeed
-            velocityY += yPIDSpeed
-
-            rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))
-            if (thetaController.atSetpoint()) {
-              rotation = 0.0
-            }
-
-            val fieldRelative = fromFieldRelativeSpeeds(ChassisSpeeds(velocityX, velocityY, rotation), robot.poseSubsystem.pose.rotation)
-            robot.poseSubsystem.setPathMag(fieldRelative)
-          }
-        } else {
-          rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))
-          if (thetaController.atSetpoint()) {
-            rotation = 0.0
-          }
-
-          robot.drive.set(ChassisSpeeds(0.0, 0.0, rotation))
-        }
-        setpointPub.set(atSetpoint)
-        rotPub.set(thetaController.atSetpoint())
-        autodistancePub.set(inPIDDistance)
-        velXPub.set(velocityX)
-        velYPub.set(velocityY)
-        velRotationPub.set(rotation)
-        admagpub.set(adMag)
+  fun pathfind() {
+    val currentTime = timer.get()
+    val distance = robot.poseSubsystem.pose.translation.getDistance(endPose.translation)
+    println("distance: $distance")
+    if (distance < pidDistance) {
+      if(!inPIDDistance) {
+        inPIDDistance = true
+        xController.setpoint = endPose.translation.x
+        yController.setpoint = endPose.translation.y
+      }
+//      adMag -= 0.02
+//      if(adMag < 0) {
+//        adMag = 0.0
+//      }
+      if (distance < tolerance) {
+        atSetpoint = true
       }
     } else {
-      robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.0))
+      inPIDDistance = false
     }
+    if (!atSetpoint) {
+      if (ADStar.isNewPathAvailable) {
+        val newPath: PathPlannerPath? = ADStar.getCurrentPath(
+          PathConstraints(
+            AutoScoreCommandConstants.MAX_LINEAR_SPEED,
+            AutoScoreCommandConstants.MAX_ACCEL,
+            5 * 2 * Math.PI,
+            RobotConstants.ROT_RATE_LIMIT
+          ),
+          GoalEndState(0.0, endPose.rotation)
+        )
+        if (newPath == null) {
+          pathNull = true
+        } else {
+          path = newPath
+          pathNull = false
+        }
+        if (!pathNull) {
+          val pathList = path.pathPoses.toTypedArray<Pose2d>()
+          val newTraj: PathPlannerTrajectory? = path.generateTrajectory(
+            robot.drive.currentSpeeds,
+            Rotation2d(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians)),
+            RobotConfig.fromGUISettings()
+          )
+          if (newTraj == null) {
+            trajectoryNull = true
+          } else {
+            trajectory = newTraj
+            trajectoryNull = false
+          }
+          if (!trajectoryNull) {
+            expectedTime = trajectory.totalTimeSeconds
+            pathPub.set(pathList)
+            trajValid = (pathList[0] != endPose)
+            startTime = currentTime
+          }
+        }
+      }
+      if (!trajectoryNull && trajValid) {
+        if (inPIDDistance || currentTime - startTime + pidOffsetTime > expectedTime) {
+          xPIDSpeed = xController.calculate(robot.poseSubsystem.pose.translation.x)
+          yPIDSpeed = yController.calculate(robot.poseSubsystem.pose.translation.y)
+          println("distance pid")
+        } else {
+          expectedTime = trajectory.totalTimeSeconds
+          trajectory.sample(currentTime - startTime + pidOffsetTime).pose.let {
+            xController.setpoint = (it.translation.x)
+            yController.setpoint = (it.translation.y)
+            xPIDSpeed = xController.calculate(robot.poseSubsystem.pose.translation.x)
+            yPIDSpeed = yController.calculate(robot.poseSubsystem.pose.translation.y)
+            println("traj pid")
+          }
+        }
+        trajectory.sample(currentTime - startTime).fieldSpeeds.let {
+          val trajSpeeds = ChassisSpeeds(
+            it.vxMetersPerSecond,
+            it.vyMetersPerSecond,
+            it.omegaRadiansPerSecond
+          )
+          velocityX = trajSpeeds.vxMetersPerSecond * adMag
+          velocityY = trajSpeeds.vyMetersPerSecond * adMag
+          rotation = 0.0
+        }
+        println("pidx: $xPIDSpeed pidy: $yPIDSpeed")
+      }
+    } else {
+      velocityX = 0.0
+      velocityY = 0.0
+      xPIDSpeed = 0.0
+      yPIDSpeed = 0.0
+      println("setpoint")
+    }
+    setpointPub.set(atSetpoint)
+    rotPub.set(thetaController.atSetpoint())
+    autodistancePub.set(inPIDDistance)
+    velXPub.set(xPIDSpeed)
+    velYPub.set(yPIDSpeed)
+    velRotationPub.set(rotation)
+    admagpub.set(adMag)
+    distpub.set(distance)
+
+    rotation = thetaController.calculate(MathUtil.angleModulus(robot.poseSubsystem.pose.rotation.radians))
+    if (thetaController.atSetpoint()) {
+      rotation = 0.0
+    }
+    val fieldRelative = fromFieldRelativeSpeeds(
+      ChassisSpeeds(velocityX+xPIDSpeed, velocityY+yPIDSpeed, rotation), robot.poseSubsystem.pose.rotation
+    )
+    robot.poseSubsystem.setPathMag(fieldRelative)
   }
 }
 
@@ -255,50 +241,30 @@ class AutoscoreWrapperCommand(
     robot.drive.defaultCommand.cancel()
     robot.drive.defaultCommand = EmptyDrive(robot.drive)
     robot.drive.defaultCommand.schedule()
-    currentCommand.initializeCommand()
-    waitTimer = waitTime
-    reachedAD = false
+    currentCommand.runSetup()
     println("initialized")
   }
 
   override fun execute() {
-    if(waitTimer < 0) {
-      this.end(true)
-      println("no execute")
-    } else {
-      currentCommand.execute()
-      println("execute")
-    }
-  }
-
-  override fun isFinished(): Boolean {
-    if(currentCommand.atSetpoint && currentCommand.thetaController.atSetpoint()) {
-      if(waitTimer < 0) {
-        this.end(true)
-        println("finished")
-        return true
-      }
-      currentCommand.wrapperDone = true
-      waitTimer -= 0.02
-    } else {
-      waitTimer = waitTime
-    }
     if (robot.poseSubsystem.pose.translation.getDistance(currentCommand.endPose.translation) < robot.poseSubsystem.autoDistance && !reachedAD) {
       println("ad reached")
       robot.superstructureManager.requestGoal(goal).schedule()
       reachedAD = true
     }
+    if(currentCommand.atSetpoint && currentCommand.thetaController.atSetpoint()) {
+      println("in timer")
+      waitTimer -= 0.02
+    } else {
+      waitTimer = waitTime
+      currentCommand.pathfind()
+    }
+  }
+
+  override fun isFinished(): Boolean {
+    if(waitTimer < 0) {
+      println("finished")
+      return true
+    }
     return false
-  }
-
-  override fun end(interrupted: Boolean) {
-    super.end(interrupted)
-    println("end")
-  }
-
-  override fun cancel() {
-    super.cancel()
-    this.end(true)
-    println("cancel")
   }
 }

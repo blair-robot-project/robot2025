@@ -1,6 +1,7 @@
 package frc.team449.commands.autoscoreCommands
 
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj2.command.Command
@@ -11,7 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 
 class AutoScoreCommands(private val robot : Robot) {
-  var currentCommand : Command = InstantCommand()
+  private var currentCommand : Command = InstantCommand()
 
   fun getReefCommand(rl : AutoScoreCommandConstants.ReefLocation, cl : AutoScoreCommandConstants.CoralLevel) : Command {
     return runOnce({
@@ -66,7 +67,10 @@ class AutoScoreCommands(private val robot : Robot) {
           robot.superstructureManager.requestGoal(scoreGoal)
         }
       }))
-      .andThen(runOnce({ robot.drive.defaultCommand = robot.driveCommand }))
+      .andThen(runOnce({
+        robot.drive.defaultCommand = robot.driveCommand
+        robot.drive.set(ChassisSpeeds(0.0, 0.0, 0.0))
+      }))
     currentCommand.schedule()
     })
   }
