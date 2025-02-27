@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "idea"
     id "org.jetbrains.kotlin.jvm" version "1.9.22"
-    id "edu.wpi.first.GradleRIO" version "2025.2.1"
+    id "edu.wpi.first.GradleRIO" version "2025.3.1"
     id "org.jlleitschuh.gradle.ktlint" version "11.6.1"
     id "org.jetbrains.dokka" version "1.8.10"
 }
@@ -60,8 +60,6 @@ ktlint {
 // Also defines JUnit 5.
 dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.1'
-
-    implementation 'com.github.shueja:Monologue:v1.0.0-beta6'
 
     implementation("io.javalin:javalin:5.6.2")
     implementation("org.slf4j:slf4j-nop:2.0.6")

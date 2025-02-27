@@ -11,6 +11,12 @@ object FieldConstants {
   const val fieldWidth = 8.05
 
   val REEF_LOCATIONS = arrayListOf<Pose2d>()
+  val REEF_CENTER_LOCATIONS = arrayListOf<Pose2d>()
+
+  enum class ReefSide {
+    LEFT,
+    RIGHT
+  }
 
   fun configureReef(alliance: Alliance) {
     val allianceComp = alliance == Alliance.Red
@@ -42,6 +48,24 @@ object FieldConstants {
         REEF_J,
         REEF_K,
         REEF_L
+      )
+    )
+
+    val REEF_1 = findPose(3.192615509033203, (4.189684867858887 + 3.8614695072174072) / 2, 0.0, allianceComp)
+    val REEF_2 = findPose((3.695124626159668 + 3.9832611083984375) / 2, (2.985105037689209 + 2.820899248123169) / 2, PI / 3, allianceComp)
+    val REEF_3 = findPose((4.9979729652404785 + 5.282362937927246) / 2, (2.8225479125976562 + 2.989065647125244) / 2, 2 * PI / 3, allianceComp)
+    val REEF_4 = findPose(5.78605842590332, (3.860325813293457 + 4.188675880432129) / 2, PI, allianceComp)
+    val REEF_5 = findPose((4.9979729652404785 + 5.282362937927246) / 2, (5.065289497375488 + 5.229397296905518) / 2, -2 * PI / 3, allianceComp)
+    val REEF_6 = findPose((3.695124626159668 + 3.9832611083984375) / 2, (5.231619358062744 + 5.066085338592529) / 2, -PI / 3, allianceComp)
+
+    REEF_CENTER_LOCATIONS.addAll(
+      listOf(
+        REEF_1,
+        REEF_2,
+        REEF_3,
+        REEF_4,
+        REEF_5,
+        REEF_6,
       )
     )
   }

@@ -1,7 +1,6 @@
 package frc.team449.subsystems.superstructure
 
-import edu.wpi.first.units.Units.Degrees
-import edu.wpi.first.units.Units.Meters
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.units.measure.Distance
 import frc.team449.subsystems.RobotConstants
@@ -9,45 +8,63 @@ import frc.team449.subsystems.drive.swerve.SwerveDrive
 
 object SuperstructureGoal {
   /** TODO: All placeholder guesses, need actual values */
+  private const val SCORING_SPEED = 2.6672
+  private const val SCORING_ACCEL = 12.5
+
   val L1 = SuperstructureState(
-    Degrees.of(30.0),
-    Meters.of(0.25),
-    Degrees.of(-30.0),
+    Degrees.of(40.0),
+    Meters.of(0.0),
+    Degrees.of(-60.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L2 = SuperstructureState(
-    Degrees.of(40.0),
-    Meters.of(0.5),
-    Degrees.of(-60.0),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    Degrees.of(57.197861026),
+    Inches.of(1.0),
+    Degrees.of(-95.035993817),
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L3 = SuperstructureState(
-    Degrees.of(50.0),
-    Meters.of(1.0),
-    Degrees.of(-60.0),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    Degrees.of(64.5),
+    Inches.of(15.75),
+    Degrees.of(-104.5),
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val L4 = SuperstructureState(
-    Degrees.of(60.0),
-    Meters.of(1.65),
-    Degrees.of(-50.0),
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+    Degrees.of(73.676012622),
+    Inches.of(46.223700787),
+    Degrees.of(-139.015031), // -138.5
+    DriveDynamics(SCORING_SPEED, SCORING_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val SUBSTATION_INTAKE = SuperstructureState(
-    Degrees.of(40.0),
-    Meters.of(0.10),
-    Degrees.of(60.0),
+    Degrees.of(61.94964495804422),
+    Meters.of(0.0),
+    Radians.of(1.268311),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
   val STOW = SuperstructureState(
-    Degrees.of(0.0),
+    Degrees.of(40.0),
     Meters.of(0.0),
-    Degrees.of(180.0),
+    Degrees.of(90.0),
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  val CLIMB = SuperstructureState(
+    Degrees.of(60.0),
+    Meters.of(0.0),
+    Degrees.of(-90.0),
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
+  )
+
+  /** Actually find these positions*/
+  val L2_ALGAE_DESCORE = SuperstructureState(
+    Degrees.of(60.0),
+    Meters.of(0.0),
+    Degrees.of(-90.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 
@@ -75,7 +92,7 @@ object SuperstructureGoal {
   val L4_PREMOVE = SuperstructureState(
     L4.pivot,
     STOW.elevator,
-    SUBSTATION_INTAKE.wrist,
+    STOW.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
 

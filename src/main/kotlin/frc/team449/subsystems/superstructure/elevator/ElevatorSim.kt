@@ -1,4 +1,4 @@
-package frc.team449.subsystems.elevator
+package frc.team449.subsystems.superstructure.elevator
 
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.TalonFXSimState
@@ -12,12 +12,12 @@ class ElevatorSim(
 ) : Elevator(motor) {
 
   override val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
-    DCMotor.getKrakenX60(1),
-    ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
+    DCMotor.getKrakenX60(2),
+    1 / ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
     ElevatorConstants.CARRIAGE_MASS,
     ElevatorConstants.PULLEY_RADIUS,
-    ElevatorConstants.MIN_HEIGHT,
-    ElevatorConstants.MAX_HEIGHT,
+    ElevatorConstants.SIM_MIN_HEIGHT,
+    ElevatorConstants.SIM_MAX_HEIGHT,
     simulateGravity = false,
     PI / 12
   )

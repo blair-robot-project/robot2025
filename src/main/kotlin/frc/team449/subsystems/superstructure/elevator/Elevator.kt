@@ -1,12 +1,12 @@
-package frc.team449.subsystems.elevator
+package frc.team449.subsystems.superstructure.elevator
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.wrist.WristConstants
+import frc.team449.subsystems.superstructure.wrist.WristConstants
+import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
@@ -37,7 +38,7 @@ open class Elevator(
   val elevatorLigament: MechanismLigament2d = rootElevator.append(
     MechanismLigament2d(
       "elevatorLigament",
-      ElevatorConstants.MIN_HEIGHT,
+      ElevatorConstants.SIM_MIN_HEIGHT,
       ElevatorConstants.ANGLE,
       ElevatorConstants.WIDTH,
       ElevatorConstants.COLOR
@@ -47,7 +48,7 @@ open class Elevator(
   val desiredElevatorLigament: MechanismLigament2d = rootElevator.append(
     MechanismLigament2d(
       "elevatorDesiredLigament",
-      ElevatorConstants.MIN_HEIGHT,
+      ElevatorConstants.SIM_MIN_HEIGHT,
       ElevatorConstants.ANGLE,
       ElevatorConstants.DESIRED_WIDTH,
       ElevatorConstants.DESIRED_COLOR
@@ -66,49 +67,64 @@ open class Elevator(
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
     SuperstructureGoal.STOW.elevator.`in`(Meters)
-  )
+  ).withEnableFOC(false)
 
-  // last request is sticky
   fun setPosition(position: Double): Command {
-    return this.run {
+    return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(
-            elevatorFeedForward.calculate(motor.closedLoopReferenceSlope.valueAsDouble)
-          )
+          .withFeedForward(elevatorFeedForward.calculateGravity())
       )
-    }.until(::atSetpoint)
+    }
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return this.run {
+      motor.setVoltage(-2.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return this.run {
+      motor.setVoltage(2.0)
+      request.Position = positionSupplier.get()
+    }
+  }
+
+  fun hold(): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(elevatorFeedForward.calculateGravity())
+      )
+    }
+  }
+
+  fun setVoltage(voltage: Double) {
+    return motor.setVoltage(voltage)
   }
 
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
 
-  private fun atSetpoint(): Boolean {
+  fun atSetpoint(): Boolean {
     return (abs(positionSupplier.get() - request.Position) < ElevatorConstants.TOLERANCE)
   }
 
-  override fun periodic() {}
+  override fun periodic() {
+    logData()
+  }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("1.0", "Elevator Info")
-    builder.addDoubleProperty("1.1 Voltage", { motor.motorVoltage.valueAsDouble }, null)
-    builder.addDoubleProperty("1.2 Position", { positionSupplier.get() }, null)
-    builder.addDoubleProperty("1.3 Velocity", { velocitySupplier.get() }, null)
-    builder.addDoubleProperty("1.4 Desired Target", { request.Position }, null)
-    builder.addDoubleProperty("1.5 Desired Target", { goalSupplier.get() }, null)
-    builder.addBooleanProperty("1.6 At Tolerance", { atSetpoint() }, null)
-    // builder.addStringProperty("1.7 Command", {this.currentCommand.name}, null)
+  private fun logData() {
+    DogLog.log("Elevator/Desired Target", request.Position)
+    DogLog.log("Elevator/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
+    DogLog.log("Elevator/In Tolerance", atSetpoint())
+    KrakenDogLog.log("Elevator/Motor", motor)
   }
 
   companion object {
@@ -137,6 +153,9 @@ open class Elevator(
       config.Slot0.kI = ElevatorConstants.KI
       config.Slot0.kD = ElevatorConstants.KD
 
+      config.Slot0.kS = ElevatorConstants.KS
+      config.Slot0.kV = ElevatorConstants.KV
+
       config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.CRUISE_VEL
       config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL
 
@@ -153,6 +172,9 @@ open class Elevator(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
@@ -165,6 +187,9 @@ open class Elevator(
         followerMotor.motorVoltage,
         followerMotor.supplyCurrent,
         followerMotor.statorCurrent,
+        followerMotor.closedLoopReference,
+        followerMotor.closedLoopReferenceSlope,
+        followerMotor.closedLoopFeedForward,
         followerMotor.deviceTemp
       )
 

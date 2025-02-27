@@ -1,17 +1,21 @@
-package frc.team449.subsystems.wrist
+package frc.team449.subsystems.superstructure.wrist
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.sim.ChassisReference
+import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
-// TODO(the entire class bru)
 class Wrist(
   private val motor: TalonFX
 ) : SubsystemBase() {
@@ -22,39 +26,82 @@ class Wrist(
 
   private val request = MotionMagicVoltage(
     SuperstructureGoal.STOW.wrist.`in`(Radians)
-  )
+  ).withEnableFOC(false)
+
+  private val isReal = RobotBase.isReal()
+
+  lateinit var wristFeedForward: WristFeedForward
 
   fun setPosition(position: Double): Command {
     return this.runOnce {
       motor.setControl(
         request
           .withPosition(position)
+          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(wristFeedForward.calculate(position))
       )
-    } // .until(::atSetpoint)
+    }
+  }
+
+  fun hold(): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(wristFeedForward.calculate(request.Position))
+      )
+    }
+  }
+
+  fun setVoltageChar(volts: Double) {
+    motor.setControl(VoltageOut(volts))
   }
 
   fun manualDown(): Command {
-    return runOnce { motor.setVoltage(-3.0) }
+    return run {
+      motor.setVoltage(-1.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun manualUp(): Command {
-    return runOnce { motor.setVoltage(3.0) }
+    return run {
+      motor.setVoltage(1.0)
+      request.Position = positionSupplier.get()
+    }
   }
 
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
 
-  private fun atSetpoint(): Boolean {
-    return (abs(positionSupplier.get() - request.Position) < WristConstants.TOLERANCE)
+  fun atSetpoint(): Boolean {
+    return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
   }
 
-  override fun periodic() {}
+  fun elevatorReady(): Boolean {
+    return positionSupplier.get() < WristConstants.ELEVATOR_READY.`in`(Radians)
+  }
+
+  fun startupZero() {
+    motor.setPosition(WristConstants.STARTUP_ANGLE.`in`(Radians))
+  }
+
+  override fun periodic() {
+    logData()
+  }
 
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
-
+    motorSimState.Orientation = ChassisReference.Clockwise_Positive
     motorSimState.setRawRotorPosition(motor.closedLoopReference.valueAsDouble / (WristConstants.GEARING * WristConstants.UPR))
+  }
+
+  private fun logData() {
+    DogLog.log("Wrist/Desired Target", targetSupplier.get())
+    DogLog.log("Wrist/Motion Magic Setpoint", motor.closedLoopReference.valueAsDouble)
+    DogLog.log("Wrist/In Tolerance", atSetpoint())
+    KrakenDogLog.log("Wrist/Motor", motor)
   }
 
   companion object {
@@ -81,6 +128,9 @@ class Wrist(
       config.Slot0.kI = WristConstants.KI
       config.Slot0.kD = WristConstants.KD
 
+      config.Slot0.kS = WristConstants.KS
+      config.Slot0.kV = WristConstants.KV
+
       config.MotionMagic.MotionMagicCruiseVelocity = WristConstants.CRUISE_VEL.`in`(RadiansPerSecond)
       config.MotionMagic.MotionMagicAcceleration = WristConstants.MAX_ACCEL.`in`(RadiansPerSecondPerSecond)
 
@@ -94,6 +144,9 @@ class Wrist(
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
+        leadMotor.closedLoopReference,
+        leadMotor.closedLoopReferenceSlope,
+        leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
