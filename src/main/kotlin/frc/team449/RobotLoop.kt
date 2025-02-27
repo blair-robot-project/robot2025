@@ -27,6 +27,7 @@ import frc.team449.subsystems.superstructure.pivot.PivotFeedForward.Companion.cr
 import frc.team449.subsystems.superstructure.wrist.WristFeedForward.Companion.createWristFeedForward
 import frc.team449.subsystems.vision.VisionConstants
 import frc.team449.system.encoder.QuadCalibration
+import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
@@ -179,6 +180,9 @@ class RobotLoop : TimedRobot() {
   override fun simulationInit() {}
 
   override fun simulationPeriodic() {
+    // MapleSim
+    SimulatedArena.getInstance().simulationPeriodic()
+
     // Superstructure Simulation
     robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
     robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()

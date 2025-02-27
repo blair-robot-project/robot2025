@@ -1,17 +1,24 @@
 package frc.team449.subsystems.drive.swerve
 
 import dev.doglog.DogLog
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
+import frc.team449.subsystems.drive.swerve.sim.SwerveModuleSim.Companion.createModuleSim
+import org.ironmaple.simulation.SimulatedArena
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig
 import kotlin.math.hypot
 
 /**
@@ -123,64 +130,114 @@ open class SwerveDrive(
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
     fun createSwerveKraken(field: Field2d): SwerveDrive {
-      val modules = listOf(
-        createKrakenModule(
-          "FLModule",
-          SwerveConstants.DRIVE_MOTOR_FL,
-          SwerveConstants.DRIVE_INVERTED,
-          SwerveConstants.TURN_MOTOR_FL,
-          SwerveConstants.TURN_INVERTED,
-          SwerveConstants.TURN_ENC_CHAN_FL,
-          SwerveConstants.TURN_ENC_OFFSET_FL,
-          SwerveConstants.TURN_ENC_INVERTED,
-          Translation2d(
-            SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            SwerveConstants.TRACKWIDTH / 2
-          )
-        ),
-        createKrakenModule(
-          "FRModule",
-          SwerveConstants.DRIVE_MOTOR_FR,
-          SwerveConstants.DRIVE_INVERTED,
-          SwerveConstants.TURN_MOTOR_FR,
-          SwerveConstants.TURN_INVERTED,
-          SwerveConstants.TURN_ENC_CHAN_FR,
-          SwerveConstants.TURN_ENC_OFFSET_FR,
-          SwerveConstants.TURN_ENC_INVERTED,
-          Translation2d(
-            SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            -SwerveConstants.TRACKWIDTH / 2
-          )
-        ),
-        createKrakenModule(
-          "BLModule",
-          SwerveConstants.DRIVE_MOTOR_BL,
-          SwerveConstants.DRIVE_INVERTED,
-          SwerveConstants.TURN_MOTOR_BL,
-          SwerveConstants.TURN_INVERTED,
-          SwerveConstants.TURN_ENC_CHAN_BL,
-          SwerveConstants.TURN_ENC_OFFSET_BL,
-          SwerveConstants.TURN_ENC_INVERTED,
-          Translation2d(
-            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            SwerveConstants.TRACKWIDTH / 2
-          )
-        ),
-        createKrakenModule(
-          "BLModule",
-          SwerveConstants.DRIVE_MOTOR_BR,
-          SwerveConstants.DRIVE_INVERTED,
-          SwerveConstants.TURN_MOTOR_BR,
-          SwerveConstants.TURN_INVERTED,
-          SwerveConstants.TURN_ENC_CHAN_BR,
-          SwerveConstants.TURN_ENC_OFFSET_BR,
-          SwerveConstants.TURN_ENC_INVERTED,
-          Translation2d(
-            -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
-            -SwerveConstants.TRACKWIDTH / 2
+      val modules: List<SwerveModule>
+      if (isReal()) {
+        modules = listOf(
+          createKrakenModule(
+            "FLModule",
+            SwerveConstants.DRIVE_MOTOR_FL,
+            SwerveConstants.DRIVE_INVERTED,
+            SwerveConstants.TURN_MOTOR_FL,
+            SwerveConstants.TURN_INVERTED,
+            SwerveConstants.TURN_ENC_CHAN_FL,
+            SwerveConstants.TURN_ENC_OFFSET_FL,
+            SwerveConstants.TURN_ENC_INVERTED,
+            Translation2d(
+              SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              SwerveConstants.TRACKWIDTH / 2
+            )
+          ),
+          createKrakenModule(
+            "FRModule",
+            SwerveConstants.DRIVE_MOTOR_FR,
+            SwerveConstants.DRIVE_INVERTED,
+            SwerveConstants.TURN_MOTOR_FR,
+            SwerveConstants.TURN_INVERTED,
+            SwerveConstants.TURN_ENC_CHAN_FR,
+            SwerveConstants.TURN_ENC_OFFSET_FR,
+            SwerveConstants.TURN_ENC_INVERTED,
+            Translation2d(
+              SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              -SwerveConstants.TRACKWIDTH / 2
+            )
+          ),
+          createKrakenModule(
+            "BLModule",
+            SwerveConstants.DRIVE_MOTOR_BL,
+            SwerveConstants.DRIVE_INVERTED,
+            SwerveConstants.TURN_MOTOR_BL,
+            SwerveConstants.TURN_INVERTED,
+            SwerveConstants.TURN_ENC_CHAN_BL,
+            SwerveConstants.TURN_ENC_OFFSET_BL,
+            SwerveConstants.TURN_ENC_INVERTED,
+            Translation2d(
+              -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              SwerveConstants.TRACKWIDTH / 2
+            )
+          ),
+          createKrakenModule(
+            "BLModule",
+            SwerveConstants.DRIVE_MOTOR_BR,
+            SwerveConstants.DRIVE_INVERTED,
+            SwerveConstants.TURN_MOTOR_BR,
+            SwerveConstants.TURN_INVERTED,
+            SwerveConstants.TURN_ENC_CHAN_BR,
+            SwerveConstants.TURN_ENC_OFFSET_BR,
+            SwerveConstants.TURN_ENC_INVERTED,
+            Translation2d(
+              -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              -SwerveConstants.TRACKWIDTH / 2
+            )
           )
         )
-      )
+      } else {
+        val driveSim = SwerveDriveSimulation(
+          DriveTrainSimulationConfig.Default()
+            .withTrackLengthTrackWidth(
+              Meters.of(SwerveConstants.TRACKWIDTH),
+              Meters.of(SwerveConstants.WHEELBASE)
+            ),
+          Pose2d(
+            Translation2d(0.0, 0.0),
+            Rotation2d(0.0, 0.0)
+          )
+        )
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSim)
+        modules = listOf(
+          createModuleSim(
+            "FLModule",
+            driveSim.modules[0],
+            Translation2d(
+              SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              SwerveConstants.TRACKWIDTH / 2
+            )
+          ),
+          createModuleSim(
+            "FRModule",
+            driveSim.modules[1],
+            Translation2d(
+              SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              -SwerveConstants.TRACKWIDTH / 2
+            )
+          ),
+          createModuleSim(
+            "BLModule",
+            driveSim.modules[2],
+            Translation2d(
+              -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              SwerveConstants.TRACKWIDTH / 2
+            )
+          ),
+          createModuleSim(
+            "BLModule",
+            driveSim.modules[3],
+            Translation2d(
+              -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
+              -SwerveConstants.TRACKWIDTH / 2
+            )
+          )
+        )
+      }
       return if (isReal()) {
         SwerveDrive(
           modules,

@@ -19,7 +19,6 @@ import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.Encoder
 import frc.team449.system.motor.createSparkMax
 import frc.team449.subsystems.drive.swerve.sim.SwerveModuleKrakenSim
-import frc.team449.subsystems.drive.swerve.sim.SwerveModuleNEOSim
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sign

@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveModule
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
@@ -17,22 +18,25 @@ import kotlin.math.sign
 // MapleSim Swerve Module Sim based on SwerveModuleKraken
 class SwerveModuleSim(
   private val name: String,
-  val module: SwerveModuleSimulation,
-  val turnController: PIDController,
-  val driveController: PIDController,
+  private val module: SwerveModuleSimulation,
+  private val turnController: PIDController,
+  private val driveController: PIDController,
   override val location: Translation2d
 ): SwerveModule {
   init {
     turnController.enableContinuousInput(.0, 2 * PI)
     turnController.reset()
     driveController.reset()
+    // Module sim init
+    module.useGenericControllerForSteer()
+    module.useGenericMotorControllerForDrive()
   }
 
   val drive: SimulatedMotorController.GenericMotorController = module
     .useGenericMotorControllerForDrive()
     .withCurrentLimit(SwerveConstants.DRIVE_FOC_CURRENT_LIMIT)
 
-  val turn: SimulatedMotorController.GenericMotorController = module
+  private val turn: SimulatedMotorController.GenericMotorController = module
     .useGenericControllerForSteer()
     .withCurrentLimit(SwerveConstants.STEERING_CURRENT_LIM)
 
@@ -84,25 +88,23 @@ class SwerveModuleSim(
     turnController.setpoint = module.steerRelativeEncoderPosition.`in`(Radians)
     desiredState.speedMetersPerSecond = 0.0
   }
-
   override fun update() {
-
     /** CONTROL speed of module */
     val drivePid = driveController.calculate(
-      module.driveWheelFinalSpeed.`in`(RadiansPerSecond)
+      module.currentState.speedMetersPerSecond,
+      desiredState.speedMetersPerSecond
     )
-
     drive.requestVoltage(Volts.of(drivePid))
 
     /** CONTROL direction of module */
     val turnPid = turnController.calculate(
-      module.steerRelativeEncoderPosition.`in`(Radians)
+      module.currentState.angle.radians,
+      desiredState.angle.radians
     )
-
     turn.requestVoltage(
       Volts.of(
         turnPid +
-          sign(desiredState.angle.radians - module.steerRelativeEncoderPosition.`in`(Radians)) *
+          sign(desiredState.angle.radians - module.steerAbsoluteFacing.rotations) *
           SwerveConstants.STEER_KS
       )
     )
