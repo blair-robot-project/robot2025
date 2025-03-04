@@ -1,11 +1,14 @@
 package frc.team449.subsystems.drive.swerve.sim
 
+import com.ctre.phoenix6.controls.VelocityVoltage
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveModule
@@ -89,25 +92,21 @@ class SwerveModuleSim(
     desiredState.speedMetersPerSecond = 0.0
   }
   override fun update() {
-    /** CONTROL speed of module */
-    val drivePid = driveController.calculate(
-      module.currentState.speedMetersPerSecond,
-      desiredState.speedMetersPerSecond
-    )
-    drive.requestVoltage(Volts.of(drivePid))
-
-    /** CONTROL direction of module */
-    val turnPid = turnController.calculate(
-      module.currentState.angle.radians,
-      desiredState.angle.radians
-    )
-    turn.requestVoltage(
-      Volts.of(
-        turnPid +
-          sign(desiredState.angle.radians - module.steerAbsoluteFacing.rotations) *
-          SwerveConstants.STEER_KS
+    // Drive Motor
+    val drivePID: Voltage = Volts.of(
+      driveController.calculate(
+        module.driveWheelFinalSpeed.`in`(RadiansPerSecond),
+        desiredState.speedMetersPerSecond / SwerveConstants.DRIVE_GEARING
       )
     )
+    drive.requestVoltage(drivePID)
+    // Turn Motor
+    val turnPID: Voltage = Volts.of(
+      turnController.calculate(
+        module.steerAbsoluteFacing.radians
+      )
+    )
+    turn.requestVoltage(turnPID)
   }
 
   companion object {

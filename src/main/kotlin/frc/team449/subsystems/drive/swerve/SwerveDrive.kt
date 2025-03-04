@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.wpilibj.RobotBase.isReal
+import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
@@ -35,9 +36,11 @@ open class SwerveDrive(
   var accel: Double,
   var maxRotSpeed: Double,
   protected val field: Field2d,
-  val maxModuleSpeed: Double
-) : SubsystemBase() {
+  val maxModuleSpeed: Double,
 
+  // MapleSim
+  val driveSim: SwerveDriveSimulation
+) : SubsystemBase() {
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
@@ -112,6 +115,11 @@ open class SwerveDrive(
   }
 
   fun logData() {
+    // MapleSim
+    if (isSimulation()) {
+      DogLog.log("MapleSim Position", driveSim.simulatedDriveTrainPose)
+    }
+
     DogLog.log("Swerve/FL Module Current State", modules[0].state)
     DogLog.log("Swerve/FR Module Current State", modules[1].state)
     DogLog.log("Swerve/BL Module Current State", modules[2].state)
@@ -131,6 +139,7 @@ open class SwerveDrive(
     /** Create a [SwerveDrive] using [SwerveConstants]. */
     fun createSwerveKraken(field: Field2d): SwerveDrive {
       val modules: List<SwerveModule>
+      var driveSim: SwerveDriveSimulation = SwerveDriveSimulation(DriveTrainSimulationConfig.Default(), Pose2d())
       if (isReal()) {
         modules = listOf(
           createKrakenModule(
@@ -191,7 +200,7 @@ open class SwerveDrive(
           )
         )
       } else {
-        val driveSim = SwerveDriveSimulation(
+        driveSim = SwerveDriveSimulation(
           DriveTrainSimulationConfig.Default()
             .withTrackLengthTrackWidth(
               Meters.of(SwerveConstants.TRACKWIDTH),
@@ -245,7 +254,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          driveSim
         )
       } else {
         SwerveSim(
@@ -254,12 +264,15 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          driveSim
         )
       }
     }
 
     fun createSwerveNEO(field: Field2d): SwerveDrive {
+      // MapleSim Placeholder
+      var driveSim: SwerveDriveSimulation = SwerveDriveSimulation(DriveTrainSimulationConfig.Default(), Pose2d())
       val modules = listOf(
         createNEOModule(
           "FLModule",
@@ -325,7 +338,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          driveSim
         )
       } else {
         SwerveSim(
@@ -334,7 +348,8 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
+          driveSim
         )
       }
     }

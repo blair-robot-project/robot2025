@@ -177,7 +177,10 @@ class RobotLoop : TimedRobot() {
 
   override fun testPeriodic() {}
 
-  override fun simulationInit() {}
+  override fun simulationInit() {
+    // MapleSim
+    SimulatedArena.getInstance().resetFieldForAuto()
+  }
 
   override fun simulationPeriodic() {
     // MapleSim
