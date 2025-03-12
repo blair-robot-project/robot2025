@@ -1,8 +1,10 @@
 package frc.team449.subsystems.drive.swerve
 
+import dev.doglog.DogLog
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry
+import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import edu.wpi.first.wpilibj.Timer.getFPGATimestamp
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
@@ -14,8 +16,8 @@ class SwerveSim(
   maxRotSpeed: Double,
   field: Field2d,
   maxModuleSpeed: Double,
-  driveSim: SwerveDriveSimulation
-) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed, driveSim) {
+  val driveSim: SwerveDriveSimulation
+) : SwerveDrive(modules, maxLinearSpeed, accel, maxRotSpeed, field, maxModuleSpeed) {
 
   private var lastTime = getFPGATimestamp()
   var currHeading = Rotation2d()
@@ -51,8 +53,11 @@ class SwerveSim(
       currHeading,
       getPositions()
     )
-
     logData()
+    // Log MapleSim Position
+
+    // MapleSim
+    DogLog.log("MapleSim Position", driveSim.simulatedDriveTrainPose)
   }
 
   fun resetOdometryOnly(pose: Pose2d) {

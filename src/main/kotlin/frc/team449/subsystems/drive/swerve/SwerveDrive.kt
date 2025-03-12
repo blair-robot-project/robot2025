@@ -36,10 +36,7 @@ open class SwerveDrive(
   var accel: Double,
   var maxRotSpeed: Double,
   protected val field: Field2d,
-  val maxModuleSpeed: Double,
-
-  // MapleSim
-  val driveSim: SwerveDriveSimulation
+  val maxModuleSpeed: Double
 ) : SubsystemBase() {
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
@@ -115,11 +112,6 @@ open class SwerveDrive(
   }
 
   fun logData() {
-    // MapleSim
-    if (isSimulation()) {
-      DogLog.log("MapleSim Position", driveSim.simulatedDriveTrainPose)
-    }
-
     DogLog.log("Swerve/FL Module Current State", modules[0].state)
     DogLog.log("Swerve/FR Module Current State", modules[1].state)
     DogLog.log("Swerve/BL Module Current State", modules[2].state)
@@ -207,7 +199,7 @@ open class SwerveDrive(
               Meters.of(SwerveConstants.WHEELBASE)
             ),
           Pose2d(
-            Translation2d(0.0, 0.0),
+            Translation2d(1.0, 1.0),
             Rotation2d(0.0, 0.0)
           )
         )
@@ -254,8 +246,7 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
-          driveSim
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
         )
       } else {
         SwerveSim(
@@ -338,8 +329,7 @@ open class SwerveDrive(
           RobotConstants.MAX_ACCEL,
           RobotConstants.MAX_ROT_SPEED,
           field,
-          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED,
-          driveSim
+          SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED
         )
       } else {
         SwerveSim(

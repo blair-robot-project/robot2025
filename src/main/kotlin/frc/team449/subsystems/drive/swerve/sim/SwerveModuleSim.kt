@@ -1,6 +1,7 @@
 package frc.team449.subsystems.drive.swerve.sim
 
 import com.ctre.phoenix6.controls.VelocityVoltage
+import com.ctre.phoenix6.swerve.SwerveRequest
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -59,7 +60,7 @@ class SwerveModuleSim(
         return
       }
       /** Ensure the module doesn't turn more than 90 degrees. */
-      desState.optimize(Rotation2d(module.steerRelativeEncoderPosition))
+      desState.optimize(module.steerAbsoluteFacing)
 
       turnController.setpoint = desState.angle.radians
       driveController.setpoint = desState.speedMetersPerSecond
@@ -93,20 +94,24 @@ class SwerveModuleSim(
   }
   override fun update() {
     // Drive Motor
-    val drivePID: Voltage = Volts.of(
-      driveController.calculate(
-        module.driveWheelFinalSpeed.`in`(RadiansPerSecond),
-        desiredState.speedMetersPerSecond / SwerveConstants.DRIVE_GEARING
-      )
+    val drivePID: Double =
+    driveController.calculate(
+      module.currentState.speedMetersPerSecond
     )
-    drive.requestVoltage(drivePID)
+    val driveVoltage: Voltage = Volts.of(
+      drivePID + sign(desiredState.speedMetersPerSecond - module.currentState.speedMetersPerSecond) *
+      SwerveConstants.DRIVE_KS
+    )
+    drive.requestVoltage(driveVoltage)
     // Turn Motor
-    val turnPID: Voltage = Volts.of(
-      turnController.calculate(
-        module.steerAbsoluteFacing.radians
-      )
+    val turnPID: Double = turnController.calculate(
+      module.steerAbsoluteFacing.radians
     )
-    turn.requestVoltage(turnPID)
+    val turnVoltage: Voltage = Volts.of(
+      turnPID + sign(desiredState.angle.radians - module.steerAbsoluteFacing.radians) *
+        SwerveConstants.STEER_KS
+    )
+    turn.requestVoltage(turnVoltage)
   }
 
   companion object {
@@ -118,8 +123,7 @@ class SwerveModuleSim(
       return SwerveModuleSim(
         name,
         module,
-        PIDController(
-          SwerveConstants.TURN_KP,
+        PIDController(SwerveConstants.TURN_KP,
           SwerveConstants.TURN_KI,
           SwerveConstants.TURN_KD
         ),
