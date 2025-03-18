@@ -287,7 +287,7 @@ class PoseSubsystem(
       drive.set(combinedChassisSpeeds)
     }
     lastDistance = distance
-    agreeVal = maxAgreeVal - maxAgreeVal / (1 + exp(-(distance-0.5) * 10))
+    agreeVal = maxAgreeVal - maxAgreeVal / (1 + exp((distance-2.0) * -5))
   }
 
   private val isReal = RobotBase.isReal()

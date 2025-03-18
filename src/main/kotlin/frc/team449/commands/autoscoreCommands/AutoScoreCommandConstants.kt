@@ -64,9 +64,9 @@ class AutoScoreCommandConstants {
 
     // pathfinding vars
     val MAX_ACCEL = 4.0 // m/s/s
-    val MAX_ROT_ACCEL = 2 * PI // rad/s/s
-    val MAX_PATHFINDING_ROT_SPEED = 2 * PI // rad/s
-    val MAX_PATHFINDING_LINEAR_SPEED = SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED * 7 / 10 // m/s
+    val MAX_ROT_ACCEL = PI * 5 / 2 // rad/s/s
+    val MAX_PATHFINDING_ROT_SPEED = PI * 2 // rad/s
+    val MAX_PATHFINDING_LINEAR_SPEED = SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED * 0.85 // m/s
 
     // pathmag vars
     val MAX_ROT_SPEED = 2 * PI // rad/s
