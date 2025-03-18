@@ -3,12 +3,12 @@ package frc.team449.subsystems.superstructure.wrist
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.ChassisReference
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -28,8 +28,6 @@ class Wrist(
     SuperstructureGoal.STOW.wrist.`in`(Radians)
   ).withEnableFOC(false)
 
-  private val isReal = RobotBase.isReal()
-
   lateinit var wristFeedForward: WristFeedForward
 
   fun setPosition(position: Double): Command {
@@ -46,7 +44,7 @@ class Wrist(
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        request
+        PositionVoltage(request.Position)
           .withUpdateFreqHz(WristConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(wristFeedForward.calculate(request.Position))
       )
@@ -71,6 +69,20 @@ class Wrist(
     }
   }
 
+  fun webComManualUp(voltage: Double): Command {
+    return runOnce {
+      motor.setVoltage(voltage)
+      request.Position = positionSupplier.get()
+    }
+  }
+
+  fun webComManualDown(voltage: Double): Command {
+    return runOnce {
+      motor.setVoltage(-voltage)
+      request.Position = positionSupplier.get()
+    }
+  }
+
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
@@ -80,7 +92,8 @@ class Wrist(
   }
 
   fun elevatorReady(): Boolean {
-    return positionSupplier.get() < WristConstants.ELEVATOR_READY.`in`(Radians)
+    return positionSupplier.get() < WristConstants.ELEVATOR_READY.`in`(Radians) &&
+      motor.closedLoopReferenceSlope.valueAsDouble <= 0.0
   }
 
   fun startupZero() {

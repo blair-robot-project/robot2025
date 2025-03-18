@@ -7,11 +7,8 @@ import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj2.command.ConditionalCommand
-import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
-import edu.wpi.first.wpilibj2.command.WaitCommand
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand
+import edu.wpi.first.wpilibj.util.Color
+import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -22,6 +19,7 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.drive.swerve.WheelRadiusCharacterization
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
@@ -36,14 +34,16 @@ class ControllerBindings(
 
   var STOW_AFTER_AUTOSCORE = false
 
+  val percentageElevatorPosition = { robot.elevator.positionSupplier.get() / SuperstructureGoal.L4.elevator.`in`(Meters) }
+
   private fun robotBindings() {
     /** Call robot functions you create below */
     /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
      * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
      */
     score_l1()
-    score_l2()
-    score_l3()
+    scoreDescore_l2()
+    scoreDescore_l3()
     score_l4()
 
     autoScoreLeft()
@@ -51,6 +51,7 @@ class ControllerBindings(
 //    autoScoreStowTrigger()
 
     substationIntake()
+    coralBlockSubstationIntake()
     coralOuttake()
 
 //    premove_l1()
@@ -59,18 +60,23 @@ class ControllerBindings(
 //    premove_l4()
 
     stow()
+    climbBefore()
+    climbIntermediate()
     climb()
-    algaeDescoreL2()
-  }
+    scoreL2()
+    scoreL3()
+    stopReefAlign()
 
-  private fun characterizationBindings() {
     manualElevator()
     manualPivot()
     manualWrist()
-    testVoltagePivot()
-    runClimbWheels()
+  }
 
-    pivotCharacterizaton()
+  private fun characterizationBindings() {
+//    testVoltagePivot()
+//    runClimbWheels()
+
+//    pivotCharacterizaton()
   }
 
   private fun nonRobotBindings() {
@@ -85,47 +91,74 @@ class ControllerBindings(
   }
 
   private fun climb() {
-    mechanismController.rightBumper().onTrue(
-      robot.climb.runClimbWheels()
-        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.CLIMB))
-        .andThen(WaitUntilCommand { robot.climb.isClimbEngaged() })
-        .andThen(WaitCommand(0.15))
-        .andThen(robot.pivot.climbDown())
+    mechanismController.b().onTrue(
+      robot.wrist.setPosition(WristConstants.CLIMB_DOWN.`in`(Radians))
+        .alongWith(robot.pivot.climbDown())
     )
   }
 
-  private fun algaeDescoreL2() {
+  private fun climbIntermediate() {
+    mechanismController.rightTrigger().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.CLIMB_INTERMEDIATE)
+    )
+  }
+
+  private fun climbBefore() {
+    mechanismController.leftTrigger().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.CLIMB_BEFORE)
+    )
+  }
+
+  private fun scoreL2() {
     mechanismController.x().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L2_ALGAE_DESCORE)
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
+    )
+  }
+
+  private fun scoreL3() {
+    mechanismController.y().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
+    )
+  }
+
+  private fun stopReefAlign() {
+    mechanismController.start().onTrue(
+      robot.driveCommand
     )
   }
 
   private fun stow() {
     mechanismController.a().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+        .deadlineFor(robot.light.progressMaskGradient(percentageElevatorPosition))
+        .andThen(robot.intake.holdCoral())
     )
   }
 
-  private fun autoScoreLeft() {
+  private fun autoScoreLeftOuttake() {
     driveController.leftTrigger().onTrue(
-      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
-//        .andThen(
-//          WaitUntilCommand {
-//            (
-//              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
-//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
-//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
-//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
-//              ) &&
-//              robot.superstructureManager.isAtPos()
-//          }
-//        )
-//        .andThen(PrintCommand("boutta outtake this coral"))
-//        .andThen(robot.intake.outtakeCoral())
-//        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
-//        .andThen(WaitCommand(0.25))
-//        .andThen(robot.intake.stop())
-//        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
+      Commands.sequence(
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+          .deadlineFor(robot.light.gradient(MetersPerSecond.of(0.35), Color.kPurple, Color.kWhite)),
+        Commands.parallel(
+          robot.intake.outtakeCoral()
+            .andThen(
+              WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() }
+                .onlyIf { RobotBase.isReal() }
+            )
+            .andThen(WaitCommand(0.10))
+            .andThen(robot.intake.stop())
+            .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+            .onlyIf {
+              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2
+            },
+          robot.light.blink(Seconds.of(0.20), Color.kWhite)
+            .withTimeout(1.5)
+        )
+      )
+    ).onFalse(
+      robot.driveCommand
     )
   }
 
@@ -136,26 +169,56 @@ class ControllerBindings(
     )
   }
 
+  private fun autoScoreRightOuttake() {
+    driveController.rightTrigger().onTrue(
+      Commands.sequence(
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+          .deadlineFor(robot.light.gradient(MetersPerSecond.of(0.35), Color.kPurple, Color.kWhite)),
+        Commands.parallel(
+          robot.intake.outtakeCoral()
+            .andThen(
+              WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() }
+                .onlyIf { RobotBase.isReal() }
+            )
+            .andThen(WaitCommand(0.10))
+            .andThen(robot.intake.stop())
+            .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+            .onlyIf {
+              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
+                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2
+            },
+          robot.light.blink(Seconds.of(0.20), Color.kWhite)
+            .withTimeout(1.5)
+        )
+      )
+    ).onFalse(
+      robot.driveCommand
+    )
+  }
+
+  private fun autoScoreLeft() {
+    driveController.leftTrigger().onTrue(
+      Commands.sequence(
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.LEFT))
+          .deadlineFor(robot.light.gradient(MetersPerSecond.of(0.35), Color.kPurple, Color.kWhite)),
+        robot.light.blink(Seconds.of(0.20), Color.kWhite)
+          .withTimeout(1.5)
+      )
+    ).onFalse(
+      robot.driveCommand
+    )
+  }
+
   private fun autoScoreRight() {
     driveController.rightTrigger().onTrue(
-      SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
-//        .andThen(
-//          WaitUntilCommand {
-//            (
-//              robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 ||
-//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L2 ||
-//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L3 ||
-//                robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L4
-//              ) &&
-//              robot.superstructureManager.isAtPos()
-//          }
-//        )
-//        .andThen(PrintCommand("boutta outtake this coral"))
-//        .andThen(robot.intake.outtakeCoral())
-//        .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
-//        .andThen(WaitCommand(0.25))
-//        .andThen(robot.intake.stop())
-//        .andThen(InstantCommand({ STOW_AFTER_AUTOSCORE = true }))
+      Commands.sequence(
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(FieldConstants.ReefSide.RIGHT))
+          .deadlineFor(robot.light.gradient(MetersPerSecond.of(0.35), Color.kPurple, Color.kWhite)),
+        robot.light.blink(Seconds.of(0.20), Color.kWhite)
+          .withTimeout(1.5)
+      )
+    ).onFalse(
+      robot.driveCommand
     )
   }
 
@@ -165,7 +228,31 @@ class ControllerBindings(
         .alongWith(robot.intake.intakeCoral())
         .andThen(WaitUntilCommand { robot.intake.coralDetected() && RobotBase.isReal() })
         .andThen(robot.intake.holdCoral())
-        .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
+//        .deadlineFor(robot.light.gradient(MetersPerSecond.of(0.5), Color.kYellow, Color.kLightCoral, Color.kIndianRed))
+        .andThen(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+//            .alongWith(
+//              robot.light.blink(Seconds.of(0.25), Color.kWhite)
+//                .withTimeout(1.5)
+//            )
+        )
+    )
+  }
+
+  private fun coralBlockSubstationIntake() {
+    driveController.povDown().onTrue(
+      robot.superstructureManager.requestGoal(SuperstructureGoal.SUBSTATION_INTAKE_CORAL_IN_FRONT)
+        .alongWith(robot.intake.intakeCoral())
+        .andThen(WaitUntilCommand { robot.intake.coralDetected() && RobotBase.isReal() })
+        .andThen(robot.intake.holdCoral())
+        .deadlineFor(robot.light.gradient(MetersPerSecond.of(0.5), Color.kYellow, Color.kLightCoral, Color.kIndianRed))
+        .andThen(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+            .alongWith(
+              robot.light.blink(Seconds.of(0.25), Color.kWhite)
+                .withTimeout(1.5)
+            )
+        )
     )
   }
 
@@ -176,7 +263,10 @@ class ControllerBindings(
           .andThen(WaitUntilCommand { !robot.intake.coralDetected() && RobotBase.isReal() })
           .andThen(WaitCommand(0.10))
           .andThen(robot.intake.stop())
-          .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)),
+          .andThen(
+            robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)
+              .deadlineFor(robot.light.progressMaskGradient(percentageElevatorPosition))
+          ),
         WaitCommand(0.15)
           .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
       ) { RobotBase.isReal() }
@@ -184,50 +274,32 @@ class ControllerBindings(
   }
 
   private fun score_l1() {
-    driveController.povDown().onTrue(
+    driveController.a().onTrue(
       robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
     )
   }
 
-  private fun score_l2() {
+  private fun scoreDescore_l2() {
     driveController.x().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
+      ConditionalCommand(
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L2),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L2_ALGAE_DESCORE)
+      ) { robot.intake.coralDetected() }
     )
   }
 
-  private fun score_l3() {
+  private fun scoreDescore_l3() {
     driveController.b().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
+      ConditionalCommand(
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L3),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_DESCORE)
+      ) { robot.intake.coralDetected() }
     )
   }
 
   private fun score_l4() {
     driveController.y().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-    )
-  }
-
-  private fun premove_l1() {
-    mechanismController.a().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L1_PREMOVE)
-    )
-  }
-
-  private fun premove_l2() {
-    mechanismController.x().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PREMOVE)
-    )
-  }
-
-  private fun premove_l3() {
-    mechanismController.b().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PREMOVE)
-    )
-  }
-
-  private fun premove_l4() {
-    mechanismController.y().onTrue(
-      robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PREMOVE)
+      robot.superstructureManager.requestL4()
     )
   }
 
@@ -239,13 +311,13 @@ class ControllerBindings(
     )
   }
 
-  private fun runClimbWheels() {
-    characterizationController.leftTrigger().onTrue(
-      robot.climb.runClimbWheels()
-    ).onFalse(
-      robot.climb.stop()
-    )
-  }
+//  private fun runClimbWheels() {
+//    characterizationController.leftTrigger().onTrue(
+//      robot.climb.runClimbWheels()
+//    ).onFalse(
+//      robot.climb.stop()
+//    )
+//  }
 
   private fun wheelRadiusCharacterization() {
     characterizationController.leftTrigger().onTrue(
@@ -255,35 +327,35 @@ class ControllerBindings(
 
   private fun manualPivot() {
     // up
-    characterizationController.b().onTrue(
+    mechanismController.povLeft().onTrue(
       robot.pivot.manualUp()
     ).onFalse(robot.pivot.hold())
     // down
-    characterizationController.x().onTrue(
+    mechanismController.povRight().onTrue(
       robot.pivot.manualDown()
     ).onFalse(robot.pivot.hold())
   }
 
   private fun manualElevator() {
     // up
-    characterizationController.y().onTrue(
+    mechanismController.povUp().onTrue(
       robot.elevator.manualUp()
     ).onFalse(robot.elevator.hold())
 
     // down
-    characterizationController.a().onTrue(
+    mechanismController.povDown().onTrue(
       robot.elevator.manualDown()
     ).onFalse(robot.elevator.hold())
   }
 
   private fun manualWrist() {
     // up
-    characterizationController.rightBumper().onTrue(
+    mechanismController.rightBumper().onTrue(
       robot.wrist.manualUp()
     ).onFalse(robot.wrist.hold())
 
     // down
-    characterizationController.leftBumper().onTrue(
+    mechanismController.leftBumper().onTrue(
       robot.wrist.manualDown()
     ).onFalse(robot.wrist.hold())
   }

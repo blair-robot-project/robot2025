@@ -1,16 +1,16 @@
 package frc.team449
 
+import choreo.auto.AutoChooser
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.WebConnection
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
 import frc.team449.subsystems.light.Light.Companion.createLight
 import frc.team449.subsystems.superstructure.SuperstructureManager
 import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
-import frc.team449.subsystems.superstructure.climb.Climb
-import frc.team449.subsystems.superstructure.climb.Climb.Companion.createClimb
 import frc.team449.subsystems.superstructure.elevator.Elevator
 import frc.team449.subsystems.superstructure.elevator.Elevator.Companion.createElevator
 import frc.team449.subsystems.superstructure.intake.Intake
@@ -42,7 +42,9 @@ class Robot : RobotBase() {
 
   override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
 
-  override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field)
+  val autoChooser = AutoChooser()
+
+  override val poseSubsystem: PoseSubsystem = createPoseSubsystem(ahrs, drive, field, driveController)
 
   override val driveCommand: SwerveOrthogonalCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
 
@@ -54,9 +56,11 @@ class Robot : RobotBase() {
 
   val intake: Intake = createIntake()
 
-  val climb: Climb = createClimb()
+//  val climb: Climb = createClimb()
 
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
+
+  val webCom = WebConnection(this)
 }

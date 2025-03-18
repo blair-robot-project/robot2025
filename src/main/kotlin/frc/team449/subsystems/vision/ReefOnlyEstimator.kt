@@ -9,7 +9,6 @@ import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonPipelineResult
 import org.photonvision.targeting.PhotonTrackedTarget
 import java.util.Optional
-import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 /**
@@ -112,10 +111,7 @@ class ReefOnlyEstimator(
       val targetPoseAmbiguity = target.poseAmbiguity
       // Make sure the target is a Fiducial target.
       if (targetPoseAmbiguity != -1.0 && targetPoseAmbiguity < lowestAmbiguityScore &&
-        (
-          (listOf(6, 7, 8, 9, 10, 11).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) ||
-            (listOf(17, 18, 19, 20, 21, 22).contains(target.fiducialId) && DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Blue)
-          )
+        listOf(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22).contains(target.fiducialId)
       ) {
         lowestAmbiguityScore = targetPoseAmbiguity
         lowestAmbiguityTarget = target

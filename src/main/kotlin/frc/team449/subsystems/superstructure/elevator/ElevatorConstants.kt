@@ -27,8 +27,8 @@ object ElevatorConstants {
   const val FOLLOWER_INVERTED_TO_MASTER = true
   val BRAKE_MODE = NeutralModeValue.Brake
 
-  const val STATOR_LIM = 80.0
-  const val SUPPLY_LIM = 40.0
+  const val STATOR_LIM = 90.0
+  const val SUPPLY_LIM = 50.0
 
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
@@ -40,18 +40,23 @@ object ElevatorConstants {
   val GEARING_MOTOR_TO_ELEVATOR = 1 / (GEARING_MOTOR_TO_PULLEY * UPR)
   const val CARRIAGE_MASS = 4.0
 
+  const val CLIMB_HEIGHT = 0.198824
+
   const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
 
   // TODO(Adjust gains.)
-  val KS = if (RobotBase.isReal()) 0.0175 else 0.0
+  val KS = if (RobotBase.isReal()) 0.0612 else 0.0
   const val KV = 4.5112 // theoretical 4.5112
-  val KG = if (RobotBase.isReal()) 0.26851 else 0.0 // was 0.26233
+  val KG = if (RobotBase.isReal()) 0.27951 else 0.0 // was 0.26233
 
-  const val KP = 9.8532
+  const val L4_FF = 0.920
+
+  const val KP = 19.8532
   const val KI = 0.0
-  const val KD = 0.0015
+  const val L4_KI = 7.0
+  const val KD = 0.00015
 
   // Motion Magic
-  const val CRUISE_VEL = 2.5 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
-  const val MAX_ACCEL = 6.0 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
+  const val CRUISE_VEL = 2.325 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
+  const val MAX_ACCEL = 7.5 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
 }

@@ -29,8 +29,10 @@ object WristConstants {
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
+  val CLIMB_DOWN = Degrees.of(60.0)
+
   const val KS = 0.020
-  const val KG = 0.25
+  const val KG = 0.258
   const val KV = 0.63027
 
   const val KP = 5.9119
@@ -38,7 +40,7 @@ object WristConstants {
   const val KD = 0.096482
 
   val CRUISE_VEL = RotationsPerSecond.of(2.75) // should get to 2.5, max theoretical 2.95
-  val MAX_ACCEL = RotationsPerSecondPerSecond.of(4.9496) // should get to 3.0, max theoretical 18.842
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0) // should get to 3.0, max theoretical 18.842
 
   val STARTUP_ANGLE = Degrees.of(90.0)
 }

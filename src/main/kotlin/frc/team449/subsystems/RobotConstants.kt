@@ -20,7 +20,7 @@ object RobotConstants {
 
   /** Drive Configuration */
   val MAX_LINEAR_SPEED = SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED // m/s
-  const val MAX_ROT_SPEED = 5.804 * PI / 4 // r ad/s
+  const val MAX_ROT_SPEED = 4.9496 * PI / 4 // r ad/s
 
   const val USE_ACCEL_LIMIT = true
 

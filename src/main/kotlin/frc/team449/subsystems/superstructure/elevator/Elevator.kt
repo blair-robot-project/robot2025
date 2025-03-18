@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
@@ -80,6 +81,18 @@ open class Elevator(
     }
   }
 
+  fun setPositionCarriage(position: Double): Command {
+    return this.runOnce {
+      motor.setControl(
+        request
+          .withPosition(position)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(ElevatorConstants.L4_FF)
+          .withSlot(1)
+      )
+    }
+  }
+
   fun manualDown(): Command {
     return this.run {
       motor.setVoltage(-2.0)
@@ -94,12 +107,37 @@ open class Elevator(
     }
   }
 
+  fun webComManualUp(voltage: Double): Command {
+    return runOnce {
+      motor.setVoltage(voltage)
+      request.Position = positionSupplier.get()
+    }
+  }
+
+  fun webComManualDown(voltage: Double): Command {
+    return runOnce {
+      motor.setVoltage(-voltage)
+      request.Position = positionSupplier.get()
+    }
+  }
+
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        request
+        PositionVoltage(request.Position)
           .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(elevatorFeedForward.calculateGravity())
+      )
+    }
+  }
+
+  fun holdCarriage(): Command {
+    return this.runOnce {
+      motor.setControl(
+        PositionVoltage(request.Position)
+          .withUpdateFreqHz(ElevatorConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(ElevatorConstants.L4_FF)
+          .withSlot(1)
       )
     }
   }
@@ -155,6 +193,13 @@ open class Elevator(
 
       config.Slot0.kS = ElevatorConstants.KS
       config.Slot0.kV = ElevatorConstants.KV
+
+      config.Slot1.kP = ElevatorConstants.KP
+      config.Slot1.kI = ElevatorConstants.L4_KI
+      config.Slot1.kD = ElevatorConstants.KD
+
+      config.Slot1.kS = ElevatorConstants.KS
+      config.Slot1.kV = ElevatorConstants.KV
 
       config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.CRUISE_VEL
       config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL

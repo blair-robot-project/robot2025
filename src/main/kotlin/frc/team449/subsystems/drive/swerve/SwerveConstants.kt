@@ -67,11 +67,8 @@ object SwerveConstants {
   const val TURN_UPR = 2 * PI
   val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.5) // (12 - DRIVE_KS) / DRIVE_KV
 
-  val DRIVE_SUPPLY_LIMIT = Amps.of(40.0)
-  val DRIVE_FOC_CURRENT_LIMIT = Amps.of(80.0)
-  val DRIVE_SUPPLY_BOOST = Amps.of(55.0)
-  val DRIVE_SUPPLY_BOOST_TIME = Seconds.of(0.0)
-  val DRIVE_STATOR_LIMIT = Amps.of(85.0)
+  val DRIVE_SUPPLY_LIMIT = Amps.of(52.5)
+  val DRIVE_STATOR_LIMIT = Amps.of(105.0)
   val STEERING_CURRENT_LIM = Amps.of(40.0)
 
   val KRAKEN_UPDATE_RATE = Hertz.of(100.0)

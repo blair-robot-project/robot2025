@@ -51,11 +51,11 @@ object VisionConstants {
   )
 
   /** Filtering Constants */
-  const val MAX_AMBIGUITY = 0.25
+  const val MAX_AMBIGUITY = 0.40
   var MAX_DISTANCE_SINGLE_TAG = 5.0
   var MAX_DISTANCE_MULTI_TAG = 6.0
   val TAG_HEADING_MAX_DEV_RAD = Units.degreesToRadians(360.0)
-  var MAX_HEIGHT_ERR_METERS = 0.25
+  var MAX_HEIGHT_ERR_METERS = 0.275
   const val NUM_TAG_FACTOR = 2.0
 
   /** Std Dev Calculation Constants */
@@ -79,12 +79,20 @@ object VisionConstants {
 
   /** List of cameras that we want to use */
   val ESTIMATORS: ArrayList<ApriltagCamera> = arrayListOf(
+// Disabled for sim, reenable during merge
     ApriltagCamera(
       "reef_cam",
       TAG_LAYOUT,
       front,
       VISION_SIM
     )
+//    ApriltagCamera(
+//      "Camera_03",
+//      TAG_LAYOUT,
+//      testTrans,
+//      VISION_SIM
+//    )
+
   )
 
   val interpolatedVisionSets: List<InterpolatedVisionDataset> = listOf(

@@ -1,6 +1,6 @@
 {
  "name":"test",
- "version":"v2025.0.0",
+ "version":1,
  "type":"Swerve",
  "variables":{
   "expressions":{},
@@ -50,6 +50,10 @@
   "tmax":{
    "exp":"0.8717213114754098 N m",
    "val":0.8717213114754098
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
   },
   "bumper":{
    "front":{

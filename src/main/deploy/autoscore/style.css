@@ -1,0 +1,143 @@
+body {
+    background-attachment: fixed;
+    background: #72728a;
+    font-family: 'Orbitron';
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+}
+
+.reefSelection, .reefConfirmation, .processorContainer, .netContainer, .coralIntakeContainer {
+    display: flex;
+    gap: 2vw;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+}
+
+.reefContainer {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    gap: 1vw;
+    display: flex;
+    flex-direction: column;
+}
+
+#elevatorUp, #elevatorDown {
+    height: 8vh;
+    width: 20vw;
+}
+
+.elevatorContainer {
+    gap: 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.scoringContainer, .messageContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2vw;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    margin:auto;
+    margin-top: 5vh;
+}
+
+.reefText {
+    font-size: 2vw;
+    justify-self: center;
+    align-self: center;
+    justify-self: center;
+    height: 10%;
+}
+
+#coral {
+    width: 20%;
+    max-height: 90%;
+    aspect-ratio: 0.5;
+}
+
+#locationSelect {
+    /* width 315 height 274 */
+    width: 60%;
+    max-height: 100%;
+    aspect-ratio: 1.15085158151;
+    align-self: center;
+    vertical-align: middle;
+    offset-rotate: 120deg;
+    margin: auto;
+}
+
+.buttonContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5vw;
+}
+
+.Button {
+    background-color: #DD0000;
+    width: 25vw;
+    height: 10vh;
+    color: white;
+    font-size: 1.75vw;
+    font-weight: bold;
+    border-radius: 5vh;
+    font-family: 'Orbitron';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 1vh;
+    user-select: none;
+}
+
+#confirmReefButton {
+    width: 20%;
+    height: 30%;
+}
+
+.Button:hover {
+    filter: brightness(1.2);
+}
+
+.Button:active {
+    filter: brightness(0.8);
+}
+
+h1 {
+    color: white;
+}
+
+#processorChoice, #reefChoice, #netChoice, #coralIntakeChoice, #messageDisplay {
+    align-self: center;
+    justify-self: center;
+    align-items: center;
+}
+
+#messageDisplay {
+    color: red;
+    font-size: 4vw;
+}
+
+#locationSelect {
+    justify-self: center;
+}
+
+h1 {
+    font-size: 2vw;
+}
+
+.manualContainer {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    gap: 3vh;
+}

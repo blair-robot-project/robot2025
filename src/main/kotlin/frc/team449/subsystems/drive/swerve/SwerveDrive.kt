@@ -1,6 +1,11 @@
 package frc.team449.subsystems.drive.swerve
 
+import choreo.trajectory.SwerveSample
 import dev.doglog.DogLog
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -12,7 +17,10 @@ import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
+import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
@@ -25,7 +33,6 @@ import kotlin.math.hypot
 /**
  * A Swerve Drive chassis.
  * @param modules An array of [SwerveModule]s that are on the drivetrain.
- * @param ahrs The gyro that is mounted on the chassis.
  * @param maxLinearSpeed The maximum translation speed of the chassis.
  * @param maxRotSpeed The maximum rotation speed of the chassis.
  * @param field The SmartDashboard [Field2d] widget that shows the robot's pose.
@@ -38,6 +45,9 @@ open class SwerveDrive(
   protected val field: Field2d,
   val maxModuleSpeed: Double
 ) : SubsystemBase() {
+
+  var pose: Pose2d = Pose2d()
+
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
@@ -48,20 +58,53 @@ open class SwerveDrive(
 
   var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
+  var desiredAngle = 0.0
+  var desiredOmega = 0.0
+
+  // Removed magic numbers
+  private val xController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
+  private val yController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
+  private val headingController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
+
+  init {
+    headingController.enableContinuousInput(-Math.PI, Math.PI)
+  }
+  fun followTrajectory(
+    robot: Robot,
+    sample: SwerveSample
+  ) {
+    desiredAngle = MathUtil.angleModulus(sample.heading)
+    desiredOmega = sample.omega
+    val speeds = ChassisSpeeds(
+      sample.vx + xController.calculate(robot.poseSubsystem.pose.x, sample.x),
+      sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
+      sample.omega + headingController.calculate(
+        robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(sample.heading))).radians
+      )
+    )
+    val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      speeds,
+      robot.poseSubsystem.heading
+    )
+
+    // Apply the generated speeds
+    set(newSpeeds)
+  }
+
   fun set(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
-
     // Converts the desired [ChassisSpeeds] into an array of [SwerveModuleState].
     val desiredModuleStates =
       this.kinematics.toSwerveModuleStates(this.desiredSpeeds)
-
     // Scale down module speed if a module is going faster than the max speed, and prevent early desaturation.
 //    normalizeDrive(desiredModuleStates, desiredSpeeds)
     SwerveDriveKinematics.desaturateWheelSpeeds(
       desiredModuleStates,
       maxModuleSpeed
     )
-
     for (i in this.modules.indices) {
       this.modules[i].state = desiredModuleStates[i]
     }
@@ -80,6 +123,13 @@ open class SwerveDrive(
     var totalVel = 0.0
     modules.forEach { totalVel += it.state.speedMetersPerSecond }
     return totalVel / modules.size
+  }
+
+  /** Stops the robot's drive. */
+  fun driveStop(): Command {
+    return runOnce {
+      set(ChassisSpeeds(0.0, 0.0, 0.0))
+    }
   }
 
   override fun periodic() {

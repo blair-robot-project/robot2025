@@ -79,12 +79,36 @@ class Pivot(
     }
   }
 
+  fun webComManualDown(voltage: Double): Command {
+    return runOnce {
+      motor.setVoltage(-voltage)
+      request.Position = positionSupplier.get()
+    }
+  }
+
+  fun webComManualUp(voltage: Double): Command {
+    return runOnce {
+      motor.setVoltage(voltage)
+      request.Position = positionSupplier.get()
+    }
+  }
+
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
         PositionVoltage(request.Position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(pivotFeedForward.calculateWithLength(request.Position))
+      )
+    }
+  }
+
+  fun holdClimb(): Command {
+    return this.runOnce {
+      motor.setControl(
+        PositionVoltage(request.Position)
+          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+          .withFeedForward(-0.875)
       )
     }
   }
@@ -98,12 +122,13 @@ class Pivot(
   fun climbDown(): Command {
     return this.runOnce { motor.setVoltage(PivotConstants.CLIMB_VOLTAGE.`in`(Volt)) }
       .andThen(WaitUntilCommand { positionSupplier.get() < PivotConstants.CLIMB_MIN_ANGLE.`in`(Radians) })
-      .andThen(runOnce { request.Position = positionSupplier.get() })
-      .andThen(hold())
+      .andThen(runOnce { request.Position = PivotConstants.CLIMB_MIN_ANGLE.`in`(Radians) })
+      .andThen(runOnce { motor.stopMotor() })
+      .andThen(holdClimb())
   }
 
   fun setVoltageChar(voltage: Double) {
-    motor.setVoltage(voltage)
+    return motor.setVoltage(voltage)
   }
 
   fun stop(): Command {

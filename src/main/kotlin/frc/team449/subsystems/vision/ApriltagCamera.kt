@@ -3,7 +3,6 @@ package frc.team449.control.vision
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
@@ -14,7 +13,6 @@ import frc.team449.subsystems.vision.VisionConstants
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonCamera
 import org.photonvision.simulation.PhotonCameraSim
-import org.photonvision.simulation.SimCameraProperties
 import org.photonvision.simulation.VisionSystemSim
 import java.util.Optional
 import kotlin.math.abs
@@ -36,7 +34,7 @@ class ApriltagCamera(
   private var cameraSim: PhotonCameraSim? = null
 
   init {
-    if (RobotBase.isSimulation()) {
+   /* if (RobotBase.isSimulation()) {
       visionSystemSim!!.addAprilTags(tagLayout)
 
       val cameraProp = SimCameraProperties()
@@ -50,9 +48,9 @@ class ApriltagCamera(
 
       cameraSim!!.enableDrawWireframe(VisionConstants.ENABLE_WIREFRAME)
 
-      visionSystemSim.addCamera(cameraSim, robotToCam)
-    }
+      visionSystemSim.addCamera(cameraSim, robotToCam) */
   }
+  /*}*/
 
   private fun getSimDebugField(): Field2d? {
     return if (!RobotBase.isSimulation()) null else visionSystemSim!!.debugField

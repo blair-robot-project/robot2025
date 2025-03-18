@@ -25,18 +25,18 @@ import kotlin.math.min
 class SimpleReefAlign(
   private val drive: SwerveDrive,
   private val poseSubsystem: PoseSubsystem,
-  translationSpeedLim: Double = 0.5 * RobotConstants.MAX_LINEAR_SPEED,
-  translationAccelLim: Double = 2.35,
+  translationSpeedLim: Double = 0.65 * RobotConstants.MAX_LINEAR_SPEED,
+  translationAccelLim: Double = 2.5,
   headingSpeedLim: Double = PI,
   headingAccelLim: Double = 4 * PI,
-  translationPID: Triple<Double, Double, Double> = Triple(5.0, 0.0, 0.0),
+  translationPID: Triple<Double, Double, Double> = Triple(6.25, 0.0, 0.0),
   headingPID: Triple<Double, Double, Double> = Triple(6.5, 0.0, 0.0),
-  private val translationTolerance: Double = Units.inchesToMeters(0.5),
+  private val translationTolerance: Double = Units.inchesToMeters(0.675),
   private val headingTolerance: Double = Units.degreesToRadians(0.75),
-  private val speedTol: Double = 0.10,
+  private val speedTol: Double = 0.075,
   private val speedTolRot: Double = PI / 16,
   private val ffMinRadius: Double = 0.2,
-  private val ffMaxRadius: Double = 0.65,
+  private val ffMaxRadius: Double = 0.6,
   private val leftOrRight: Optional<FieldConstants.ReefSide> = Optional.empty()
 ) : Command() {
   init {
