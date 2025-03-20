@@ -5,11 +5,15 @@ import dev.doglog.DogLog
 import dev.doglog.DogLogOptions
 import edu.wpi.first.hal.FRCNetComm
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.TimedRobot
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -25,9 +29,13 @@ import frc.team449.subsystems.superstructure.wrist.WristFeedForward.Companion.cr
 import frc.team449.subsystems.vision.VisionConstants
 import frc.team449.system.encoder.QuadCalibration
 import org.ironmaple.simulation.SimulatedArena
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoral
 import org.littletonrobotics.urcl.URCL
 import kotlin.jvm.optionals.getOrDefault
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.sin
+
 
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
@@ -108,6 +116,15 @@ class RobotLoop : TimedRobot() {
     if (RobotBase.isReal()) {
       robot.wrist.startupZero()
     }
+
+
+
+
+    SimulatedArena.getInstance().addGamePiece(
+      ReefscapeCoral( // We must specify a heading since the coral is a tube
+        Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90.0))
+      )
+    )
   }
 
   override fun driverStationConnected() {
@@ -155,12 +172,21 @@ class RobotLoop : TimedRobot() {
   override fun simulationInit() {
     // MapleSim
     SimulatedArena.getInstance().resetFieldForAuto()
+    SimulatedArena.getInstance().addGamePiece(
+      ReefscapeCoral( // We must specify a heading since the coral is a tube
+        Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90.0))
+      )
+    )
   }
 
   override fun simulationPeriodic() {
     // MapleSim
     SimulatedArena.getInstance().simulationPeriodic()
+    val algaeLocs = SimulatedArena.getInstance()
+      .getGamePiecesArrayByType("Algae")
 
+    // Publish to telemetry using AdvantageKit
+    DogLog.log("FieldSimulation/Algae", algaeLocs)
     // Superstructure Simulation
     robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
     robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()

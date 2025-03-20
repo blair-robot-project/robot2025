@@ -44,8 +44,8 @@ object SwerveConstants {
 
   /** PID gains for turning each module */
   const val TURN_KP = 0.5
-  const val TURN_KI = 0.0
-  const val TURN_KD = 0.0
+  const val TURN_KI = 0.2
+  const val TURN_KD = 0.2
 
   /** Feed forward values for driving each module */
   const val DRIVE_KS = 0.15
@@ -57,8 +57,8 @@ object SwerveConstants {
 
   /** PID gains for driving each module*/
   const val DRIVE_KP = 0.75
-  const val DRIVE_KI = 0.0
-  const val DRIVE_KD = 0.0
+  const val DRIVE_KI = 0.2
+  const val DRIVE_KD = 0.2
 
   /** Drive configuration */
   val WHEEL_RADIUS = Units.inchesToMeters(1.935)

@@ -256,10 +256,7 @@ open class SwerveDrive(
                 SwerveConstants.GEAR_RATIO_LEVEL
               )
             ),
-          Pose2d(
-            field.robotPose.translation,
-            field.robotPose.rotation
-          )
+          RobotConstants.INITIAL_POSE
         )
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSim)
         modules = listOf(

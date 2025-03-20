@@ -82,7 +82,6 @@ class SwerveModuleSim(
     desiredState.speedMetersPerSecond = 0.0
     turnController.setpoint = 0.0
     driveController.setpoint = 0.0
-
     turn.requestVoltage(Volts.of(turnController.calculate(module.steerRelativeEncoderPosition.`in`(Radians))))
     drive.requestVoltage(Volts.of(volts))
   }

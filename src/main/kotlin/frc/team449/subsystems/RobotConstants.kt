@@ -30,7 +30,7 @@ object RobotConstants {
 //      .getTorque(75.0) /
 //    ((SwerveConstants.DRIVE_UPR / (2 * PI)) * ROBOT_WEIGHT * SwerveConstants.DRIVE_GEARING) // m/s/s
 
-  val INITIAL_POSE = Pose2d(0.0, 0.0, Rotation2d())
+  val INITIAL_POSE = Pose2d(3.0, 3.0, Rotation2d())
 
   init {
     println("Drive Max Accel: $MAX_ACCEL")
@@ -40,8 +40,8 @@ object RobotConstants {
 
   /** PID controller for snap to angle turning */
   val SNAP_KP = 5.85
-  val SNAP_KI = 0.0
-  val SNAP_KD = 0.0
+  val SNAP_KI = 0.2
+  val SNAP_KD = 0.5
 
   const val ALIGN_ROT_SPEED = 7 * PI / 2
 
