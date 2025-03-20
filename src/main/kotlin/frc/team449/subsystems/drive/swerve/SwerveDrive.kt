@@ -6,13 +6,12 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.RobotBase.isSimulation
@@ -26,8 +25,10 @@ import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKr
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
 import frc.team449.subsystems.drive.swerve.sim.SwerveModuleSim.Companion.createModuleSim
 import org.ironmaple.simulation.SimulatedArena
+import org.ironmaple.simulation.drivesims.COTS
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 import kotlin.math.hypot
 
 /**
@@ -247,10 +248,17 @@ open class SwerveDrive(
             .withTrackLengthTrackWidth(
               Meters.of(SwerveConstants.TRACKWIDTH),
               Meters.of(SwerveConstants.WHEELBASE)
+            ).withSwerveModule(
+              COTS.ofMark4(
+                DCMotor.getKrakenX60(1),
+                DCMotor.getKrakenX60(1),
+                0.1,
+                SwerveConstants.GEAR_RATIO_LEVEL
+              )
             ),
           Pose2d(
-            Translation2d(1.0, 1.0),
-            Rotation2d(0.0, 0.0)
+            field.robotPose.translation,
+            field.robotPose.rotation
           )
         )
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSim)

@@ -69,6 +69,11 @@ object SwerveConstants {
 
   val DRIVE_SUPPLY_LIMIT = Amps.of(52.5)
   val DRIVE_STATOR_LIMIT = Amps.of(105.0)
+  const val GEAR_RATIO_LEVEL = 4
+
+  val DRIVE_FOC_CURRENT_LIMIT = Amps.of(80.0)
+  val DRIVE_SUPPLY_BOOST = Amps.of(55.0)
+  val DRIVE_SUPPLY_BOOST_TIME = Seconds.of(0.0)
   val STEERING_CURRENT_LIM = Amps.of(40.0)
 
   val KRAKEN_UPDATE_RATE = Hertz.of(100.0)
