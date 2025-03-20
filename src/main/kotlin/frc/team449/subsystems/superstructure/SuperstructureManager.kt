@@ -143,6 +143,13 @@ class SuperstructureManager(
     )
   }
 
+  fun runAutoTest(): Command {
+    return Commands.sequence(
+      requestGoal(SuperstructureGoal.STOW),
+
+    )
+  }
+
   companion object {
     fun createSuperstructureManager(robot: Robot): SuperstructureManager {
       return SuperstructureManager(
