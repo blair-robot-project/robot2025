@@ -1,26 +1,30 @@
 package frc.team449.subsystems.drive.swerve
 
+import choreo.trajectory.SwerveSample
+import dev.doglog.DogLog
+import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
+import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
-import frc.team449.subsystems.vision.PoseSubsystem.*
 import kotlin.math.hypot
 
 /**
  * A Swerve Drive chassis.
  * @param modules An array of [SwerveModule]s that are on the drivetrain.
- * @param ahrs The gyro that is mounted on the chassis.
  * @param maxLinearSpeed The maximum translation speed of the chassis.
  * @param maxRotSpeed The maximum rotation speed of the chassis.
  * @param field The SmartDashboard [Field2d] widget that shows the robot's pose.
@@ -36,8 +40,6 @@ open class SwerveDrive(
 
   var pose: Pose2d = Pose2d()
 
-  var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
-
   /** The kinematics that convert [ChassisSpeeds] into multiple [SwerveModuleState] objects. */
   val kinematics = SwerveDriveKinematics(
     *this.modules.map { it.location }.toTypedArray()
@@ -46,9 +48,45 @@ open class SwerveDrive(
   /** The current speed of the robot's drive. */
   var currentSpeeds = ChassisSpeeds()
 
-  protected var speedMagnitude: Double = 0.0
+  var desiredSpeeds: ChassisSpeeds = ChassisSpeeds()
 
-  fun driveRobotRelative(desiredSpeeds: ChassisSpeeds) {
+  var desiredAngle = 0.0
+  var desiredOmega = 0.0
+
+  // Removed magic numbers
+  private val xController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
+  private val yController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
+  private val headingController: PIDController
+    get() = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
+
+  init {
+    headingController.enableContinuousInput(-Math.PI, Math.PI)
+  }
+  fun followTrajectory(
+    robot: Robot,
+    sample: SwerveSample
+  ) {
+    desiredAngle = MathUtil.angleModulus(sample.heading)
+    desiredOmega = sample.omega
+    val speeds = ChassisSpeeds(
+      sample.vx + xController.calculate(robot.poseSubsystem.pose.x, sample.x),
+      sample.vy + yController.calculate(robot.poseSubsystem.pose.y, sample.y),
+      sample.omega + headingController.calculate(
+        robot.poseSubsystem.pose.rotation.minus(Rotation2d.fromRadians(MathUtil.angleModulus(sample.heading))).radians
+      )
+    )
+    val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      speeds,
+      robot.poseSubsystem.heading
+    )
+
+    // Apply the generated speeds
+    set(newSpeeds)
+  }
+
+  fun set(desiredSpeeds: ChassisSpeeds) {
     this.desiredSpeeds = desiredSpeeds
     // Converts the desired [ChassisSpeeds] into an array of [SwerveModuleState].
     val desiredModuleStates =
@@ -73,14 +111,16 @@ open class SwerveDrive(
     }
   }
 
-  /** Stops the robot's drive. */
-  fun stop() {
-    this.driveRobotRelative(ChassisSpeeds(0.0, 0.0, 0.0))
+  fun getModuleVel(): Double {
+    var totalVel = 0.0
+    modules.forEach { totalVel += it.state.speedMetersPerSecond }
+    return totalVel / modules.size
   }
 
+  /** Stops the robot's drive. */
   fun driveStop(): Command {
     return runOnce {
-      driveRobotRelative(ChassisSpeeds(0.0, 0.0, 0.0))
+      set(ChassisSpeeds(0.0, 0.0, 0.0))
     }
   }
 
@@ -95,7 +135,12 @@ open class SwerveDrive(
       )
     )
 
-    speedMagnitude = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+    logData()
+  }
+
+  /** Stops the robot's drive. */
+  fun stop() {
+    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 
   /** @return An array of [SwerveModulePosition] for each module, containing distance and angle. */
@@ -108,57 +153,20 @@ open class SwerveDrive(
     return Array(modules.size) { i -> modules[i].state }
   }
 
-  override fun initSendable(builder: SendableBuilder) {
-    builder.publishConstString("3.0", "Driving & Steering (Std Order FL, FR, BL, BR)")
-    builder.addDoubleArrayProperty(
-      "3.1 Current States",
-      {
-        doubleArrayOf(
-          modules[0].state.angle.radians,
-          modules[0].state.speedMetersPerSecond,
-          modules[1].state.angle.radians,
-          modules[1].state.speedMetersPerSecond,
-          modules[2].state.angle.radians,
-          modules[2].state.speedMetersPerSecond,
-          modules[3].state.angle.radians,
-          modules[3].state.speedMetersPerSecond,
-        )
-      },
-      null
-    )
-    builder.addDoubleArrayProperty(
-      "3.2 Desired States",
-      {
-        doubleArrayOf(
-          modules[0].desiredState.angle.radians,
-          modules[0].desiredState.speedMetersPerSecond,
-          modules[1].desiredState.angle.radians,
-          modules[1].desiredState.speedMetersPerSecond,
-          modules[2].desiredState.angle.radians,
-          modules[2].desiredState.speedMetersPerSecond,
-          modules[3].desiredState.angle.radians,
-          modules[3].desiredState.speedMetersPerSecond,
-        )
-      },
-      null
-    )
+  fun logData() {
+    DogLog.log("Swerve/FL Module Current State", modules[0].state)
+    DogLog.log("Swerve/FR Module Current State", modules[1].state)
+    DogLog.log("Swerve/BL Module Current State", modules[2].state)
+    DogLog.log("Swerve/BR Module Current State", modules[3].state)
 
-    builder.addDoubleArrayProperty(
-      "3.3 Steering Rotation",
-      {
-        doubleArrayOf(
-          modules[0].state.angle.rotations,
-          modules[1].state.angle.rotations,
-          modules[2].state.angle.rotations,
-          modules[3].state.angle.rotations,
-        )
-      },
-      null
-    )
-  }
+    DogLog.log("Swerve/FL Module Desired State", modules[0].desiredState)
+    DogLog.log("Swerve/FR Module Desired State", modules[1].desiredState)
+    DogLog.log("Swerve/BL Module Desired State", modules[2].desiredState)
+    DogLog.log("Swerve/BR Module Desired State", modules[3].desiredState)
 
-  fun set(fromFieldRelativeSpeeds: ChassisSpeeds?) {
-    TODO("Not yet implemented")
+    DogLog.log("Swerve/Current Speeds", currentSpeeds)
+    DogLog.log("Swerve/Desired Speeds", desiredSpeeds)
+    DogLog.log("Swerve/Translation Speed", hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond))
   }
 
   companion object {

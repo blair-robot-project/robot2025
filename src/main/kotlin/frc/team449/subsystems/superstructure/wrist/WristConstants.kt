@@ -2,7 +2,7 @@ package frc.team449.subsystems.superstructure.wrist
 
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj.util.Color8Bit
@@ -13,28 +13,34 @@ object WristConstants {
   const val WIDTH = 2.0
   val COLOR = Color8Bit(Color.kWhite)
 
-  const val MOTOR_ID = 40 // TODO(Change motor ID.)
+  const val MOTOR_ID = 41
 
-  const val TOLERANCE = 0.05
-  const val GEARING = 1.0 / 300.0
+  val TOLERANCE = Degrees.of(5.0)
+  val ELEVATOR_READY = Degrees.of(50.0)
+  const val GEARING = 17.0 / 576.0
   const val UPR = 2 * PI
 
-  val INVERTED = InvertedValue.CounterClockwise_Positive
+  val INVERTED = InvertedValue.Clockwise_Positive
   val BRAKE_MODE = NeutralModeValue.Brake
 
   const val STATOR_LIM = 80.0
   const val SUPPLY_LIM = 40.0
 
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
+  val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val KS = 0.0
-  const val KV = 0.0
-  const val KA = 0.0
+  val CLIMB_DOWN = Degrees.of(60.0)
 
-  const val KP = 1.0
+  const val KS = 0.020
+  const val KG = 0.258
+  const val KV = 0.63027
+
+  const val KP = 5.9119
   const val KI = 0.0
-  const val KD = 0.0
+  const val KD = 0.096482
 
-  const val CRUISE_VEL = 1.0
-  const val MAX_ACCEL = 1.0
+  val CRUISE_VEL = RotationsPerSecond.of(2.75) // should get to 2.5, max theoretical 2.95
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0) // should get to 3.0, max theoretical 18.842
+
+  val STARTUP_ANGLE = Degrees.of(90.0)
 }

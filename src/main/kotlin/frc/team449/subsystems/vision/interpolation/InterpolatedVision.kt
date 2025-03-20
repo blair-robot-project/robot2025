@@ -16,10 +16,15 @@ object InterpolatedVision {
    * @return a transformed pose that can be added to the pose estimator
    */
   fun interpolatePose(visionInput: Pose2d, camIndex: Int): Pose2d {
-    val usedDataPoints = if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) usedSet[camIndex].redSet else usedSet[camIndex].blueSet
-    return Pose2d(
-      InterpolationUtil.interpolateTranslation(usedDataPoints, visionInput.translation),
-      visionInput.rotation
-    )
+    return if (usedSet.isNotEmpty()) {
+      val usedDataPoints = if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) usedSet[camIndex].redSet else usedSet[camIndex].blueSet
+
+      Pose2d(
+        InterpolationUtil.interpolateTranslation(usedDataPoints, visionInput.translation),
+        visionInput.rotation
+      )
+    } else {
+      visionInput
+    }
   }
 }

@@ -177,3 +177,4 @@ simgui-ds.json
 *.hoot
 *.dat
 /.run/
+/.vscode/settings.json

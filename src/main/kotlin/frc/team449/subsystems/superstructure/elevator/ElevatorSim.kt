@@ -12,12 +12,12 @@ class ElevatorSim(
 ) : Elevator(motor) {
 
   override val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
-    DCMotor.getKrakenX60(1),
-    1 / ElevatorConstants.GEARING,
+    DCMotor.getKrakenX60(2),
+    1 / ElevatorConstants.GEARING_MOTOR_TO_PULLEY,
     ElevatorConstants.CARRIAGE_MASS,
     ElevatorConstants.PULLEY_RADIUS,
-    ElevatorConstants.MIN_HEIGHT,
-    ElevatorConstants.MAX_HEIGHT,
+    ElevatorConstants.SIM_MIN_HEIGHT,
+    ElevatorConstants.SIM_MAX_HEIGHT,
     simulateGravity = false,
     PI / 12
   )
@@ -34,7 +34,7 @@ class ElevatorSim(
 //    println("${request.Position}  -  ${elevatorSim.positionMeters}")
     elevatorSim.update(RobotConstants.LOOP_TIME)
 
-    motorSim.setRawRotorPosition(elevatorSim.positionMeters / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
-    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond / (ElevatorConstants.UPR * ElevatorConstants.GEARING))
+    motorSim.setRawRotorPosition(elevatorSim.positionMeters * ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR)
+    motorSim.setRotorVelocity(elevatorSim.velocityMetersPerSecond * ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR)
   }
 }

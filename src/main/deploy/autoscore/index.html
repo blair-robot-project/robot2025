@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics Stuff</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="scoringContainer" style="display: none;">
+
+        <div class="reefContainer" style="display: none;">
+
+            <div class="reefSelection" style="height: 80%;">
+                <img src="coralLevelImages/coralNone.png" alt="" id="coral">
+                    <img src="locationSelectorImages/locationSelectorNone.png" alt="" id="locationSelect">
+                <div class="Button" id="confirmReefButton">
+                    Choose Robot Alignment
+                </div>
+            </div>
+
+            <div class="reefConfirmation" style="height: 20%; gap: 2vw;">
+                <div class="Button" id="cancel">
+                    Cancel Command
+                </div>
+                <div class="elevatorContainer">
+                    <div class="Button" id="elevatorUp">
+                        Elevator Up
+                    </div>
+                    <div class="Button" id="elevatorDown">
+                        Elevator Down
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="processorContainer" style="display: none;">
+            <div class="buttonContainer">
+                <div class="Button" id="processorScore">
+                    Score Processor
+                </div>
+            </div>
+        </div>
+        
+        <div class="netContainer" style="display: none;">
+            <div class="buttonContainer">
+                <div class="Button" id="netScoreRed">
+                    Score Net on Red Side
+                </div>
+                <div class="Button" id="netScoreBlue">
+                    Score Net on Blue Side
+                </div>
+            </div>
+        </div>
+
+        <div class="coralIntakeContainer" style="display: none;">
+            <div class="buttonContainer">
+                <div class="Button" id="coralIntakeTop">
+                    Intake Coral Top
+                </div>
+                <div class="Button" id="coralIntakeBottom">
+                    Intake Coral Bottom
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="messageContainer" style="display: none;">
+        <h1 id="messageDisplay">NO ROBOT CONNECTION</h1>
+    </div>
+
+    <script src="ntsetup.js"></script>
+    <script src="robotCommunication.js"></script>
+    <script src="processor.js"></script>
+    <script src="net.js"></script>
+    <script src="reefPlacement.js"></script>
+    <script src="coralLevel.js"></script>
+    <script src="coralIntake.js"></script>
+
+</body>
+</html>

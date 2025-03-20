@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.RobotConstants
+import frc.team449.subsystems.drive.DriveSubsystem
 import frc.team449.system.AHRS
 import frc.team449.system.encoder.Encoder
 import frc.team449.system.encoder.QuadEncoder
@@ -33,7 +34,7 @@ open class DifferentialDrive(
   private val feedForward: DifferentialDriveFeedforward,
   private val makeSidePID: () -> PIDController,
   private val trackwidth: Double
-) : SubsystemBase() {
+) : DriveSubsystem, SubsystemBase() {
   init {
     leftEncoder.resetPosition(0.0)
     rightEncoder.resetPosition(0.0)
@@ -68,7 +69,7 @@ open class DifferentialDrive(
   private var rightVel = 0.0
 
   /** Calculate left and right side speeds from given [ChassisSpeeds]. */
-  fun set(desiredSpeeds: ChassisSpeeds) {
+  override fun set(desiredSpeeds: ChassisSpeeds) {
     prevWheelSpeeds = desiredWheelSpeeds
 
     prevLeftVel = desiredWheelSpeeds.leftMetersPerSecond
@@ -98,13 +99,13 @@ open class DifferentialDrive(
   }
 
   /** The (x, y, theta) position of the robot on the field. */
-  open var pose: Pose2d
+  override var pose: Pose2d
     get() = this.poseEstimator.estimatedPosition
     set(pose) {
       this.poseEstimator.resetPosition(ahrs.heading, leftEncoder.position, rightEncoder.position, pose)
     }
 
-  fun stop() {
+  override fun stop() {
     this.set(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 

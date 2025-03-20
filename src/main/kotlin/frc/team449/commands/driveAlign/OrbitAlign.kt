@@ -138,7 +138,7 @@ class OrbitAlign(
       poseSubsystem.heading
     )
 
-    drive.driveRobotRelative(
+    drive.set(
       desVel
     )
   }

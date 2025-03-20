@@ -2,17 +2,18 @@ package frc.team449.subsystems.superstructure.pivot
 
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
+import edu.wpi.first.wpilibj.Encoder
 import kotlin.math.PI
 
 object PivotConstants {
-  const val LEAD_MOTOR_ID = 2 // TODO(Change motor ID.)
-  const val FOLLOWER_MOTOR_ID = 33
+  const val LEAD_MOTOR_ID = 10 // left side
+  const val FOLLOWER_MOTOR_ID = 11
 
   // TODO(Adjust gearing and UPR.)
-  const val GEARING = 1.0 / 75.0
-  const val UPR = 2.0 * PI * (26.0 / 36.0)
+  const val GEARING = 1.0 / 252.0
+  const val UPR = 2.0 * PI
 
   // Simulation Constants
   const val MOMENT_OF_INERTIA = 0.57125221 + 0.085
@@ -20,29 +21,47 @@ object PivotConstants {
   const val MIN_ANGLE = PI / 12
   const val MAX_ANGLE = 5 * PI / 9
 
-  val INVERTED = InvertedValue.CounterClockwise_Positive
+  val STARTING_ANGLE = Degrees.of(0.0)
+
+  val INVERTED = InvertedValue.Clockwise_Positive
   const val FOLLOWER_INVERTED_TO_MASTER = true
   val BRAKE_MODE = NeutralModeValue.Brake
 
+  val CLIMB_MIN_ANGLE = Degrees.of(17.95314300431867)
+  val CLIMB_VOLTAGE = Volts.of(-4.5)
+
   const val STATOR_LIM = 80.0
+
   const val SUPPLY_LIM = 40.0
 
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)
 
-  const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
+  val TOLERANCE = Degrees.of(1.65)
 
-  const val KP = 1.0
+  const val KP = 8.1048
   const val KI = 0.0
-  const val KD = 0.0
+  const val KD = 0.048099
 
   // TODO(Adjust gains.)
-  const val KS = 0.0
-  const val KV = 0.0
-  const val KA = 0.0
-  const val KG_MIN = 0.0 // (KG when elevator is fully retracted.)
-  const val KG_MAX = 0.0 // TODO(KG when elevator is fully extended.)
+  const val KS = 0.085813
+  const val KV = 4.4941
+  const val KG_MIN = 0.15439 // (KG when elevator is fully retracted.)
+  const val KG_MAX = 0.58076 // (KG when elevator is fully extended.)
+  const val KG_MAX_EXTENSION = 1.36934
 
-  const val CRUISE_VEL = 1.0
-  const val MAX_ACCEL = 1.0
+  val CRUISE_VEL = RotationsPerSecond.of(0.325) // max theoretical 0.392
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(0.75) // 5.0, heavily limited by robot tipping
+
+  val RESET_ENC_LIMIT = Degrees.of(0.25)
+
+  /** Encoder Values */
+  const val ABS_ENC_DIO_PORT = 4
+  const val ENC_INVERTED = true
+  val ABS_RANGE = Pair(-0.25, 0.75)
+  const val ENC_RATIO = 2 * PI * (1.0 / 2.0)
+  const val ABS_OFFSET = -2.310589 / ENC_RATIO
+  val QUAD_ENCODER = Encoder(2, 3)
+  const val ENC_CPR = 2048
+  const val SAMPLES_TO_AVERAGE = 127
 }
