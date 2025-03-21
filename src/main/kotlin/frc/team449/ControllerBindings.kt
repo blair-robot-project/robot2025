@@ -70,6 +70,8 @@ class ControllerBindings(
     manualElevator()
     manualPivot()
     manualWrist()
+
+    autoTest()
   }
 
   private fun characterizationBindings() {
@@ -290,13 +292,22 @@ class ControllerBindings(
 
   private fun scoreDescore_l3() {
     driveController.b().onTrue(
-      robot.superstructureManager.runAutoTests()
+      ConditionalCommand(
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L3),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_DESCORE)
+      ) { robot.intake.coralDetected() }
     )
   }
 
   private fun score_l4() {
     driveController.y().onTrue(
       robot.superstructureManager.requestL4()
+    )
+  }
+
+  private fun autoTest() {
+    driveController.povCenter().onTrue(
+      robot.superstructureManager.runAutoTests()
     )
   }
 

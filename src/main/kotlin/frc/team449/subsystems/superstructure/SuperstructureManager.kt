@@ -212,8 +212,7 @@ class SuperstructureManager(
       AutoTestConstants.ELEVATOR_SETPOINT_ONE,
       AutoTestConstants.ELEVATOR_SETPOINT_TWO,
       AutoTestConstants.ELEVATOR_SETPOINT_THREE,
-      AutoTestConstants.ELEVATOR_SETPOINT_FOUR,
-      AutoTestConstants.ELEVATOR_SETPOINT_FIVE
+      AutoTestConstants.ELEVATOR_SETPOINT_FOUR
     ).forEach { pivotTests.addCommands(runTest("elevator", it, AutoTestConstants.ELEVATOR_EXPECTED_TIME,
       AutoTestConstants.ELEVATOR_TIMEOUT, "the height $it in meters")) }
 

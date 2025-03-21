@@ -33,13 +33,12 @@ class AutoTestConstants {
     val PIVOT_SETPOINT_THREE = PIVOT_HARDSTOP_BACK + Units.degreesToRadians(2.5)
     val PIVOT_SETPOINT_FOUR = SuperstructureGoal.L1.pivot.`in`(Radians)
     val PIVOT_SETPOINT_FIVE = SuperstructureGoal.L3.pivot.`in`(Radians)
-    val PIVOT_SETPOINT_SIX = SuperstructureGoal.STOW.pivot.`in`(Radians)
+    val PIVOT_SETPOINT_SIX = Units.degreesToRadians(85.0)
 
-    val ELEVATOR_SETPOINT_ONE = SuperstructureGoal.L3.elevator.`in`(Meters)
-    val ELEVATOR_SETPOINT_TWO = SuperstructureGoal.L1.elevator.`in`(Meters)
-    val ELEVATOR_SETPOINT_THREE = SuperstructureGoal.L4.elevator.`in`(Meters)
-    val ELEVATOR_SETPOINT_FOUR = SuperstructureGoal.L2.elevator.`in`(Meters)
-    val ELEVATOR_SETPOINT_FIVE = SuperstructureGoal.STOW.elevator.`in`(Meters)
+    val ELEVATOR_SETPOINT_ONE= SuperstructureGoal.L2.elevator.`in`(Meters)
+    val ELEVATOR_SETPOINT_TWO = SuperstructureGoal.L4.elevator.`in`(Meters)
+    val ELEVATOR_SETPOINT_THREE = SuperstructureGoal.L1.elevator.`in`(Meters)
+    val ELEVATOR_SETPOINT_FOUR = SuperstructureGoal.L3.elevator.`in`(Meters)
 
     val WRIST_SETPOINT_ONE = SuperstructureGoal.L1.wrist.`in`(Radians)
     val WRIST_SETPOINT_TWO = SuperstructureGoal.L3.wrist.`in`(Radians)
