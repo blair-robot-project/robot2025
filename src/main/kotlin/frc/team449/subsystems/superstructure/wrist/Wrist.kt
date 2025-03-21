@@ -69,26 +69,16 @@ class Wrist(
     }
   }
 
-  fun webComManualUp(voltage: Double): Command {
-    return runOnce {
-      motor.setVoltage(voltage)
-      request.Position = positionSupplier.get()
-    }
-  }
-
-  fun webComManualDown(voltage: Double): Command {
-    return runOnce {
-      motor.setVoltage(-voltage)
-      request.Position = positionSupplier.get()
-    }
-  }
-
   fun stop(): Command {
     return this.runOnce { motor.stopMotor() }
   }
 
   fun atSetpoint(): Boolean {
     return (abs(positionSupplier.get() - targetSupplier.get()) < WristConstants.TOLERANCE.`in`(Radians))
+  }
+
+  fun atSetpoint(tolerance: Double): Boolean {
+    return (abs(positionSupplier.get() - targetSupplier.get()) < tolerance)
   }
 
   fun elevatorReady(): Boolean {

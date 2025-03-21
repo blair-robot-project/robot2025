@@ -290,10 +290,7 @@ class ControllerBindings(
 
   private fun scoreDescore_l3() {
     driveController.b().onTrue(
-      ConditionalCommand(
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L3),
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_DESCORE)
-      ) { robot.intake.coralDetected() }
+      robot.superstructureManager.runAutoTests()
     )
   }
 

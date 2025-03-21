@@ -154,6 +154,10 @@ open class Elevator(
     return (abs(positionSupplier.get() - request.Position) < ElevatorConstants.TOLERANCE)
   }
 
+  fun atSetpoint(tolerance: Double): Boolean {
+    return (abs(positionSupplier.get() - request.Position) < tolerance)
+  }
+
   override fun periodic() {
     logData()
   }
