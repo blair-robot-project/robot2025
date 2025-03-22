@@ -5,6 +5,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.Encoder
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.math.PI
 
 object PivotConstants {
@@ -22,6 +23,13 @@ object PivotConstants {
   const val MAX_ANGLE = 5 * PI / 9
 
   val STARTING_ANGLE = Degrees.of(0.0)
+
+  val STOW_ANGLE = SuperstructureGoal.STOW.pivot
+
+  val HOMING_VOLTAGE = Volts.of(1.5) // placeholder
+  val HOMING_TIME_CUTOFF = Seconds.of(4.0) // placeholder
+  val HOMING_CURRENT_CUTOFF = Amps.of(20.0) // placeholder
+  val HOMING_MAX_VEL = RotationsPerSecond.of(0.05) // placeholder
 
   val INVERTED = InvertedValue.Clockwise_Positive
   const val FOLLOWER_INVERTED_TO_MASTER = true

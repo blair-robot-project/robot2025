@@ -7,9 +7,12 @@ import edu.wpi.first.units.Units.Hertz
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color8Bit
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.math.PI
 
 object ElevatorConstants {
+  var STOW_HEIGHT = SuperstructureGoal.STOW.elevator
+
   val ANGLE = Units.radiansToDegrees(PI / 12) // DEGREES
   const val WIDTH = 7.0
   const val DESIRED_WIDTH = 4.0
@@ -29,6 +32,11 @@ object ElevatorConstants {
 
   const val STATOR_LIM = 90.0
   const val SUPPLY_LIM = 50.0
+
+  val HOMING_VOLTAGE = edu.wpi.first.units.Units.Volts.of(-1.5) // placeholder
+  val HOMING_TIME_CUTOFF = edu.wpi.first.units.Units.Seconds.of(1.5) // placehodler
+  val HOMING_CUTOFF = edu.wpi.first.units.Units.Amps.of(10.0) // placeholder
+  val HOMING_MAX_VEL = edu.wpi.first.units.Units.RotationsPerSecond.of(0.05) // placeholder
 
   val VALUE_UPDATE_RATE: Frequency = Hertz.of(50.0)
   val REQUEST_UPDATE_RATE: Frequency = Hertz.of(100.0)

@@ -9,10 +9,13 @@ import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -32,6 +35,8 @@ class Pivot(
   val positionSupplier = Supplier { motor.position.valueAsDouble }
   val velocitySupplier = Supplier { motor.velocity.valueAsDouble }
   val targetSupplier = Supplier { request.Position }
+
+  var timer = Timer()
 
   lateinit var pivotFeedForward: PivotFeedForward
 
@@ -53,6 +58,39 @@ class Pivot(
   ).withEnableFOC(false)
 
   private val isReal = RobotBase.isReal()
+
+  fun currentHoming(): Command {
+    return FunctionalCommand(
+      {
+        timer.stop()
+        timer.reset()
+      },
+      {
+        motor.setVoltage(PivotConstants.HOMING_VOLTAGE.`in`(Volts))
+        if (motor.statorCurrent.value > PivotConstants.HOMING_CURRENT_CUTOFF &&
+          motor.velocity.value < PivotConstants.HOMING_MAX_VEL
+        ) {
+          timer.start()
+        } else {
+          timer.stop()
+          timer.reset()
+        }
+      },
+      {
+        motor.setPosition(PivotConstants.STOW_ANGLE.`in`(Rotations))
+        println("COMPLETED PIVOT CURRENT HOMING, SET TO STOW ANGLE")
+      },
+      {
+        motor.statorCurrent.value > PivotConstants.HOMING_CURRENT_CUTOFF &&
+          timer.hasElapsed(PivotConstants.HOMING_TIME_CUTOFF.`in`(Seconds))
+      }
+    )
+      .andThen(stow())
+  }
+
+  fun stow(): Command {
+    return setPosition(PivotConstants.STOW_ANGLE.`in`(Degrees))
+  }
 
   fun setPosition(position: Double): Command {
     return this.runOnce {

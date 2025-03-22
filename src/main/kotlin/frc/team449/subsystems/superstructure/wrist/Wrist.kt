@@ -9,9 +9,12 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.ChassisReference
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
@@ -29,6 +32,41 @@ class Wrist(
   ).withEnableFOC(false)
 
   lateinit var wristFeedForward: WristFeedForward
+
+  var timer = Timer()
+
+  fun currentHoming(): Command {
+    return FunctionalCommand(
+      {
+        timer.stop()
+        timer.reset()
+      },
+      {
+        motor.setVoltage(WristConstants.HOMING_VOLTAGE.`in`(Volts))
+        if (motor.statorCurrent.value > WristConstants.HOMING_CURRENT_CUTOFF &&
+          motor.velocity.value < WristConstants.HOMING_MAX_VEL
+        ) {
+          timer.start()
+        } else {
+          timer.stop()
+          timer.reset()
+        }
+      },
+      {
+        motor.setPosition(WristConstants.STOW_ANGLE.`in`(Rotations))
+        println("COMPLETED PIVOT CURRENT HOMING, SET TO STOW ANGLE")
+      },
+      {
+        motor.statorCurrent.value > WristConstants.HOMING_CURRENT_CUTOFF &&
+          timer.hasElapsed(WristConstants.HOMING_TIME_CUTOFF.`in`(Seconds))
+      }
+    )
+      .andThen(stow())
+  }
+
+  fun stow(): Command {
+    return setPosition(WristConstants.STOW_ANGLE.`in`(Degrees))
+  }
 
   fun setPosition(position: Double): Command {
     return this.runOnce {

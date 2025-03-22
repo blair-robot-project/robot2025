@@ -6,12 +6,20 @@ import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj.util.Color8Bit
+import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.math.PI
 
 object WristConstants {
   const val ANGLE = 0.0
   const val WIDTH = 2.0
   val COLOR = Color8Bit(Color.kWhite)
+
+  var STOW_ANGLE = SuperstructureGoal.STOW.wrist
+
+  var HOMING_VOLTAGE = Volts.of(1.5) // placeholder
+  val HOMING_TIME_CUTOFF = Seconds.of(4.0) // placeholder
+  val HOMING_CURRENT_CUTOFF = Amps.of(20.0) // placeholder
+  val HOMING_MAX_VEL = RotationsPerSecond.of(0.05) // placeholder
 
   const val MOTOR_ID = 41
 
