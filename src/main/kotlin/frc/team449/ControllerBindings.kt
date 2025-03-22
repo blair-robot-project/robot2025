@@ -67,6 +67,8 @@ class ControllerBindings(
     scoreL3()
     stopReefAlign()
 
+    currentHoming()
+
     manualElevator()
     manualPivot()
     manualWrist()
@@ -77,6 +79,12 @@ class ControllerBindings(
 //    runClimbWheels()
 
 //    pivotCharacterizaton()
+  }
+
+  private fun currentHoming() {
+    driveController.povCenter().onTrue(robot.elevator.currentHoming())
+//    driveController.povCenter().onTrue(robot.wrist.currentHoming())
+//    driveController.povCenter().onTrue(robot.pivot.currentHoming())
   }
 
   private fun nonRobotBindings() {
