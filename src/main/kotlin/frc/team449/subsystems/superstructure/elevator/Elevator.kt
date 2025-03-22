@@ -17,9 +17,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.superstructure.SuperstructureManager
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
@@ -97,7 +95,7 @@ open class Elevator(
         println("COMPLETED ELEVATOR CURRENT HOMING, SET TO STOW POSITION")
       },
       {
-        motor.statorCurrent.value > ElevatorConstants.HOMING_CUTOFF &&
+        motor.statorCurrent.value > ElevatorConstants.HOMING_CUTOFF ||
           timer.hasElapsed(ElevatorConstants.HOMING_TIME_CUTOFF.`in`(Seconds))
       }
     )

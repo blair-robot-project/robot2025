@@ -401,8 +401,9 @@ open class Routines(
 
     l4ETrajectory.done().onTrue(
       ScoreL4(robot, FieldConstants.ReefSide.LEFT)
-        .andThen(rightStationTrajectory.cmd()
-          .alongWith(PremoveIntake(robot))
+        .andThen(
+          rightStationTrajectory.cmd()
+            .alongWith(PremoveIntake(robot))
         )
     )
 

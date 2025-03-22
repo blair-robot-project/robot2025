@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
@@ -57,7 +56,7 @@ class Wrist(
         println("COMPLETED PIVOT CURRENT HOMING, SET TO STOW ANGLE")
       },
       {
-        motor.statorCurrent.value > WristConstants.HOMING_CURRENT_CUTOFF &&
+        motor.statorCurrent.value > WristConstants.HOMING_CURRENT_CUTOFF ||
           timer.hasElapsed(WristConstants.HOMING_TIME_CUTOFF.`in`(Seconds))
       }
     )
