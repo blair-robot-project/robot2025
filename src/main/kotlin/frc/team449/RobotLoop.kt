@@ -129,7 +129,6 @@ class RobotLoop : TimedRobot() {
 
   override fun driverStationConnected() {
     FieldConstants.configureReef(DriverStation.getAlliance().getOrDefault(DriverStation.Alliance.Blue))
-    robot.webCom.setUpNT()
   }
 
   override fun robotPeriodic() {

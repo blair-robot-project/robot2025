@@ -5,7 +5,6 @@ import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
-import frc.team449.subsystems.WebConnection
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
 import frc.team449.subsystems.light.Light.Companion.createLight
@@ -61,6 +60,4 @@ class Robot : RobotBase() {
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 
   val light = createLight()
-
-  val webCom = WebConnection(this)
 }
