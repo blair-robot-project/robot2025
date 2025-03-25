@@ -4,12 +4,10 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.*
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveModule
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 import org.ironmaple.simulation.motorsims.SimulatedMotorController
 
 class SwerveModuleKrakenSim(name: String, moduleIn: SwerveModuleSimulation, locationIn: Translation2d) : SwerveModule {
@@ -47,16 +45,15 @@ class SwerveModuleKrakenSim(name: String, moduleIn: SwerveModuleSimulation, loca
   override val desiredState: SwerveModuleState = SwerveModuleState(
     0.0,
     Rotation2d()
-  );
+  )
 
   /** The module's [SwerveModuleState], containing speed and angle. */
   override var state: SwerveModuleState
     get() = module.currentState
     set(value) {
-      module.currentState.angle = value.angle;
-      module.currentState.speedMetersPerSecond = value.speedMetersPerSecond;
+      module.currentState.angle = value.angle
+      module.currentState.speedMetersPerSecond = value.speedMetersPerSecond
     }
-
 
   /** The module's [SwerveModulePosition], containing distance and angle. */
   override val position: SwerveModulePosition
@@ -66,14 +63,14 @@ class SwerveModuleKrakenSim(name: String, moduleIn: SwerveModuleSimulation, loca
       module.steerAbsoluteFacing
     )
 
-
   override fun setVoltage(volts: Double) {
     drive.requestVoltage(Volts.of(volts))
   }
 
   /** Set module speed to zero but keep module angle the same. */
   override fun stop() {
-    drive.requestVoltage(Volts.of(0.0));}
+    drive.requestVoltage(Volts.of(0.0));
+  }
 
   override fun update() {}
 }

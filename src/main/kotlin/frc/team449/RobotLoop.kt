@@ -36,7 +36,6 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-
 /** The main class of the robot, constructs all the subsystems
  * and initializes default commands . */
 class RobotLoop : TimedRobot() {
@@ -116,9 +115,6 @@ class RobotLoop : TimedRobot() {
     if (RobotBase.isReal()) {
       robot.wrist.startupZero()
     }
-
-
-
 
     SimulatedArena.getInstance().addGamePiece(
       ReefscapeCoral( // We must specify a heading since the coral is a tube

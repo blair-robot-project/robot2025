@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.Timer
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.Encoder
 import frc.team449.system.motor.createSparkMax
-import frc.team449.subsystems.drive.swerve.sim.SwerveModuleKrakenSim
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sign
@@ -196,7 +195,7 @@ open class SwerveModuleKraken(
           location
         )
       } else {
-        return SwerveModuleSimKraken( //what is this?! nvm
+        return SwerveModuleSimKraken( // what is this?! nvm
           name,
           drivingMotor,
           turnMotor,
@@ -208,8 +207,6 @@ open class SwerveModuleKraken(
     }
   }
 }
-
-
 
 /** A "simulated" swerve module. Immediately reaches to its desired state. */
 

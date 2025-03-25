@@ -4,7 +4,6 @@ import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.path.GoalEndState
 import com.pathplanner.lib.path.PathConstraints
 import com.pathplanner.lib.path.PathPlannerPath
-import com.pathplanner.lib.pathfinding.LocalADStar
 import com.pathplanner.lib.pathfinding.RemoteADStar
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory
 import edu.wpi.first.math.MathUtil
@@ -255,7 +254,7 @@ class AutoScorePathfinder(private val robot: Robot, private val endPose: Pose2d,
 
     val distanceToReef = currentPose.translation.getDistance(reefCenter)
     val reefPushbackTranslation = if (expectedTime > 0.5 && distanceToReef < 1.75 && distance > 0.6505 && scoringReef) {
-      currentPose.translation.minus(reefCenter) * (distance - 0.6505) * pushbackMultiply * (if (expectedTime > 1.0) 1.0 else (expectedTime - 0.5)*2)
+      currentPose.translation.minus(reefCenter) * (distance - 0.6505) * pushbackMultiply * (if (expectedTime > 1.0) 1.0 else (expectedTime - 0.5) * 2)
     } else {
       Translation2d(0.0, 0.0)
     }

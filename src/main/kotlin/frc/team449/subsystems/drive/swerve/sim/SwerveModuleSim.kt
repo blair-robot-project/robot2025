@@ -1,16 +1,12 @@
 package frc.team449.subsystems.drive.swerve.sim
 
-import com.ctre.phoenix6.controls.VelocityVoltage
-import com.ctre.phoenix6.swerve.SwerveRequest
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveModule
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation
@@ -26,7 +22,7 @@ class SwerveModuleSim(
   private val turnController: PIDController,
   private val driveController: PIDController,
   override val location: Translation2d
-): SwerveModule {
+) : SwerveModule {
   init {
     turnController.enableContinuousInput(.0, 2 * PI)
     turnController.reset()
@@ -77,7 +73,6 @@ class SwerveModuleSim(
       )
     }
 
-
   override fun setVoltage(volts: Double) {
     desiredState.speedMetersPerSecond = 0.0
     turnController.setpoint = 0.0
@@ -94,13 +89,13 @@ class SwerveModuleSim(
   override fun update() {
     // Drive Motor
     val drivePID: Double =
-    driveController.calculate(
-      module.currentState.speedMetersPerSecond,
-      desiredState.speedMetersPerSecond
-    )
+      driveController.calculate(
+        module.currentState.speedMetersPerSecond,
+        desiredState.speedMetersPerSecond
+      )
     val driveVoltage: Voltage = Volts.of(
       drivePID + sign(desiredState.speedMetersPerSecond - module.currentState.speedMetersPerSecond) *
-      SwerveConstants.DRIVE_KS
+        SwerveConstants.DRIVE_KS
     )
     drive.requestVoltage(driveVoltage)
     // Turn Motor
@@ -119,11 +114,12 @@ class SwerveModuleSim(
       name: String,
       module: SwerveModuleSimulation,
       location: Translation2d
-      ): SwerveModuleSim {
+    ): SwerveModuleSim {
       return SwerveModuleSim(
         name,
         module,
-        PIDController(SwerveConstants.TURN_KP,
+        PIDController(
+          SwerveConstants.TURN_KP,
           SwerveConstants.TURN_KI,
           SwerveConstants.TURN_KD
         ),

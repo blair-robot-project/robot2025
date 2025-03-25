@@ -2,10 +2,10 @@ package frc.team449.subsystems.drive.swerve
 
 import choreo.trajectory.SwerveSample
 import dev.doglog.DogLog
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -14,7 +14,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.wpilibj.RobotBase.isReal
-import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -28,7 +27,6 @@ import org.ironmaple.simulation.SimulatedArena
 import org.ironmaple.simulation.drivesims.COTS
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig
 import kotlin.math.hypot
 
 /**
