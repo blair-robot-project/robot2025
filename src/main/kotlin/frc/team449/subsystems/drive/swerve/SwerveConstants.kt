@@ -66,6 +66,7 @@ object SwerveConstants {
   val DRIVE_UPR = 2 * PI * WHEEL_RADIUS
   const val TURN_UPR = 2 * PI
   val MAX_ATTAINABLE_MK4I_SPEED = Units.feetToMeters(15.5) // (12 - DRIVE_KS) / DRIVE_KV
+  val WHEEL_COF = 1.0 // TODO Get actual wheel coefficient
 
   val DRIVE_SUPPLY_LIMIT = Amps.of(52.5)
   val DRIVE_STATOR_LIMIT = Amps.of(105.0)

@@ -182,11 +182,9 @@ class RobotLoop : TimedRobot() {
   override fun simulationPeriodic() {
     // MapleSim
     SimulatedArena.getInstance().simulationPeriodic()
-    val algaeLocs = SimulatedArena.getInstance()
-      .getGamePiecesArrayByType("Algae")
-
-    // Publish to telemetry using AdvantageKit
-    DogLog.log("FieldSimulation/Algae", algaeLocs)
+    // Publish Game Piece Positions
+    DogLog.log("FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"))
+    DogLog.log("FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"))
     // Superstructure Simulation
     robot.elevator.elevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.positionSupplier.get()
     robot.elevator.desiredElevatorLigament.length = ElevatorConstants.MIN_VIS_HEIGHT + robot.elevator.targetSupplier.get()

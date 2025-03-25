@@ -95,7 +95,8 @@ class SwerveModuleSim(
     // Drive Motor
     val drivePID: Double =
     driveController.calculate(
-      module.currentState.speedMetersPerSecond
+      module.currentState.speedMetersPerSecond,
+      desiredState.speedMetersPerSecond
     )
     val driveVoltage: Voltage = Volts.of(
       drivePID + sign(desiredState.speedMetersPerSecond - module.currentState.speedMetersPerSecond) *

@@ -252,7 +252,7 @@ open class SwerveDrive(
               COTS.ofMark4(
                 DCMotor.getKrakenX60(1),
                 DCMotor.getKrakenX60(1),
-                0.1,
+                SwerveConstants.WHEEL_COF,
                 SwerveConstants.GEAR_RATIO_LEVEL
               )
             ),
