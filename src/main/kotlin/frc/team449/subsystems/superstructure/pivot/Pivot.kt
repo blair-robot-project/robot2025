@@ -129,6 +129,10 @@ class Pivot(
     return (abs(positionSupplier.get() - request.Position) < tolerance)
   }
 
+  fun getMotorVoltage(): Double {
+    return motor.motorVoltage.valueAsDouble
+  }
+
   override fun periodic() {
     logData()
 

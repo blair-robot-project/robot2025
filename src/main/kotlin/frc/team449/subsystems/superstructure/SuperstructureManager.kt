@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
@@ -24,6 +23,7 @@ import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.subsystems.superstructure.wrist.Wrist
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.function.BooleanSupplier
+import java.util.function.DoubleSupplier
 
 class SuperstructureManager(
   private val elevator: Elevator,
@@ -37,6 +37,7 @@ class SuperstructureManager(
   //auto test vars
   private var autotestStart = ""
   private val timer = Timer()
+  private lateinit var autotestCommand: Command
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
@@ -157,27 +158,31 @@ class SuperstructureManager(
     )
   }
 
+  private fun checkVoltageWait(boolSupplier: BooleanSupplier, dblSupplier: DoubleSupplier, highVoltageVal: Double): Command {
+    return InstantCommand({ if(dblSupplier.asDouble > highVoltageVal)
+      println("Voltage is High! Currently Reading: " + dblSupplier.asDouble) }).until(boolSupplier)
+  }
+
   private fun runTest(name: String, setpoint: Double, slowDeadline: Double, realDeadline: Double, setpointName: String): Command {
-    return runOnce({
-      timer.restart()
-      autotestStart = when (name) {
-        "pivot" -> "${Units.radiansToDegrees(pivot.positionSupplier.get())} degrees"
-        "elevator" -> "${Units.radiansToDegrees(elevator.positionSupplier.get())} meters"
-        else -> "${Units.radiansToDegrees(wrist.positionSupplier.get())} degrees"
-      }
-    }).andThen(Commands.sequence(
+    return Commands.sequence(
+      InstantCommand({
+        timer.restart()
+        autotestStart = when (name) {
+          "pivot" -> "${Units.radiansToDegrees(pivot.positionSupplier.get())} degrees"
+          "elevator" -> "${Units.radiansToDegrees(elevator.positionSupplier.get())} meters"
+          else -> "${Units.radiansToDegrees(wrist.positionSupplier.get())} degrees"
+        }
+      }),
       when (name) {
         "pivot" -> pivot.setPosition(setpoint)
         "elevator" -> elevator.setPosition(setpoint)
         else -> wrist.setPosition(setpoint)
       },
-      WaitUntilCommand(
-        when (name) {
-          "pivot" -> BooleanSupplier { pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }
-          "elevator" -> BooleanSupplier { elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }
-          else -> BooleanSupplier { wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }
-        }
-      )
+      when (name) {
+        "pivot" -> checkVoltageWait({ pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, AutoTestConstants.HIGH_PIVOT_VOLTAGE)
+        "elevator" -> checkVoltageWait({ elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, AutoTestConstants.HIGH_ELEVATOR_VOLTAGE)
+        else -> checkVoltageWait({ wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, AutoTestConstants.HIGH_WRIST_VOLTAGE)
+      }
         .raceWith(WaitUntilCommand{timer.get() > realDeadline})
         .finallyDo(Runnable {
           if (timer.get() > slowDeadline) {
@@ -191,14 +196,14 @@ class SuperstructureManager(
           }
         }),
       WaitCommand(when (name) {
-        "pivot" -> AutoTestConstants.WAIT_BETWEEN_PIVOT_TESTS
-        "elevator" -> AutoTestConstants.WAIT_BETWEEN_ELEVATOR_TESTS
-        else -> AutoTestConstants.WAIT_BETWEEN_WRIST_TESTS
+        "pivot" -> AutoTestConstants.PIVOT_WAIT
+        "elevator" -> AutoTestConstants.ELEVATOR_WAIT
+        else -> AutoTestConstants.WRIST_WAIT
       })
-    ))
+    )
   }
 
-  private fun setUpPremoveTests(): List<SequentialCommandGroup> {
+  private fun generatePremoveTests(): List<Command> {
     val pivotTests = SequentialCommandGroup()
     listOf(
       AutoTestConstants.PIVOT_SETPOINT_ONE,
@@ -231,9 +236,13 @@ class SuperstructureManager(
 
     return listOf(
       pivotTests,
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
       elevatorTests,
-      wristTests
-    )
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      wristTests,
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      requestGoal(SuperstructureGoal.STOW)
+      )
   }
 
   private fun doPivotROM(cruiseVel: AngularVelocity, maxAccel: AngularAcceleration): Command {
@@ -243,9 +252,9 @@ class SuperstructureManager(
         PivotConstants.changeCruiseVel(cruiseVel)
       }),
       pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_FRONT - Units.degreesToRadians(1.0)),
-      WaitUntilCommand { pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) },
+      checkVoltageWait({ pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, AutoTestConstants.HIGH_PIVOT_VOLTAGE),
       pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
-      WaitUntilCommand { pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }
+      checkVoltageWait({ pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, AutoTestConstants.HIGH_PIVOT_VOLTAGE)
     )
   }
 
@@ -256,9 +265,9 @@ class SuperstructureManager(
         ElevatorConstants.changeCruiseVel(cruiseVel)
       }),
       elevator.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
-      WaitUntilCommand { elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) },
+      checkVoltageWait({ elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, AutoTestConstants.HIGH_ELEVATOR_VOLTAGE),
       elevator.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
-      WaitUntilCommand { elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) },
+      checkVoltageWait({ elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, AutoTestConstants.HIGH_ELEVATOR_VOLTAGE),
     )
   }
 
@@ -269,16 +278,14 @@ class SuperstructureManager(
         WristConstants.changeCruiseVel(cruiseVel)
       }),
       wrist.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
-      WaitUntilCommand { wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) },
+      checkVoltageWait({ wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, AutoTestConstants.HIGH_WRIST_VOLTAGE),
       wrist.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
-      WaitUntilCommand { wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) },
+      checkVoltageWait({ wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, AutoTestConstants.HIGH_WRIST_VOLTAGE),
     )
   }
 
   private fun generateROMTests(): List<Command> {
     val pivotRomTest = Commands.sequence(
-      pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
-      WaitUntilCommand { pivot.atSetpoint() },
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.6, PivotConstants.MAX_ACCEL_VALUE / 1.6),
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.33, PivotConstants.MAX_ACCEL_VALUE / 1.33),
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE, PivotConstants.MAX_ACCEL_VALUE),
@@ -302,28 +309,65 @@ class SuperstructureManager(
       
     return listOf(
       pivotRomTest,
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
       elevatorRomTest,
-      requestGoal(SuperstructureGoal.STOW)
-    )
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      wristRomTest,
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      requestGoal(SuperstructureGoal.STOW),
+      WaitCommand(AutoTestConstants.EXTERNAL_WAIT)
+      )
     
   }
 
+  private fun getUserConfirmation(scanner: java.util.Scanner, timeout: Double): Boolean {
+    var input: String
+    timer.restart()
+    while(timer.get() < timeout) {
+      if(scanner.hasNextLine()) {
+        println("we got input")
+        input = scanner.nextLine().lowercase().trim()
+        println(input)
+        if(input == "s") {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  private fun runWithCancel(command: Command, scanner: java.util.Scanner): Boolean {
+    command.schedule()
+    while(command.isScheduled) {
+      if(scanner.hasNextLine() && scanner.nextLine().lowercase().trim() == "c") {
+        command.cancel()
+        return false
+      }
+    }
+    return true
+  }
+
   fun runAutoTests(): Command {
-    val tests = setUpPremoveTests()
+    val premoveTests = SequentialCommandGroup()
+    generatePremoveTests().forEach { premoveTests.addCommands(it) }
     val romTests = SequentialCommandGroup()
     generateROMTests().forEach { romTests.addCommands(it) }
-    return Commands.sequence(
-      romTests,
-      requestGoal(SuperstructureGoal.STOW),
-      tests[0],
-      WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
-      tests[1],
-      WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
-      tests[2],
-      WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
-      requestGoal(SuperstructureGoal.STOW),
-      PrintCommand("Autotest is done.")
-    )
+
+    autotestCommand = runOnce({
+      val scanner = java.util.Scanner(System.`in`)
+      println("Welcome to autotest. Enter 's' to start testing. Enter anything else to cancel.")
+      if (getUserConfirmation(scanner, AutoTestConstants.INPUT_TIMEOUT)) {
+        println("Starting range of motion tests, enter c to cancel")
+        romTests.schedule()
+        if (runWithCancel(romTests, scanner)) {
+          println("Enter 's' to start testing specific locations. Enter anything else to cancel.")
+          getUserConfirmation(scanner, AutoTestConstants.INPUT_TIMEOUT)
+          runWithCancel(romTests, scanner)
+        }
+      }
+      println("autotest is done.")
+    })
+    return autotestCommand
   }
 
   companion object {

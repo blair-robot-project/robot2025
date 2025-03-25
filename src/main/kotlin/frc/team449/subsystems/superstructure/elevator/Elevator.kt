@@ -142,6 +142,10 @@ open class Elevator(
     }
   }
 
+  fun getMotorVoltage(): Double {
+    return motor.motorVoltage.valueAsDouble
+  }
+
   fun setVoltage(voltage: Double) {
     return motor.setVoltage(voltage)
   }

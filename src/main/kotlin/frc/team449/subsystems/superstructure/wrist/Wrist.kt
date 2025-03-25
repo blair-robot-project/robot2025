@@ -94,6 +94,10 @@ class Wrist(
     logData()
   }
 
+  fun getMotorVoltage(): Double {
+    return motor.motorVoltage.valueAsDouble
+  }
+
   override fun simulationPeriodic() {
     val motorSimState = motor.simState
     motorSimState.Orientation = ChassisReference.Clockwise_Positive

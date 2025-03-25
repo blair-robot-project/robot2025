@@ -22,11 +22,12 @@ class AutoTestConstants {
     val WRIST_HARDSTOP_BACK = Units.degreesToRadians(4.790334)
     val WRIST_HARDSTOP_FRONT = Units.degreesToRadians(220.928943)
 
-    const val WAIT_BETWEEN_PIVOT_TESTS = 0.25
-    const val WAIT_BETWEEN_ELEVATOR_TESTS = 0.6
-    const val WAIT_BETWEEN_WRIST_TESTS = 0.45
+    const val PIVOT_WAIT = 0.25 //s
+    const val ELEVATOR_WAIT = 0.6 //s
+    const val WRIST_WAIT = 0.45 //s
+    const val EXTERNAL_WAIT = 0.25 //s
 
-    const val WAIT_BETWEEN_EXTERNAL_TESTS = 0.25
+    const val INPUT_TIMEOUT = 7.5 //s
 
     val PIVOT_SETPOINT_ONE = PIVOT_HARDSTOP_FRONT - Units.degreesToRadians(2.5)
     val PIVOT_SETPOINT_TWO = (PIVOT_HARDSTOP_FRONT - PIVOT_HARDSTOP_BACK) / 2
@@ -45,6 +46,10 @@ class AutoTestConstants {
     val WRIST_SETPOINT_THREE = SuperstructureGoal.L2.wrist.`in`(Radians)
     val WRIST_SETPOINT_FOUR = SuperstructureGoal.L4.wrist.`in`(Radians)
     val WRIST_SETPOINT_FIVE = SuperstructureGoal.STOW.wrist.`in`(Radians)
+
+    val HIGH_PIVOT_VOLTAGE = 15.0
+    val HIGH_ELEVATOR_VOLTAGE = 17.5
+    val HIGH_WRIST_VOLTAGE = 12.5
 
   }
 
