@@ -3,6 +3,8 @@ package frc.team449.subsystems.superstructure.pivot
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.AngularAcceleration
+import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.Encoder
 import kotlin.math.PI
@@ -50,8 +52,18 @@ object PivotConstants {
   const val KG_MAX = 0.58076 // (KG when elevator is fully extended.)
   const val KG_MAX_EXTENSION = 1.36934
 
-  val CRUISE_VEL = RotationsPerSecond.of(0.325) // max theoretical 0.392
-  val MAX_ACCEL = RotationsPerSecondPerSecond.of(0.75) // 5.0, heavily limited by robot tipping
+
+  val CRUISE_VEL_VALUE = RotationsPerSecond.of(0.325) // max theoretical 0.392
+  val MAX_ACCEL_VALUE = RotationsPerSecondPerSecond.of(0.75) // 5.0, heavily limited by robot tipping
+  var CRUISE_VEL = CRUISE_VEL_VALUE
+  var MAX_ACCEL = MAX_ACCEL_VALUE
+
+  fun changeCruiseVel(newCruiseVel: AngularVelocity) {
+    CRUISE_VEL = newCruiseVel
+  }
+  fun changeMaxAccel(newMaxAccel: AngularAcceleration) {
+    MAX_ACCEL = newMaxAccel
+  }
 
   val RESET_ENC_LIMIT = Degrees.of(0.25)
 

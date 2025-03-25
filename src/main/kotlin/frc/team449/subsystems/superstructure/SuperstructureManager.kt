@@ -3,13 +3,14 @@ package frc.team449.subsystems.superstructure
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Meters
 import edu.wpi.first.units.Units.Radians
+import edu.wpi.first.units.measure.AngularAcceleration
+import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
@@ -17,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.superstructure.elevator.Elevator
+import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import frc.team449.subsystems.superstructure.pivot.Pivot
+import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.subsystems.superstructure.wrist.Wrist
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.function.BooleanSupplier
@@ -195,7 +198,7 @@ class SuperstructureManager(
     ))
   }
 
-  fun runAutoTests(): Command {
+  private fun setUpPremoveTests(): List<SequentialCommandGroup> {
     val pivotTests = SequentialCommandGroup()
     listOf(
       AutoTestConstants.PIVOT_SETPOINT_ONE,
@@ -226,13 +229,97 @@ class SuperstructureManager(
     ).forEach { pivotTests.addCommands(runTest("wrist", it, AutoTestConstants.WRIST_EXPECTED_TIME,
       AutoTestConstants.WRIST_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
 
-    return Commands.sequence(
-      requestGoal(SuperstructureGoal.STOW),
+    return listOf(
       pivotTests,
-      WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
       elevatorTests,
+      wristTests
+    )
+  }
+
+  private fun doPivotROM(cruiseVel: AngularVelocity, maxAccel: AngularAcceleration): Command {
+    return Commands.sequence(
+      InstantCommand({
+        PivotConstants.changeMaxAccel(maxAccel)
+        PivotConstants.changeCruiseVel(cruiseVel)
+      }),
+      pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_FRONT - Units.degreesToRadians(1.0)),
+      WaitUntilCommand { pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) },
+      pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
+      WaitUntilCommand { pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }
+    )
+  }
+
+  private fun doElevatorROM(cruiseVel: Double, maxAccel: Double): Command {
+    return Commands.sequence(
+      InstantCommand({
+        ElevatorConstants.changeMaxAccel(maxAccel)
+        ElevatorConstants.changeCruiseVel(cruiseVel)
+      }),
+      elevator.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
+      WaitUntilCommand { elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) },
+      elevator.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
+      WaitUntilCommand { elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) },
+    )
+  }
+
+  private fun doWristROM(cruiseVel: AngularVelocity, maxAccel: AngularAcceleration): Command {
+    return Commands.sequence(
+      InstantCommand({
+        WristConstants.changeMaxAccel(maxAccel)
+        WristConstants.changeCruiseVel(cruiseVel)
+      }),
+      wrist.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
+      WaitUntilCommand { wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) },
+      wrist.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
+      WaitUntilCommand { wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) },
+    )
+  }
+
+  private fun generateROMTests(): List<Command> {
+    val pivotRomTest = Commands.sequence(
+      pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
+      WaitUntilCommand { pivot.atSetpoint() },
+      doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.6, PivotConstants.MAX_ACCEL_VALUE / 1.6),
+      doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.33, PivotConstants.MAX_ACCEL_VALUE / 1.33),
+      doPivotROM(PivotConstants.CRUISE_VEL_VALUE, PivotConstants.MAX_ACCEL_VALUE),
+      pivot.setPosition(AutoTestConstants.PIVOT_SETPOINT_SIX),
+      WaitUntilCommand { pivot.atSetpoint() },
+    )
+
+    val elevatorRomTest = Commands.sequence(
+      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE / 1.6, ElevatorConstants.MAX_ACCEL_VALUE / 1.6),
+      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE / 1.33, ElevatorConstants.MAX_ACCEL_VALUE / 1.33),
+      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE, ElevatorConstants.MAX_ACCEL_VALUE),
+      requestGoal(SuperstructureGoal.STOW)
+    )
+
+    val wristRomTest = Commands.sequence(
+      doWristROM(WristConstants.CRUISE_VEL_VALUE / 1.6, WristConstants.MAX_ACCEL_VALUE / 1.6),
+      doWristROM(WristConstants.CRUISE_VEL_VALUE / 1.33, WristConstants.MAX_ACCEL_VALUE / 1.33),
+      doWristROM(WristConstants.CRUISE_VEL_VALUE, WristConstants.MAX_ACCEL_VALUE),
+      requestGoal(SuperstructureGoal.STOW)
+    )
+      
+    return listOf(
+      pivotRomTest,
+      elevatorRomTest,
+      requestGoal(SuperstructureGoal.STOW)
+    )
+    
+  }
+
+  fun runAutoTests(): Command {
+    val tests = setUpPremoveTests()
+    val romTests = SequentialCommandGroup()
+    generateROMTests().forEach { romTests.addCommands(it) }
+    return Commands.sequence(
+      romTests,
+      requestGoal(SuperstructureGoal.STOW),
+      tests[0],
       WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
-      wristTests,
+      tests[1],
+      WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
+      tests[2],
       WaitCommand(AutoTestConstants.WAIT_BETWEEN_EXTERNAL_TESTS),
       requestGoal(SuperstructureGoal.STOW),
       PrintCommand("Autotest is done.")

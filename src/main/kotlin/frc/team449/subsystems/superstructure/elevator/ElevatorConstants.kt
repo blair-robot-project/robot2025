@@ -4,9 +4,12 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.measure.AngularAcceleration
+import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color8Bit
+import frc.team449.subsystems.superstructure.wrist.WristConstants
 import kotlin.math.PI
 
 object ElevatorConstants {
@@ -57,6 +60,16 @@ object ElevatorConstants {
   const val KD = 0.00015
 
   // Motion Magic
-  const val CRUISE_VEL = 2.325 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
-  const val MAX_ACCEL = 7.5 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
+  const val CRUISE_VEL_VALUE = 2.325 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
+  const val MAX_ACCEL_VALUE = 7.5 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
+  var CRUISE_VEL = CRUISE_VEL_VALUE
+  var MAX_ACCEL = MAX_ACCEL_VALUE
+
+  fun changeCruiseVel(newCruiseVel: Double) {
+    CRUISE_VEL = newCruiseVel
+  }
+  fun changeMaxAccel(newMaxAccel: Double) {
+    MAX_ACCEL = newMaxAccel
+  }
+
 }

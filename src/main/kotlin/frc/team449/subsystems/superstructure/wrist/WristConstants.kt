@@ -3,9 +3,12 @@ package frc.team449.subsystems.superstructure.wrist
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.AngularAcceleration
+import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj.util.Color8Bit
+import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import kotlin.math.PI
 
 object WristConstants {
@@ -39,8 +42,17 @@ object WristConstants {
   const val KI = 0.0
   const val KD = 0.096482
 
-  val CRUISE_VEL = RotationsPerSecond.of(2.75) // should get to 2.5, max theoretical 2.95
-  val MAX_ACCEL = RotationsPerSecondPerSecond.of(5.0) // should get to 3.0, max theoretical 18.842
+  val CRUISE_VEL_VALUE = RotationsPerSecond.of(2.75) // should get to 2.5, max theoretical 2.95
+  val MAX_ACCEL_VALUE = RotationsPerSecondPerSecond.of(5.0) // should get to 3.0, max theoretical 18.842
+  var CRUISE_VEL = CRUISE_VEL_VALUE
+  var MAX_ACCEL = MAX_ACCEL_VALUE
+
+  fun changeCruiseVel(newCruiseVel: AngularVelocity) {
+    CRUISE_VEL = newCruiseVel
+  }
+  fun changeMaxAccel(newMaxAccel: AngularAcceleration) {
+    MAX_ACCEL = newMaxAccel
+  }
 
   val STARTUP_ANGLE = Degrees.of(90.0)
 }
