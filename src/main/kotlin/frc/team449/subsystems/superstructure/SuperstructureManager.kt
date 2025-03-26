@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
@@ -37,7 +38,8 @@ class SuperstructureManager(
   //auto test vars
   private var autotestStart = ""
   private val timer = Timer()
-  private lateinit var autotestCommand: Command
+  var userInput = false
+  var runningTest = false
 
   fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
     return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
@@ -166,7 +168,7 @@ class SuperstructureManager(
   private fun runTest(name: String, setpoint: Double, slowDeadline: Double, realDeadline: Double, setpointName: String): Command {
     return Commands.sequence(
       InstantCommand({
-        timer.restart()
+        timer.reset()
         autotestStart = when (name) {
           "pivot" -> "${Units.radiansToDegrees(pivot.positionSupplier.get())} degrees"
           "elevator" -> "${Units.radiansToDegrees(elevator.positionSupplier.get())} meters"
@@ -179,9 +181,9 @@ class SuperstructureManager(
         else -> wrist.setPosition(setpoint)
       },
       when (name) {
-        "pivot" -> checkVoltageWait({ pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, AutoTestConstants.HIGH_PIVOT_VOLTAGE)
-        "elevator" -> checkVoltageWait({ elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, AutoTestConstants.HIGH_ELEVATOR_VOLTAGE)
-        else -> checkVoltageWait({ wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, AutoTestConstants.HIGH_WRIST_VOLTAGE)
+        "pivot" -> checkVoltageWait({ pivot.atSetpoint(BITConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, BITConstants.HIGH_PIVOT_VOLTAGE)
+        "elevator" -> checkVoltageWait({ elevator.atSetpoint(BITConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, BITConstants.HIGH_ELEVATOR_VOLTAGE)
+        else -> checkVoltageWait({ wrist.atSetpoint(BITConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, BITConstants.HIGH_WRIST_VOLTAGE)
       }
         .raceWith(WaitUntilCommand{timer.get() > realDeadline})
         .finallyDo(Runnable {
@@ -196,51 +198,51 @@ class SuperstructureManager(
           }
         }),
       WaitCommand(when (name) {
-        "pivot" -> AutoTestConstants.PIVOT_WAIT
-        "elevator" -> AutoTestConstants.ELEVATOR_WAIT
-        else -> AutoTestConstants.WRIST_WAIT
+        "pivot" -> BITConstants.PIVOT_WAIT
+        "elevator" -> BITConstants.ELEVATOR_WAIT
+        else -> BITConstants.WRIST_WAIT
       })
     )
   }
 
-  private fun generatePremoveTests(): List<Command> {
+  private fun generatePositionTests(): List<Command> {
     val pivotTests = SequentialCommandGroup()
     listOf(
-      AutoTestConstants.PIVOT_SETPOINT_ONE,
-      AutoTestConstants.PIVOT_SETPOINT_TWO,
-      AutoTestConstants.PIVOT_SETPOINT_THREE,
-      AutoTestConstants.PIVOT_SETPOINT_FOUR,
-      AutoTestConstants.PIVOT_SETPOINT_FIVE,
-      AutoTestConstants.PIVOT_SETPOINT_SIX
-    ).forEach { pivotTests.addCommands(runTest("pivot", it, AutoTestConstants.PIVOT_EXPECTED_TIME,
-      AutoTestConstants.PIVOT_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
+      BITConstants.PIVOT_SETPOINT_ONE,
+      BITConstants.PIVOT_SETPOINT_TWO,
+      BITConstants.PIVOT_SETPOINT_THREE,
+      BITConstants.PIVOT_SETPOINT_FOUR,
+      BITConstants.PIVOT_SETPOINT_FIVE,
+      BITConstants.PIVOT_SETPOINT_SIX
+    ).forEach { pivotTests.addCommands(runTest("pivot", it, BITConstants.PIVOT_EXPECTED_TIME,
+      BITConstants.PIVOT_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
 
     val elevatorTests = SequentialCommandGroup()
     listOf(
-      AutoTestConstants.ELEVATOR_SETPOINT_ONE,
-      AutoTestConstants.ELEVATOR_SETPOINT_TWO,
-      AutoTestConstants.ELEVATOR_SETPOINT_THREE,
-      AutoTestConstants.ELEVATOR_SETPOINT_FOUR
-    ).forEach { pivotTests.addCommands(runTest("elevator", it, AutoTestConstants.ELEVATOR_EXPECTED_TIME,
-      AutoTestConstants.ELEVATOR_TIMEOUT, "the height $it in meters")) }
+      BITConstants.ELEVATOR_SETPOINT_ONE,
+      BITConstants.ELEVATOR_SETPOINT_TWO,
+      BITConstants.ELEVATOR_SETPOINT_THREE,
+      BITConstants.ELEVATOR_SETPOINT_FOUR
+    ).forEach { pivotTests.addCommands(runTest("elevator", it, BITConstants.ELEVATOR_EXPECTED_TIME,
+      BITConstants.ELEVATOR_TIMEOUT, "the height $it in meters")) }
 
     val wristTests = SequentialCommandGroup()
     listOf(
-      AutoTestConstants.WRIST_SETPOINT_ONE,
-      AutoTestConstants.WRIST_SETPOINT_TWO,
-      AutoTestConstants.WRIST_SETPOINT_THREE,
-      AutoTestConstants.WRIST_SETPOINT_FOUR,
-      AutoTestConstants.WRIST_SETPOINT_FIVE
-    ).forEach { pivotTests.addCommands(runTest("wrist", it, AutoTestConstants.WRIST_EXPECTED_TIME,
-      AutoTestConstants.WRIST_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
+      BITConstants.WRIST_SETPOINT_ONE,
+      BITConstants.WRIST_SETPOINT_TWO,
+      BITConstants.WRIST_SETPOINT_THREE,
+      BITConstants.WRIST_SETPOINT_FOUR,
+      BITConstants.WRIST_SETPOINT_FIVE
+    ).forEach { pivotTests.addCommands(runTest("wrist", it, BITConstants.WRIST_EXPECTED_TIME,
+      BITConstants.WRIST_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
 
     return listOf(
       pivotTests,
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       elevatorTests,
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       wristTests,
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       requestGoal(SuperstructureGoal.STOW)
       )
   }
@@ -251,10 +253,10 @@ class SuperstructureManager(
         PivotConstants.changeMaxAccel(maxAccel)
         PivotConstants.changeCruiseVel(cruiseVel)
       }),
-      pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_FRONT - Units.degreesToRadians(1.0)),
-      checkVoltageWait({ pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, AutoTestConstants.HIGH_PIVOT_VOLTAGE),
-      pivot.setPosition(AutoTestConstants.PIVOT_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
-      checkVoltageWait({ pivot.atSetpoint(AutoTestConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, AutoTestConstants.HIGH_PIVOT_VOLTAGE)
+      pivot.setPosition(BITConstants.PIVOT_HARDSTOP_FRONT - Units.degreesToRadians(1.0)),
+      checkVoltageWait({ pivot.atSetpoint(BITConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, BITConstants.HIGH_PIVOT_VOLTAGE),
+      pivot.setPosition(BITConstants.PIVOT_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
+      checkVoltageWait({ pivot.atSetpoint(BITConstants.PIVOT_TOLERANCE) }, {pivot.getMotorVoltage()}, BITConstants.HIGH_PIVOT_VOLTAGE)
     )
   }
 
@@ -265,9 +267,9 @@ class SuperstructureManager(
         ElevatorConstants.changeCruiseVel(cruiseVel)
       }),
       elevator.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
-      checkVoltageWait({ elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, AutoTestConstants.HIGH_ELEVATOR_VOLTAGE),
+      checkVoltageWait({ elevator.atSetpoint(BITConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, BITConstants.HIGH_ELEVATOR_VOLTAGE),
       elevator.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
-      checkVoltageWait({ elevator.atSetpoint(AutoTestConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, AutoTestConstants.HIGH_ELEVATOR_VOLTAGE),
+      checkVoltageWait({ elevator.atSetpoint(BITConstants.ELEVATOR_TOLERANCE) }, {elevator.getMotorVoltage()}, BITConstants.HIGH_ELEVATOR_VOLTAGE),
     )
   }
 
@@ -278,9 +280,9 @@ class SuperstructureManager(
         WristConstants.changeCruiseVel(cruiseVel)
       }),
       wrist.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
-      checkVoltageWait({ wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, AutoTestConstants.HIGH_WRIST_VOLTAGE),
+      checkVoltageWait({ wrist.atSetpoint(BITConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, BITConstants.HIGH_WRIST_VOLTAGE),
       wrist.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
-      checkVoltageWait({ wrist.atSetpoint(AutoTestConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, AutoTestConstants.HIGH_WRIST_VOLTAGE),
+      checkVoltageWait({ wrist.atSetpoint(BITConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, BITConstants.HIGH_WRIST_VOLTAGE),
     )
   }
 
@@ -289,7 +291,7 @@ class SuperstructureManager(
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.6, PivotConstants.MAX_ACCEL_VALUE / 1.6),
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.33, PivotConstants.MAX_ACCEL_VALUE / 1.33),
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE, PivotConstants.MAX_ACCEL_VALUE),
-      pivot.setPosition(AutoTestConstants.PIVOT_SETPOINT_SIX),
+      pivot.setPosition(BITConstants.PIVOT_SETPOINT_SIX),
       WaitUntilCommand { pivot.atSetpoint() },
     )
 
@@ -309,65 +311,58 @@ class SuperstructureManager(
       
     return listOf(
       pivotRomTest,
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       elevatorRomTest,
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       wristRomTest,
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       requestGoal(SuperstructureGoal.STOW),
-      WaitCommand(AutoTestConstants.EXTERNAL_WAIT)
+      WaitCommand(BITConstants.EXTERNAL_WAIT)
       )
     
   }
 
-  private fun getUserConfirmation(scanner: java.util.Scanner, timeout: Double): Boolean {
-    var input: String
-    timer.restart()
-    while(timer.get() < timeout) {
-      if(scanner.hasNextLine()) {
-        println("we got input")
-        input = scanner.nextLine().lowercase().trim()
-        println(input)
-        if(input == "s") {
-          return true
-        }
-      }
-    }
-    return false
-  }
-
-  private fun runWithCancel(command: Command, scanner: java.util.Scanner): Boolean {
-    command.schedule()
-    while(command.isScheduled) {
-      if(scanner.hasNextLine() && scanner.nextLine().lowercase().trim() == "c") {
-        command.cancel()
-        return false
-      }
-    }
-    return true
-  }
-
-  fun runAutoTests(): Command {
-    val premoveTests = SequentialCommandGroup()
-    generatePremoveTests().forEach { premoveTests.addCommands(it) }
+  fun runBITs(): Command {
+    val positionTests = SequentialCommandGroup()
+    generatePositionTests().forEach { positionTests.addCommands(it) }
     val romTests = SequentialCommandGroup()
     generateROMTests().forEach { romTests.addCommands(it) }
 
-    autotestCommand = runOnce({
-      val scanner = java.util.Scanner(System.`in`)
-      println("Welcome to autotest. Enter 's' to start testing. Enter anything else to cancel.")
-      if (getUserConfirmation(scanner, AutoTestConstants.INPUT_TIMEOUT)) {
-        println("Starting range of motion tests, enter c to cancel")
-        romTests.schedule()
-        if (runWithCancel(romTests, scanner)) {
-          println("Enter 's' to start testing specific locations. Enter anything else to cancel.")
-          getUserConfirmation(scanner, AutoTestConstants.INPUT_TIMEOUT)
-          runWithCancel(romTests, scanner)
-        }
-      }
-      println("autotest is done.")
+    return Commands.sequence(
+      InstantCommand({
+        runningTest = true
+        println("runningTest set to true, value is $runningTest")
+        userInput = false
+        println("Welcome to BITs. Press d-pad down to start.")
+        timer.reset()
+      }),
+      PrintCommand("Before wait, running test is $runningTest"),
+      WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT },
+      PrintCommand("After wait, running test is $runningTest"),
+      ConditionalCommand(
+        Commands.sequence(
+          InstantCommand({ userInput = false}),
+          PrintCommand("Starting ROM tests. Press d-pad at any time to cancel."),
+          romTests.onlyWhile { !userInput },
+          ConditionalCommand(
+            Commands.sequence(
+              PrintCommand("Starting selective location testing. Press d-pad at any time to cancel."),
+              positionTests.onlyWhile { !userInput },
+              ConditionalCommand(
+                PrintCommand("Built in Tests are done. Thanks!"),
+                PrintCommand("BITs canceled.")
+              ) { !userInput }
+            ),
+            PrintCommand("BITs canceled.")
+          ) { !userInput }
+        ),
+        PrintCommand("BITs canceled.")
+      ) { userInput }
+    ).finallyDo(Runnable {
+      runningTest = false
+      userInput = false
     })
-    return autotestCommand
+
   }
 
   companion object {

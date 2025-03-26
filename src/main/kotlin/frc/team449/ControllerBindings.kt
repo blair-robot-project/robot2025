@@ -300,14 +300,24 @@ class ControllerBindings(
   }
 
   private fun score_l4() {
-    driveController.y().onTrue(
-      robot.superstructureManager.requestL4()
-    )
+    driveController.y().whileTrue(
+      PrintCommand("pressed, running test = ${robot.superstructureManager.runningTest}").andThen( ConditionalCommand(
+        InstantCommand({
+          robot.superstructureManager.userInput = true
+          println("setting user input true")
+        }),
+        robot.superstructureManager.runBITs()
+      ) { robot.superstructureManager.runningTest }
+    ))
   }
 
   private fun autoTest() {
     driveController.povCenter().onTrue(
-      robot.superstructureManager.runAutoTests()
+      ConditionalCommand(
+        InstantCommand({robot.superstructureManager.userInput = true}),
+        robot.superstructureManager.runBITs()
+      ) { robot.superstructureManager.runningTest }
+
     )
   }
 

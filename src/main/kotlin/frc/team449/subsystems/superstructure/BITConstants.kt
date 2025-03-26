@@ -3,7 +3,7 @@ package frc.team449.subsystems.superstructure
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.*
 
-class AutoTestConstants {
+class BITConstants {
   companion object {
 
     const val ELEVATOR_TOLERANCE = 0.025 //m
