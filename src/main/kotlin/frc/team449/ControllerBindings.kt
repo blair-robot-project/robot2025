@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -300,24 +301,28 @@ class ControllerBindings(
   }
 
   private fun score_l4() {
-    driveController.y().whileTrue(
-      PrintCommand("pressed, running test = ${robot.superstructureManager.runningTest}").andThen( ConditionalCommand(
-        InstantCommand({
+    driveController.y().onTrue(
+      runOnce({
+        val running = robot.superstructureManager.runningTest
+        if(running) {
           robot.superstructureManager.userInput = true
-          println("setting user input true")
-        }),
-        robot.superstructureManager.runBITs()
-      ) { robot.superstructureManager.runningTest }
-    ))
+        } else {
+          robot.superstructureManager.runBITs().schedule()
+        }
+      })
+    )
   }
 
   private fun autoTest() {
     driveController.povCenter().onTrue(
-      ConditionalCommand(
-        InstantCommand({robot.superstructureManager.userInput = true}),
-        robot.superstructureManager.runBITs()
-      ) { robot.superstructureManager.runningTest }
-
+      runOnce({
+        val running = robot.superstructureManager.runningTest
+        println(running)
+        ConditionalCommand(
+          InstantCommand({robot.superstructureManager.userInput = true}),
+          robot.superstructureManager.runBITs()
+        ) { running }.schedule()
+      })
     )
   }
 

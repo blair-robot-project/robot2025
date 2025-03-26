@@ -8,8 +8,8 @@ import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
+import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
@@ -160,9 +160,15 @@ class SuperstructureManager(
     )
   }
 
+  //BITs
   private fun checkVoltageWait(boolSupplier: BooleanSupplier, dblSupplier: DoubleSupplier, highVoltageVal: Double): Command {
-    return InstantCommand({ if(dblSupplier.asDouble > highVoltageVal)
-      println("Voltage is High! Currently Reading: " + dblSupplier.asDouble) }).until(boolSupplier)
+    return FunctionalCommand(
+      {}, {
+        if(dblSupplier.asDouble > highVoltageVal) {
+          println("Voltage is High! Currently Reading: " + dblSupplier.asDouble)
+        } }, {},
+      boolSupplier
+    )
   }
 
   private fun runTest(name: String, setpoint: Double, slowDeadline: Double, realDeadline: Double, setpointName: String): Command {
@@ -279,32 +285,32 @@ class SuperstructureManager(
         WristConstants.changeMaxAccel(maxAccel)
         WristConstants.changeCruiseVel(cruiseVel)
       }),
-      wrist.setPosition(SuperstructureGoal.L4.elevator.`in`(Meters) + Units.inchesToMeters(2.0)),
+      wrist.setPosition(BITConstants.WRIST_HARDSTOP_FRONT - Units.degreesToRadians(1.0)),
       checkVoltageWait({ wrist.atSetpoint(BITConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, BITConstants.HIGH_WRIST_VOLTAGE),
-      wrist.setPosition(SuperstructureGoal.L1.elevator.`in`(Meters)),
-      checkVoltageWait({ wrist.atSetpoint(BITConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, BITConstants.HIGH_WRIST_VOLTAGE),
+      wrist.setPosition(BITConstants.WRIST_HARDSTOP_BACK + Units.degreesToRadians(1.0)),
+      checkVoltageWait({ wrist.atSetpoint(BITConstants.WRIST_TOLERANCE) }, {wrist.getMotorVoltage()}, BITConstants.HIGH_WRIST_VOLTAGE)
     )
   }
 
   private fun generateROMTests(): List<Command> {
     val pivotRomTest = Commands.sequence(
-      doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.6, PivotConstants.MAX_ACCEL_VALUE / 1.6),
-      doPivotROM(PivotConstants.CRUISE_VEL_VALUE / 1.33, PivotConstants.MAX_ACCEL_VALUE / 1.33),
+      doPivotROM(PivotConstants.CRUISE_VEL_VALUE / BITConstants.PIVOT_FIRST_ROM_DIVIDE, PivotConstants.MAX_ACCEL_VALUE / BITConstants.PIVOT_FIRST_ROM_DIVIDE),
+      doPivotROM(PivotConstants.CRUISE_VEL_VALUE / BITConstants.PIVOT_SECOND_ROM_DIVIDE, PivotConstants.MAX_ACCEL_VALUE / BITConstants.PIVOT_SECOND_ROM_DIVIDE),
       doPivotROM(PivotConstants.CRUISE_VEL_VALUE, PivotConstants.MAX_ACCEL_VALUE),
       pivot.setPosition(BITConstants.PIVOT_SETPOINT_SIX),
       WaitUntilCommand { pivot.atSetpoint() },
     )
 
     val elevatorRomTest = Commands.sequence(
-      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE / 1.6, ElevatorConstants.MAX_ACCEL_VALUE / 1.6),
-      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE / 1.33, ElevatorConstants.MAX_ACCEL_VALUE / 1.33),
+      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE / BITConstants.ELEVATOR_FIRST_ROM_DIVIDE, ElevatorConstants.MAX_ACCEL_VALUE / BITConstants.ELEVATOR_FIRST_ROM_DIVIDE),
+      doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE / BITConstants.ELEVATOR_SECOND_ROM_DIVIDE, ElevatorConstants.MAX_ACCEL_VALUE / BITConstants.ELEVATOR_SECOND_ROM_DIVIDE),
       doElevatorROM(ElevatorConstants.CRUISE_VEL_VALUE, ElevatorConstants.MAX_ACCEL_VALUE),
       requestGoal(SuperstructureGoal.STOW)
     )
 
     val wristRomTest = Commands.sequence(
-      doWristROM(WristConstants.CRUISE_VEL_VALUE / 1.6, WristConstants.MAX_ACCEL_VALUE / 1.6),
-      doWristROM(WristConstants.CRUISE_VEL_VALUE / 1.33, WristConstants.MAX_ACCEL_VALUE / 1.33),
+      doWristROM(WristConstants.CRUISE_VEL_VALUE / BITConstants.WRIST_FIRST_ROM_DIVIDE, WristConstants.MAX_ACCEL_VALUE / BITConstants.WRIST_FIRST_ROM_DIVIDE),
+      doWristROM(WristConstants.CRUISE_VEL_VALUE / BITConstants.WRIST_SECOND_ROM_DIVIDE, WristConstants.MAX_ACCEL_VALUE / BITConstants.WRIST_SECOND_ROM_DIVIDE),
       doWristROM(WristConstants.CRUISE_VEL_VALUE, WristConstants.MAX_ACCEL_VALUE),
       requestGoal(SuperstructureGoal.STOW)
     )
@@ -331,32 +337,59 @@ class SuperstructureManager(
     return Commands.sequence(
       InstantCommand({
         runningTest = true
-        println("runningTest set to true, value is $runningTest")
         userInput = false
         println("Welcome to BITs. Press d-pad down to start.")
         timer.reset()
       }),
-      PrintCommand("Before wait, running test is $runningTest"),
       WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT },
-      PrintCommand("After wait, running test is $runningTest"),
       ConditionalCommand(
         Commands.sequence(
-          InstantCommand({ userInput = false}),
+          InstantCommand({ userInput = false }),
           PrintCommand("Starting ROM tests. Press d-pad at any time to cancel."),
           romTests.onlyWhile { !userInput },
           ConditionalCommand(
+
             Commands.sequence(
-              PrintCommand("Starting selective location testing. Press d-pad at any time to cancel."),
-              positionTests.onlyWhile { !userInput },
+              PrintCommand("ROM tests finished. Press d-pad to start selective location testing."),
+              InstantCommand({ timer.reset() }),
+              WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT },
               ConditionalCommand(
-                PrintCommand("Built in Tests are done. Thanks!"),
-                PrintCommand("BITs canceled.")
-              ) { !userInput }
+
+                Commands.sequence(
+                  PrintCommand("Starting selective location testing. Press d-pad at any time to cancel."),
+                  InstantCommand({userInput = false}),
+                  positionTests.onlyWhile { !userInput },
+                  ConditionalCommand(
+
+                    Commands.sequence(
+                      PrintCommand("Selective location testing finished. Press d-pad to start reef level testing."),
+                      InstantCommand({ timer.reset() }),
+                      WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT },
+                      ConditionalCommand(
+
+                        Commands.sequence(
+                          InstantCommand({ userInput = false }),
+                          Commands.sequence(
+                            requestGoal(SuperstructureGoal.L2),
+                            requestGoal(SuperstructureGoal.L4),
+                            requestGoal(SuperstructureGoal.L1),
+                            requestGoal(SuperstructureGoal.L3)
+                          ).onlyWhile({!userInput})
+
+                        ),
+                        PrintCommand("BITs canceled from lack of input."),
+                        { userInput }
+                      )
+                    ),
+                    PrintCommand("BITs canceled.")
+                  ) { !userInput }),
+                PrintCommand("BITs canceled from lack of input."),
+              ) { userInput }
             ),
             PrintCommand("BITs canceled.")
-          ) { !userInput }
+          ) { !userInput },
         ),
-        PrintCommand("BITs canceled.")
+        PrintCommand("BITs canceled from lack of input..")
       ) { userInput }
     ).finallyDo(Runnable {
       runningTest = false
