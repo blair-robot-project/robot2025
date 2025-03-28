@@ -57,6 +57,13 @@ class BITConstants {
     const val HIGH_PIVOT_VOLTAGE = 15.0
     const val HIGH_ELEVATOR_VOLTAGE = 17.5
     const val HIGH_WRIST_VOLTAGE = 12.5
+
+    const val PIVOT_SLOW_VOLTAGE = 4.0
+    const val PIVOT_MEDIUM_VOLTAGE = 4.0
+    const val PIVOT_HIGH_VOLTAGE = 4.0
+
+
+    val DRIVE_ANGLE_TOLERANCE = Units.degreesToRadians(5.0)
   }
 
 }
