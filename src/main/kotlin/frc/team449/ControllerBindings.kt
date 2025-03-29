@@ -303,11 +303,11 @@ class ControllerBindings(
   private fun score_l4() {
     driveController.y().onTrue(
       runOnce({
-        val running = robot.superstructureManager.runningTest
+        val running = robot.tester.runningTest
         if(running) {
-          robot.superstructureManager.userInput = true
+          robot.tester.userInput = true
         } else {
-          robot.superstructureManager.runBITs().schedule()
+          robot.tester.runBITs().schedule()
         }
       })
     )
@@ -316,11 +316,11 @@ class ControllerBindings(
   private fun autoTest() {
     driveController.povCenter().onTrue(
       runOnce({
-        val running = robot.superstructureManager.runningTest
+        val running = robot.tester.runningTest
         println(running)
         ConditionalCommand(
-          InstantCommand({robot.superstructureManager.userInput = true}),
-          robot.superstructureManager.runBITs()
+          InstantCommand({robot.tester.userInput = true}),
+          robot.tester.runBITs()
         ) { running }.schedule()
       })
     )
