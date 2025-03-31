@@ -12,6 +12,8 @@ import frc.team449.subsystems.light.Light.Companion.createLight
 import frc.team449.subsystems.superstructure.BuiltInTests
 import frc.team449.subsystems.superstructure.SuperstructureManager
 import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
+import frc.team449.subsystems.superstructure.climb.Climb
+import frc.team449.subsystems.superstructure.climb.Climb.Companion.createClimb
 import frc.team449.subsystems.superstructure.elevator.Elevator
 import frc.team449.subsystems.superstructure.elevator.Elevator.Companion.createElevator
 import frc.team449.subsystems.superstructure.intake.Intake
@@ -57,7 +59,7 @@ class Robot : RobotBase() {
 
   val intake: Intake = createIntake()
 
-//  val climb: Climb = createClimb()
+  val climb: Climb = createClimb()
 
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
 

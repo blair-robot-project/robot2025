@@ -13,6 +13,7 @@ object FieldConstants {
   const val fieldWidth = 8.05
 
   val REEF_LOCATIONS = arrayListOf<Pose2d>()
+  val REEF_LOCATIONS_PIVOT = arrayListOf<Pose2d>()
   val REEF_CENTER_LOCATIONS = arrayListOf<Pose2d>()
   lateinit var REEF_CENTER: Translation2d
   val CORAL_INTAKE_LOCATIONS = arrayListOf<Translation2d>()
@@ -112,6 +113,95 @@ object FieldConstants {
         REEF_J,
         REEF_K,
         REEF_L
+      )
+    )
+
+    val REEF_A_PIVOT = if (!allianceComp) {
+      Pose2d(3.212, 4.168, Rotation2d(PI))
+    } else {
+      Pose2d(14.335, 3.895, Rotation2d(0.0))
+    }
+
+    val REEF_B_PIVOT = if (!allianceComp) {
+      Pose2d(3.195, 3.856, Rotation2d(PI))
+    } else {
+      Pose2d(14.335, 4.182, Rotation2d(0.0))
+    }
+
+    val REEF_C_PIVOT = if (!allianceComp) {
+      Pose2d(3.739, 2.981, Rotation2d(-2 * PI / 3))
+    } else {
+      Pose2d(13.826, 5.05, Rotation2d(PI / 3))
+    }
+
+    val REEF_D_PIVOT = if (!allianceComp) {
+      Pose2d(4.0, 2.805, Rotation2d(-2 * PI / 3))
+    } else {
+      Pose2d(13.565, 5.225, Rotation2d(PI / 3))
+    }
+
+    val REEF_E_PIVOT = if (!allianceComp) {
+      Pose2d(5.020, 2.858, Rotation2d(-PI / 3))
+    } else {
+      Pose2d(12.532, 5.191, Rotation2d(2 * PI / 3))
+    }
+
+    val REEF_F_PIVOT = if (!allianceComp) {
+      Pose2d(5.281, 2.984, Rotation2d(-PI / 3))
+    } else {
+      Pose2d(12.261, 5.053, Rotation2d(2 * PI / 3))
+    }
+
+    val REEF_G_PIVOT = if (!allianceComp) {
+      Pose2d(5.763, 3.880, Rotation2d())
+    } else {
+      Pose2d(11.783, 4.147, Rotation2d(PI))
+    }
+
+    val REEF_H_PIVOT = if (!allianceComp) {
+      Pose2d(5.783, 4.191, Rotation2d())
+    } else {
+      Pose2d(11.764, 3.860, Rotation2d(PI))
+    }
+
+    val REEF_I_PIVOT = if (!allianceComp) {
+      Pose2d(5.260, 5.05, Rotation2d(PI / 3))
+    } else {
+      Pose2d(12.301, 2.984, Rotation2d(-2 * PI / 3))
+    }
+
+    val REEF_J_PIVOT = if (!allianceComp) {
+      Pose2d(4.984, 5.231, Rotation2d(PI / 3))
+    } else {
+      Pose2d(12.546, 2.819, Rotation2d(-2 * PI / 3))
+    }
+
+    val REEF_K_PIVOT = if (!allianceComp) {
+      Pose2d(3.982, 5.199, Rotation2d(2 * PI / 3))
+    } else {
+      Pose2d(13.575, 2.850, Rotation2d(-PI / 3))
+    }
+
+    val REEF_L_PIVOT = if (!allianceComp) {
+      Pose2d(3.700, 5.060, Rotation2d(2 * PI / 3))
+    } else {
+      Pose2d(13.850, 2.980, Rotation2d(-PI / 3))
+    }
+
+    REEF_LOCATIONS_PIVOT.addAll(
+      listOf(
+        REEF_A_PIVOT,
+        REEF_B_PIVOT,
+        REEF_C_PIVOT,
+        REEF_D_PIVOT,
+        REEF_E_PIVOT,
+        REEF_F_PIVOT,
+        REEF_G_PIVOT,
+        REEF_H_PIVOT,
+        REEF_I_PIVOT,
+        REEF_J_PIVOT,
+        REEF_K_PIVOT,
+        REEF_L_PIVOT
       )
     )
 

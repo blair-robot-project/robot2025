@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
@@ -65,6 +66,17 @@ class Pivot(
     }
   }
 
+  fun safePivotSide(): Command {
+    return this.runOnce { motor.setVoltage(-1.65) }
+      .andThen(WaitCommand(0.75))
+      .andThen(this.runOnce { motor.stopMotor() })
+  }
+
+  fun elevatorReady(): Boolean {
+    return positionSupplier.get() > PivotConstants.ELEVATOR_READY.`in`(Radians) ||
+      request.Position < PivotConstants.ELEVATOR_READY.`in`(Radians)
+  }
+
   fun manualDown(): Command {
     return this.run {
       motor.setVoltage(-1.5)
@@ -74,7 +86,7 @@ class Pivot(
 
   fun manualUp(): Command {
     return this.run {
-      motor.setVoltage(0.75)
+      motor.setVoltage(1.5)
       request.Position = positionSupplier.get()
     }
   }
@@ -103,6 +115,10 @@ class Pivot(
     return this.run {
       motor.setVoltage(SmartDashboard.getNumber("Pivot Test Voltage", 0.0))
     }
+  }
+
+  fun climbReady(): Boolean {
+    return positionSupplier.get() < PivotConstants.CLIMB_READY.`in`(Radians)
   }
 
   fun climbDown(): Command {
