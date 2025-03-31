@@ -17,24 +17,19 @@ class BITConstants {
     const val WRIST_EXPECTED_TIME = 1.2 //sec
     const val WRIST_TIMEOUT = 2.0 //sec
 
-    val PIVOT_HARDSTOP_BACK = Units.degreesToRadians(-4.790334) //deg
-    val PIVOT_HARDSTOP_FRONT = Units.degreesToRadians(100.0) //deg
+    val PIVOT_HARDSTOP_BACK = Units.degreesToRadians(-4.790334)
+    val PIVOT_HARDSTOP_FRONT = Units.degreesToRadians(100.0)
     val WRIST_HARDSTOP_BACK = Units.degreesToRadians(4.790334)
     val WRIST_HARDSTOP_FRONT = Units.degreesToRadians(220.928943)
+    val ELEVATOR_HARDSTOP_TOP = SuperstructureGoal.L4.elevator.`in`(Meters)
+    val ELEVATOR_HARDSTOP_BOTTOM = Inches.of(SuperstructureGoal.MIN_ELEVATOR_HEIGHT_IN).`in`(Meters)
 
     const val PIVOT_WAIT = 0.25 //s
     const val ELEVATOR_WAIT = 0.6 //s
     const val WRIST_WAIT = 0.45 //s
     const val EXTERNAL_WAIT = 0.75 //s
 
-    const val PIVOT_FIRST_ROM_DIVIDE = 2.0
-    const val ELEVATOR_FIRST_ROM_DIVIDE = 2.5
-    const val WRIST_FIRST_ROM_DIVIDE = 2.5
-    const val PIVOT_SECOND_ROM_DIVIDE = 1.5
-    const val ELEVATOR_SECOND_ROM_DIVIDE = 1.65
-    const val WRIST_SECOND_ROM_DIVIDE = 1.65
-
-    const val INPUT_TIMEOUT = 7.5 //s
+    const val INPUT_TIMEOUT = 5.0 //s
 
     val PIVOT_SETPOINT_ONE = PIVOT_HARDSTOP_FRONT - Units.degreesToRadians(2.5)
     val PIVOT_SETPOINT_TWO = (PIVOT_HARDSTOP_FRONT - PIVOT_HARDSTOP_BACK) / 2
@@ -58,10 +53,17 @@ class BITConstants {
     const val HIGH_ELEVATOR_VOLTAGE = 17.5
     const val HIGH_WRIST_VOLTAGE = 12.5
 
-    const val PIVOT_SLOW_VOLTAGE = 4.0
-    const val PIVOT_MEDIUM_VOLTAGE = 4.0
-    const val PIVOT_HIGH_VOLTAGE = 4.0
+    const val PIVOT_SLOW_VOLTAGE = 6.0
+    const val PIVOT_MEDIUM_VOLTAGE = 8.0
+    const val PIVOT_FAST_VOLTAGE = 10.0
 
+    const val ELEVATOR_SLOW_VOLTAGE = 10.0
+    const val ELEVATOR_MEDIUM_VOLTAGE = 14.0
+    const val ELEVATOR_FAST_VOLTAGE = 18.0
+
+    const val WRIST_SLOW_VOLTAGE = 6.0
+    const val WRIST_MEDIUM_VOLTAGE = 8.0
+    const val WRIST_FAST_VOLTAGE = 10.0
 
     val DRIVE_ANGLE_TOLERANCE = Units.degreesToRadians(5.0)
   }

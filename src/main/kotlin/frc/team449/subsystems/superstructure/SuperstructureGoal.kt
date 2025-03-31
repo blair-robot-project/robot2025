@@ -13,7 +13,7 @@ object SuperstructureGoal {
 
   private const val GROUND_INTAKE_SPEED = 3.5804
 
-  private const val MIN_ELEVATOR_HEIGHT_IN = -0.35
+  const val MIN_ELEVATOR_HEIGHT_IN = -0.35
 
   val L1 = SuperstructureState(
     Radians.of(0.527538),
@@ -166,13 +166,6 @@ object SuperstructureGoal {
   val L4_PREMOVE_PIVOT = SuperstructureState(
     L4_PIVOT.pivot,
     STOW.elevator,
-    STOW.wrist,
-    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
-  )
-
-  val L4_PREMOVE_PIVOTT = SuperstructureState(
-    L4_PIVOT.pivot,
-    CLIMB_BEFORE.elevator,
     STOW.wrist,
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED)
   )
