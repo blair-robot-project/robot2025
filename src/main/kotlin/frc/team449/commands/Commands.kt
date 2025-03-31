@@ -28,7 +28,7 @@ object Commands {
     return Commands.sequence(
       robot.intake.intakeCoral(),
       WaitUntilCommand(robot.intake::coralDetected),
-      robot.intake.holdCoral()
+      robot.intake.stop()
     )
   }
 }
