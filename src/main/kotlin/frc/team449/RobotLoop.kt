@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
-import frc.team449.auto.Routines
 import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.superstructure.SuperstructureGoal
@@ -33,7 +32,7 @@ import kotlin.math.*
 class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
-  val routines = Routines(robot)
+//  val routines = Routines(robot)
   private val field = robot.field
 
   private var componentStorage: Array<Pose3d> = arrayOf(
@@ -76,7 +75,7 @@ class RobotLoop : TimedRobot() {
     // Generate Auto Routines
     println("Generating Auto Routines : ${Timer.getFPGATimestamp()}")
 
-    routines.addOptions(robot.autoChooser)
+//    routines.addOptions(robot.autoChooser)
 
     SmartDashboard.putData("Auto Chooser", robot.autoChooser)
 

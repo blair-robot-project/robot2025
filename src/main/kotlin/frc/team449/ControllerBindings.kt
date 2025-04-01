@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj2.command.*
-import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -354,23 +353,23 @@ class ControllerBindings(
 
   private fun score_l4() {
     driveController.y().onTrue(
-      ConditionalCommand(
-        robot.superstructureManager.requestL4(SuperstructureGoal.L4_PIVOT),
-        robot.superstructureManager.requestL4(SuperstructureGoal.L4)
-      ) { robot.poseSubsystem.isPivotSide() }
+      InstantCommand({
+        val runningTestSupplier = { robot.tester.runningTest }
+        println("starting")
+        val runTest = robot.tester.runBITs()
+        println("got commands")
+        val cmd = ConditionalCommand(
+          InstantCommand({ robot.tester.userInput = true }),
+          PrintCommand("hola"),
+        ) { runningTestSupplier.invoke() }
+        cmd.schedule()
+      })
     )
   }
 
   private fun autoTest() {
     driveController.povCenter().onTrue(
-      runOnce({
-        val running = robot.tester.runningTest
-        println(running)
-        ConditionalCommand(
-          InstantCommand({robot.tester.userInput = true}),
-          robot.tester.runBITs()
-        ) { running }.schedule()
-      })
+      PrintCommand(":(")
     )
   }
 

@@ -1,7 +1,6 @@
 package frc.team449.subsystems.superstructure
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.util.function.BooleanConsumer
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.Command
@@ -30,18 +29,22 @@ class BuiltInTests (private val robot: Robot) {
   var userInput = false
   var runningTest = false
 
-  private val getInputCommand = Commands.sequence(
-    InstantCommand({ timer.reset() }),
-    WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT }
-  )
+  private fun getInputCommand(): Command {
+    return Commands.sequence(
+      InstantCommand({ timer.reset() }),
+      WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT }
+    )
+  }
 
-  private val scoringTests = Commands.sequence(
-    manager.requestGoal(SuperstructureGoal.L2),
-    manager.requestGoal(SuperstructureGoal.L4),
-    manager.requestGoal(SuperstructureGoal.L1),
-    manager.requestGoal(SuperstructureGoal.L3),
-    manager.requestGoal(SuperstructureGoal.STOW)
-  )
+  private fun getScoringTests(): Command {
+    return Commands.sequence(
+      manager.requestGoal(SuperstructureGoal.L2),
+      manager.requestGoal(SuperstructureGoal.L4),
+      manager.requestGoal(SuperstructureGoal.L1),
+      manager.requestGoal(SuperstructureGoal.L3),
+      manager.requestGoal(SuperstructureGoal.STOW)
+    )
+  }
 
   private fun commandWithCancel(cmd: Command): Command {
     return Commands.sequence(
@@ -68,7 +71,7 @@ class BuiltInTests (private val robot: Robot) {
     }).until { modulesAtSetpoint })
   }
 
-  fun testDrive(): Command {
+  private fun testDrive(): Command {
     return Commands.sequence(
       InstantCommand({
         val emptyCommand = InstantCommand()
@@ -91,35 +94,7 @@ class BuiltInTests (private val robot: Robot) {
       intake.stop()
     )
   }
-  fun goToHardstop(voltageChar: Runnable,
-                   negVoltageChar: Runnable,
-                   frontHardstop: BooleanSupplier,
-                   backHardstop: BooleanSupplier,
-                   stopCommand: Command): Command {
-    return Commands.sequence(
-      InstantCommand(voltageChar),
-      WaitUntilCommand(frontHardstop),
-      stopCommand,
-      InstantCommand(negVoltageChar),
-      WaitUntilCommand(backHardstop),
-      stopCommand
-    )
-  }
 
-//  fun testHardstops(): Command {
-//    return Commands.sequence(
-//      robot.superstructureManager.requestGoal(SuperstructureGoal.STOW),
-//      wrist.setPosition(0.0),
-//      WaitUntilCommand { wrist.atSetpoint() },
-//      goToHardstop(
-//        {pivot.setVoltageChar(BITConstants.PIVOT_SLOW_VOLTAGE)},
-//        {pivot.setVoltageChar(-BITConstants)}
-//      )
-//
-//    )
-//  }
-
-  //BITs
   private fun checkVoltageWait(boolSupplier: BooleanSupplier, dblSupplier: DoubleSupplier, highVoltageVal: Double): Command {
     return FunctionalCommand(
       {}, {
@@ -170,7 +145,7 @@ class BuiltInTests (private val robot: Robot) {
     )
   }
 
-  private fun generatePositionTests(): List<Command> {
+  private fun getPositionTests(): Command {
     val pivotTests = SequentialCommandGroup()
     listOf(
       BITConstants.PIVOT_SETPOINT_ONE,
@@ -201,7 +176,7 @@ class BuiltInTests (private val robot: Robot) {
     ).forEach { pivotTests.addCommands(runTest("wrist", it, BITConstants.WRIST_EXPECTED_TIME,
       BITConstants.WRIST_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
 
-    return listOf(
+    return Commands.sequence(
       pivotTests,
       WaitCommand(BITConstants.EXTERNAL_WAIT),
       elevatorTests,
@@ -220,24 +195,29 @@ class BuiltInTests (private val robot: Robot) {
     stopCommand: Command
   ): Command {
     val cmd = SequentialCommandGroup()
+    println("starting seqcmdgroup")
+    cmd.addCommands(SequentialCommandGroup())
+    println("added empty seqcmdgroup")
     voltages.forEach {
       cmd.addCommands(
-        Commands.sequence(
+        SequentialCommandGroup(
           InstantCommand({ voltageSetter.accept(it) }),
           WaitUntilCommand(atFrontSupplier),
           WaitCommand(0.25),
           InstantCommand({ voltageSetter.accept(-it) }),
           WaitUntilCommand(atBackSupplier),
           stopCommand,
-          WaitCommand(0.25),
+          WaitCommand(0.25)
         )
       )
     }
+    println("run rom test good")
     return cmd
   }
 
-  private fun generateROMTests(): List<Command> {
-    return listOf(
+  private fun getROMTests(): Command {
+    println("getting rom tests")
+    return Commands.sequence(
       runROMTest(
         listOf(
           BITConstants.PIVOT_SLOW_VOLTAGE,
@@ -277,7 +257,7 @@ class BuiltInTests (private val robot: Robot) {
   private fun inputCommand(message: String, nextCommand: Command): Command {
     return Commands.sequence(
       PrintCommand(message),
-      getInputCommand,
+      getInputCommand(),
       ConditionalCommand(
         nextCommand,
         PrintCommand("BITs canceled from lack of input.")
@@ -290,35 +270,31 @@ class BuiltInTests (private val robot: Robot) {
       PrintCommand("$message Press d-pad down at any time to cancel."),
       commandWithCancel(cmd),
       ConditionalCommand(
-        cmd,
+        nextCommand,
         PrintCommand("BITs canceled")
       ) { !userInput }
     )
   }
 
   fun runBITs(): Command {
-    val positionTests = SequentialCommandGroup()
-    generatePositionTests().forEach { positionTests.addCommands(it) }
-    val romTests = SequentialCommandGroup()
-    generateROMTests().forEach { romTests.addCommands(it) }
-
+    println("sequencing commands")
     return Commands.sequence(
       InstantCommand({
         runningTest = true
         userInput = false
+        println("starting")
       }),
       inputCommand("Welcome to BITs. Press d-pad down to start",
-        testCommand("Starting ROM tests.", romTests,
+        testCommand("Starting ROM tests.", getROMTests(),
           inputCommand("ROM tests finished. Press d-pad to start selective location testing.",
-            testCommand("Starting selective location testing.", positionTests,
+            testCommand("Starting selective location testing.", getPositionTests(),
               inputCommand("Selective location testing finished. Press d-pad to start testing scoring positions.",
-                testCommand("Testing scoring positions.", scoringTests,
+                testCommand("Testing scoring positions.", getScoringTests(),
                   inputCommand("Scoring position testing finished. Press d-pad to start testing drive.",
                     testCommand("Starting drive tests.", testDrive(),
                       inputCommand("Drive tests finished. Press d-pad to start intake tests.",
                         testCommand("Starting intake testing.", testIntake(),
-                          PrintCommand("Intake tests finished. Thanks for using Built in Tests!"))))))))))
-        ),
+                          PrintCommand("Intake tests finished. Thanks for using Built in Tests!"))))))))))),
       InstantCommand({
         runningTest = false
         userInput = false
