@@ -46,13 +46,6 @@ class BuiltInTests (private val robot: Robot) {
     )
   }
 
-  private fun commandWithCancel(cmd: Command): Command {
-    return Commands.sequence(
-      InstantCommand({ userInput = false }),
-      cmd.onlyWhile { !userInput },
-    )
-  }
-
   private fun waitUntilDriveAtTolerance(speeds: ChassisSpeeds): Command {
     return InstantCommand({
       robot.drive.set(speeds)
@@ -86,7 +79,7 @@ class BuiltInTests (private val robot: Robot) {
     )
   }
 
-  fun testIntake(): Command {
+  private fun testIntake(): Command {
     return Commands.sequence(
       intake.intakeCoral(),
       WaitUntilCommand {intake.coralDetected()},
@@ -187,70 +180,83 @@ class BuiltInTests (private val robot: Robot) {
     )
   }
 
-  private fun runROMTest(
-    voltages: List<Double>,
+  private fun getROMTest(
+    voltage: Double,
     voltageSetter: DoubleConsumer,
     atFrontSupplier: BooleanSupplier,
     atBackSupplier: BooleanSupplier,
     stopCommand: Command
   ): Command {
-    val cmd = SequentialCommandGroup()
-    println("starting seqcmdgroup")
-    cmd.addCommands(SequentialCommandGroup())
-    println("added empty seqcmdgroup")
-    voltages.forEach {
-      cmd.addCommands(
-        SequentialCommandGroup(
-          InstantCommand({ voltageSetter.accept(it) }),
-          WaitUntilCommand(atFrontSupplier),
-          WaitCommand(0.25),
-          InstantCommand({ voltageSetter.accept(-it) }),
-          WaitUntilCommand(atBackSupplier),
-          stopCommand,
-          WaitCommand(0.25)
-        )
-      )
-    }
-    println("run rom test good")
-    return cmd
+    return SequentialCommandGroup(
+        InstantCommand({ voltageSetter.accept(voltage) }),
+        WaitUntilCommand(atFrontSupplier),
+        WaitCommand(0.25),
+        InstantCommand({ voltageSetter.accept(-voltage) }),
+        WaitUntilCommand(atBackSupplier),
+        stopCommand,
+        WaitCommand(0.25)
+    )
   }
+
 
   private fun getROMTests(): Command {
     println("getting rom tests")
+    val cmd = SequentialCommandGroup()
+    listOf(
+      BITConstants.PIVOT_SLOW_VOLTAGE,
+      BITConstants.PIVOT_MEDIUM_VOLTAGE,
+      BITConstants.PIVOT_FAST_VOLTAGE,
+    ).forEach { vltg ->
+      cmd.addCommands(
+        getROMTest(
+          vltg,
+          { pivot.setVoltageChar(it) },
+          {pivot.atSetpoint(BITConstants.PIVOT_HARDSTOP_FRONT)},
+          {pivot.atSetpoint(BITConstants.PIVOT_HARDSTOP_BACK)},
+          pivot.stop()
+        )
+      )
+    }
+
+    listOf(
+      BITConstants.ELEVATOR_SLOW_VOLTAGE,
+      BITConstants.ELEVATOR_MEDIUM_VOLTAGE,
+      BITConstants.ELEVATOR_FAST_VOLTAGE,
+    ).forEach { vltg ->
+      cmd.addCommands(
+        getROMTest(
+          vltg,
+          {elevator.setVoltage(it)},
+          {elevator.atSetpoint(BITConstants.ELEVATOR_HARDSTOP_TOP)},
+          {elevator.atSetpoint(BITConstants.ELEVATOR_HARDSTOP_BOTTOM)},
+          elevator.stop()
+        )
+      )
+    }
+
+    listOf(
+      BITConstants.WRIST_SLOW_VOLTAGE,
+      BITConstants.WRIST_MEDIUM_VOLTAGE,
+      BITConstants.WRIST_FAST_VOLTAGE,
+    ).forEach { vltg ->
+      cmd.addCommands(
+        getROMTest(
+          vltg,
+          {wrist.setVoltageChar(it)},
+          {wrist.atSetpoint(BITConstants.WRIST_HARDSTOP_FRONT)},
+          {wrist.atSetpoint(BITConstants.WRIST_HARDSTOP_BACK)},
+          wrist.stop()
+        )
+      )
+    }
+    println("u good")
+    return cmd
+  }
+
+  private fun commandWithCancel(cmd: Command): Command {
     return Commands.sequence(
-      runROMTest(
-        listOf(
-          BITConstants.PIVOT_SLOW_VOLTAGE,
-          BITConstants.PIVOT_MEDIUM_VOLTAGE,
-          BITConstants.PIVOT_FAST_VOLTAGE,
-        ),
-        {pivot.setVoltageChar(it)},
-        {pivot.atSetpoint(BITConstants.PIVOT_HARDSTOP_FRONT)},
-        {pivot.atSetpoint(BITConstants.PIVOT_HARDSTOP_BACK)},
-        pivot.stop()
-      ),
-      runROMTest(
-        listOf(
-          BITConstants.ELEVATOR_SLOW_VOLTAGE,
-          BITConstants.ELEVATOR_MEDIUM_VOLTAGE,
-          BITConstants.ELEVATOR_FAST_VOLTAGE,
-        ),
-        {elevator.setVoltage(it)},
-        {elevator.atSetpoint(BITConstants.ELEVATOR_HARDSTOP_TOP)},
-        {elevator.atSetpoint(BITConstants.ELEVATOR_HARDSTOP_BOTTOM)},
-        elevator.stop()
-      ),
-      runROMTest(
-        listOf(
-          BITConstants.WRIST_SLOW_VOLTAGE,
-          BITConstants.WRIST_MEDIUM_VOLTAGE,
-          BITConstants.WRIST_FAST_VOLTAGE,
-        ),
-        {wrist.setVoltageChar(it)},
-        {wrist.atSetpoint(BITConstants.WRIST_HARDSTOP_FRONT)},
-        {wrist.atSetpoint(BITConstants.WRIST_HARDSTOP_BACK)},
-        wrist.stop()
-      ),
+      InstantCommand({ userInput = false }),
+      cmd.onlyWhile { !userInput },
     )
   }
 
@@ -277,7 +283,6 @@ class BuiltInTests (private val robot: Robot) {
   }
 
   fun runBITs(): Command {
-    println("sequencing commands")
     return Commands.sequence(
       InstantCommand({
         runningTest = true

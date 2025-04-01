@@ -355,12 +355,11 @@ class ControllerBindings(
     driveController.y().onTrue(
       InstantCommand({
         val runningTestSupplier = { robot.tester.runningTest }
-        println("starting")
         val runTest = robot.tester.runBITs()
-        println("got commands")
+        println(runningTestSupplier.invoke())
         val cmd = ConditionalCommand(
-          InstantCommand({ robot.tester.userInput = true }),
-          PrintCommand("hola"),
+          InstantCommand({ robot.tester.userInput = true }).andThen(PrintCommand("ui tru")),
+          runTest,
         ) { runningTestSupplier.invoke() }
         cmd.schedule()
       })
