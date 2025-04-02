@@ -4,6 +4,7 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Hertz
+import edu.wpi.first.units.Units.Inches
 import edu.wpi.first.units.measure.Frequency
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color8Bit
@@ -40,7 +41,9 @@ object ElevatorConstants {
   val GEARING_MOTOR_TO_ELEVATOR = 1 / (GEARING_MOTOR_TO_PULLEY * UPR)
   const val CARRIAGE_MASS = 4.0
 
-  const val CLIMB_HEIGHT = 0.198824
+  const val CLIMB_HEIGHT = 0.035
+  val CLIMB_VOLTAGE = -3.75
+  val PIVOT_READY = Inches.of(6.0)
 
   const val TOLERANCE = 0.05 // TODO(Adjust tolerance.)
 
@@ -49,7 +52,7 @@ object ElevatorConstants {
   const val KV = 4.5112 // theoretical 4.5112
   val KG = if (RobotBase.isReal()) 0.27951 else 0.0 // was 0.26233
 
-  const val L4_FF = 0.920
+  const val L4_FF = 0.90
 
   const val KP = 19.8532
   const val KI = 0.0
@@ -57,6 +60,6 @@ object ElevatorConstants {
   const val KD = 0.00015
 
   // Motion Magic
-  const val CRUISE_VEL = 2.325 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
-  const val MAX_ACCEL = 7.5 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
+  const val CRUISE_VEL = 2.40 // max theoretical 2.66 m/s, max practical ? m/s from feedforward
+  const val MAX_ACCEL = 7.35 // should get to 15.0, max theoretical ? m/s/s at 4kg and no gravity
 }

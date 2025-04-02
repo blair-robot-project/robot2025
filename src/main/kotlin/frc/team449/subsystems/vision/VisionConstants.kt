@@ -36,13 +36,18 @@ object VisionConstants {
 
   /** Robot to Camera distance */
   val front = Transform3d(
-    Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(0.0), Units.inchesToMeters(8.0)),
+    Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(0.0), Units.inchesToMeters(8.5)),
     Rotation3d(0.0, Units.degreesToRadians(-17.5), Units.degreesToRadians(0.0))
   )
 
-  val testTrans = Transform3d(
-    Translation3d(Units.inchesToMeters(-10.838), Units.inchesToMeters(10.435), Units.inchesToMeters(8.970)),
-    Rotation3d(0.0, Units.degreesToRadians(28.125), Units.degreesToRadians(7.5))
+  val back_left = Transform3d(
+    Translation3d(Units.inchesToMeters(-8.0), Units.inchesToMeters(11.0), Units.inchesToMeters(9.0)),
+    Rotation3d(0.0, Units.degreesToRadians(-19.456239), Units.degreesToRadians(180.0 + 30.801791))
+  )
+
+  val back_right = Transform3d(
+    Translation3d(Units.inchesToMeters(-8.0), Units.inchesToMeters(-11.0), Units.inchesToMeters(9.0)),
+    Rotation3d(0.0, Units.degreesToRadians(-19.456239), Units.degreesToRadians(180.0 - 30.801791))
   )
 
   val TAG_MODEL = TargetModel(
@@ -52,7 +57,7 @@ object VisionConstants {
 
   /** Filtering Constants */
   const val MAX_AMBIGUITY = 0.40
-  var MAX_DISTANCE_SINGLE_TAG = 5.0
+  var MAX_DISTANCE_SINGLE_TAG = 3.75
   var MAX_DISTANCE_MULTI_TAG = 6.0
   val TAG_HEADING_MAX_DEV_RAD = Units.degreesToRadians(360.0)
   var MAX_HEIGHT_ERR_METERS = 0.275
@@ -67,10 +72,10 @@ object VisionConstants {
   )
 
   /** Vision Sim Setup Constants */
-  const val SIM_FPS = 25.0
+  const val SIM_FPS = 8.0
   const val SIM_CAMERA_HEIGHT_PX = 800 // 1200 // 800
   const val SIM_CAMERA_WIDTH_PX = 1280 // 1600 // 1280
-  const val SIM_FOV_DEG = 79.09 // 87.6115 // 79.09
+  const val SIM_FOV_DEG = 77.92 // 87.6115 // 79.09
   const val SIM_CALIB_AVG_ERR_PX = 0.45
   const val SIM_CALIB_ERR_STDDEV_PX = 0.65
   const val SIM_AVG_LATENCY = 60.0
@@ -84,6 +89,18 @@ object VisionConstants {
       "reef_cam",
       TAG_LAYOUT,
       front,
+      VISION_SIM
+    ),
+    ApriltagCamera(
+      "jojocam",
+      TAG_LAYOUT,
+      back_left,
+      VISION_SIM
+    ),
+    ApriltagCamera(
+      "edzmjr",
+      TAG_LAYOUT,
+      back_right,
       VISION_SIM
     )
 //    ApriltagCamera(
