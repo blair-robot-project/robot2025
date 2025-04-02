@@ -65,7 +65,7 @@
     {
       "groupId": "org.photonvision",
       "artifactId": "photontargeting-java",
-      "version": "v2025.3.1-rc1"
+      "version": "v2025.1.1"
     }
   ]
 }

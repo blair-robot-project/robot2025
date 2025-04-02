@@ -1,7 +1,6 @@
 package frc.team449.subsystems.vision
 
 import dev.doglog.DogLog
-import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
@@ -22,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.auto.AutoConstants
 import frc.team449.commands.autoscoreCommands.AutoScoreCommandConstants
 import frc.team449.control.vision.ApriltagCamera
-import frc.team449.subsystems.FieldConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
@@ -35,7 +33,6 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-@Logged
 class PoseSubsystem(
   private val ahrs: AHRS,
   private val cameras: List<ApriltagCamera> = mutableListOf(),
@@ -366,18 +363,25 @@ class PoseSubsystem(
     }
   }
 
-  fun isPivotSide(): Boolean {
-    val closestReefRadians = pose.nearest(FieldConstants.REEF_CENTER_LOCATIONS).rotation.radians
-
-    return !(
-      abs(MathUtil.angleModulus(closestReefRadians - heading.radians)) <
-        abs(MathUtil.angleModulus(MathUtil.angleModulus(PI + closestReefRadians) - heading.radians))
-      )
-  }
-
   fun resetOdometry(newPose: Pose2d) {
     this.poseEstimator.resetPose(newPose)
   }
+
+//  fun setMagnetizePathplanning(desState: Pose2d) {
+//
+//
+//    val xController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0)
+//    val yController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0)
+//    val thetaController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0)
+//
+//
+//    val xPID = xController.calculate(pose.x, desState.x)
+//    val yPID = yController.calculate(pose.y, desState.y)
+//    val angPID = thetaController.calculate(pose.rotation.radians, desState.rotation.radians)
+//
+//
+//    ChassisSpeeds.fromFieldRelativeSpeeds(xPID, yPID, angPID, desState.rotation)
+//  }
 
   override fun periodic() {
     oldPose = pose
@@ -492,8 +496,14 @@ class PoseSubsystem(
     return result
   }
 
+  fun getPosea(): Pose2d {
+    return pose
+  }
+
   private fun setRobotPose() {
     this.field.robotPose = this.pose
+
+    // drive.pose = this.pose
 
     this.field.getObject("FL").pose = this.pose.plus(
       Transform2d(
