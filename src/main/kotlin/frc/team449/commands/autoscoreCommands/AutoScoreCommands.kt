@@ -17,7 +17,7 @@ class AutoScoreCommands(private val robot: Robot) {
   fun getReefCommand(reefLocation: Pose2d, coralGoal: SuperstructureGoal.SuperstructureState): Command {
     return runOnce({
       moving = true
-      val superstructureMoveCommand = robot.superstructureManager.requestGoal(coralGoal).andThen(robot.intake.holdCoral())
+      val superstructureMoveCommand = robot.superstructureManager.requestGoal(coralGoal).andThen(robot.intake.stop())
       scoreCommand = robot.intake.outtakeCoral()
       robot.poseSubsystem.autoscoreCommandPose = reefLocation
 

@@ -4,12 +4,14 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.TalonFXSimState
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.system.plant.DCMotor
+import frc.team449.Robot
 import frc.team449.subsystems.RobotConstants
 import kotlin.math.PI
 
 class ElevatorSim(
-  private val motor: TalonFX
-) : Elevator(motor) {
+  private val motor: TalonFX,
+  private val robot: Robot
+) : Elevator(motor, robot) {
 
   override val elevatorSim: TiltedElevatorSim = TiltedElevatorSim(
     DCMotor.getKrakenX60(2),

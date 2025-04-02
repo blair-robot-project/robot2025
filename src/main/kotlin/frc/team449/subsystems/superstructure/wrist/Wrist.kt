@@ -18,6 +18,7 @@ import java.util.function.Supplier
 import kotlin.math.abs
 
 class Wrist(
+  val robot: Robot,
   private val motor: TalonFX
 ) : SubsystemBase() {
 
@@ -103,6 +104,17 @@ class Wrist(
 
   override fun periodic() {
     logData()
+
+    val tempConfig = TalonFXConfiguration()
+    tempConfig.MotorOutput.Inverted = WristConstants.INVERTED
+    tempConfig.MotorOutput.NeutralMode = WristConstants.BRAKE_MODE
+    tempConfig.MotorOutput.DutyCycleNeutralDeadband = 0.001
+    tempConfig.Feedback.SensorToMechanismRatio = 1 / (WristConstants.GEARING * WristConstants.UPR)
+    tempConfig.CurrentLimits.StatorCurrentLimitEnable = true
+    tempConfig.CurrentLimits.SupplyCurrentLimitEnable = true
+    tempConfig.CurrentLimits.StatorCurrentLimit = WristConstants.STATOR_LIM
+//      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.wristSUPPLY_LIM()
+    robot.setSupplyLim(tempConfig, robot.voltageDistribution.wristSupply)
   }
 
   override fun simulationPeriodic() {
@@ -133,7 +145,8 @@ class Wrist(
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = WristConstants.STATOR_LIM
-      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.wristSUPPLY_LIM()
+//      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.wristSUPPLY_LIM()
+      robot.setSupplyLim(config, robot.voltageDistribution.wristSupply)
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)
@@ -166,7 +179,7 @@ class Wrist(
         leadMotor.deviceTemp
       )
 
-      return Wrist(leadMotor)
+      return Wrist(robot, leadMotor)
     }
   }
 }

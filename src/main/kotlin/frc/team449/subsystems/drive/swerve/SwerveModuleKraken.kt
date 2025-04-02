@@ -15,6 +15,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.units.Units.Amps
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
+import frc.team449.Robot
+import frc.team449.subsystems.voltage.VoltageDistribution
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.Encoder
 import frc.team449.system.motor.createSparkMax
@@ -32,6 +34,7 @@ import kotlin.math.sign
  * NOTE: In relation to the robot [+X is forward, +Y is left, and +THETA is Counter Clock-Wise].
  */
 open class SwerveModuleKraken(
+  val robot: Robot,
   private val name: String,
   private val drivingMotor: TalonFX,
   private val turningMotor: SparkMax,
@@ -111,11 +114,31 @@ open class SwerveModuleKraken(
         sign(desiredState.angle.radians - turnEncoder.position) *
           SwerveConstants.STEER_KS
     )
+
+    /* voltage stuff */
+    val tempConfig = TalonFXConfiguration()
+    tempConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
+    tempConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake
+    tempConfig.MotorOutput.DutyCycleNeutralDeadband = SwerveConstants.DUTY_CYCLE_DEADBAND
+    tempConfig.Feedback.SensorToMechanismRatio = 1 / (SwerveConstants.DRIVE_GEARING * SwerveConstants.DRIVE_UPR)
+    tempConfig.Slot0.kP = SwerveConstants.DRIVE_KP
+    tempConfig.Slot0.kI = SwerveConstants.DRIVE_KI
+    tempConfig.Slot0.kD = SwerveConstants.DRIVE_KD
+    tempConfig.Slot0.kS = SwerveConstants.DRIVE_KS
+    tempConfig.Slot0.kV = SwerveConstants.DRIVE_KV
+    tempConfig.Slot0.kA = SwerveConstants.DRIVE_KA
+    tempConfig.CurrentLimits.SupplyCurrentLimitEnable = true
+    tempConfig.CurrentLimits.StatorCurrentLimitEnable = true
+    tempConfig.CurrentLimits.StatorCurrentLimit = SwerveConstants.DRIVE_STATOR_LIMIT.`in`(Amps)
+//      config.CurrentLimits.SupplyCurrentLimit = SwerveConstants.DRIVE_SUPPLY_LIMIT.`in`(Amps)
+    tempConfig.CurrentLimits.StatorCurrentLimit = robot.voltageDistribution.driveSupply
+
   }
 
   companion object {
     /** Create a real or simulated [SwerveModule] based on the simulation status of the robot. */
     fun createKrakenModule(
+      robot: Robot,
       name: String,
       driveID: Int,
       driveInverted: Boolean,
@@ -146,7 +169,8 @@ open class SwerveModuleKraken(
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = SwerveConstants.DRIVE_STATOR_LIMIT.`in`(Amps)
-      config.CurrentLimits.SupplyCurrentLimit = SwerveConstants.DRIVE_SUPPLY_LIMIT.`in`(Amps)
+//      config.CurrentLimits.SupplyCurrentLimit = SwerveConstants.DRIVE_SUPPLY_LIMIT.`in`(Amps)
+      config.CurrentLimits.StatorCurrentLimit = robot.voltageDistribution.driveSupply
 
       var status: StatusCode = StatusCode.StatusCodeNotInitialized
       for (i in 0..4) {
@@ -187,6 +211,7 @@ open class SwerveModuleKraken(
       )
       if (RobotBase.isReal()) {
         return SwerveModuleKraken(
+          robot,
           name,
           drivingMotor,
           turnMotor,
@@ -196,6 +221,7 @@ open class SwerveModuleKraken(
         )
       } else {
         return SwerveModuleSimKraken(
+          robot,
           name,
           drivingMotor,
           turnMotor,
@@ -210,6 +236,7 @@ open class SwerveModuleKraken(
 
 /** A "simulated" swerve module. Immediately reaches to its desired state. */
 class SwerveModuleSimKraken(
+  robot: Robot,
   name: String,
   drivingMotor: TalonFX,
   turningMotor: SparkMax,
@@ -217,6 +244,7 @@ class SwerveModuleSimKraken(
   turnController: PIDController,
   location: Translation2d
 ) : SwerveModuleKraken(
+  robot,
   name,
   drivingMotor,
   turningMotor,

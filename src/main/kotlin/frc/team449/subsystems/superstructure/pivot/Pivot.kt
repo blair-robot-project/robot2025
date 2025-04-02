@@ -21,6 +21,7 @@ import java.util.function.Supplier
 import kotlin.math.abs
 
 class Pivot(
+  val robot: Robot,
   private val motor: TalonFX,
   val absoluteEncoder: AbsoluteEncoder,
   val quadEncoder: QuadEncoder
@@ -146,6 +147,17 @@ class Pivot(
     if (abs(motor.position.valueAsDouble - quadEncoder.position) > PivotConstants.RESET_ENC_LIMIT.`in`(Radians) && isReal) {
       motor.setPosition(quadEncoder.position)
     }
+
+    val tempConfig = TalonFXConfiguration()
+    tempConfig.MotorOutput.Inverted = PivotConstants.INVERTED
+    tempConfig.MotorOutput.NeutralMode = PivotConstants.BRAKE_MODE
+    tempConfig.MotorOutput.DutyCycleNeutralDeadband = 0.001
+    tempConfig.Feedback.SensorToMechanismRatio = -1 / (PivotConstants.GEARING * PivotConstants.UPR)
+    tempConfig.CurrentLimits.StatorCurrentLimitEnable = true
+    tempConfig.CurrentLimits.SupplyCurrentLimitEnable = true
+    tempConfig.CurrentLimits.StatorCurrentLimit = PivotConstants.STATOR_LIM
+//      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.pivotSUPPLY_LIM()
+    robot.setSupplyLim(tempConfig, robot.voltageDistribution.pivotSupply)
   }
 
   override fun simulationPeriodic() {
@@ -183,7 +195,8 @@ class Pivot(
       config.CurrentLimits.StatorCurrentLimitEnable = true
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = PivotConstants.STATOR_LIM
-      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.pivotSUPPLY_LIM()
+//      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.pivotSUPPLY_LIM()
+      robot.setSupplyLim(config, robot.voltageDistribution.pivotSupply)
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)
@@ -263,7 +276,7 @@ class Pivot(
         PivotConstants.SAMPLES_TO_AVERAGE
       )
 
-      return Pivot(leadMotor, absEnc, quadEnc)
+      return Pivot(robot, leadMotor, absEnc, quadEnc)
     }
   }
 }

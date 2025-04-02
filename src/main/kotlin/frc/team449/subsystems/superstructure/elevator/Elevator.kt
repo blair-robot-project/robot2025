@@ -23,7 +23,8 @@ import java.util.function.Supplier
 import kotlin.math.abs
 
 open class Elevator(
-  private val motor: TalonFX
+  private val motor: TalonFX,
+  private val robot: Robot
 ) : SubsystemBase() {
 
   open val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -157,6 +158,17 @@ open class Elevator(
 
   override fun periodic() {
     logData()
+
+    /* voltage stuff */
+    val tempConfig = TalonFXConfiguration()
+    tempConfig.MotorOutput.Inverted = ElevatorConstants.INVERTED
+    tempConfig.MotorOutput.NeutralMode = ElevatorConstants.BRAKE_MODE
+    tempConfig.MotorOutput.DutyCycleNeutralDeadband = 0.001
+    tempConfig.Feedback.SensorToMechanismRatio = ElevatorConstants.GEARING_MOTOR_TO_ELEVATOR
+    tempConfig.CurrentLimits.StatorCurrentLimitEnable = true
+    tempConfig.CurrentLimits.SupplyCurrentLimitEnable = true
+    tempConfig.CurrentLimits.StatorCurrentLimit = ElevatorConstants.STATOR_LIM
+    robot.setSupplyLim(tempConfig, robot.voltageDistribution.eleSupply)
   }
 
   private fun logData() {
@@ -184,7 +196,9 @@ open class Elevator(
       config.CurrentLimits.SupplyCurrentLimitEnable = true
       config.CurrentLimits.StatorCurrentLimit = ElevatorConstants.STATOR_LIM
 
-      config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.elevatorSUPPLY_LIM()
+      //config.CurrentLimits.SupplyCurrentLimit = robot.currentManager.elevatorSUPPLY_LIM()
+      //robot.setSupplyLim(config, robot.currentManager.elevatorSUPPLY_LIM())
+      robot.setSupplyLim(config, robot.voltageDistribution.eleSupply)
 
       /** If we gonna have FOC in the future
        config.TorqueCurrent.PeakForwardTorqueCurrent = torqueCurrentLimit.`in`(Amps)
@@ -248,7 +262,7 @@ open class Elevator(
         Follower(ElevatorConstants.LEAD_MOTOR_ID, ElevatorConstants.FOLLOWER_INVERTED_TO_MASTER)
       )
 
-      return if (RobotBase.isReal()) Elevator(leadMotor) else ElevatorSim(leadMotor)
+      return if (RobotBase.isReal()) Elevator(leadMotor, robot) else ElevatorSim(leadMotor, robot)
     }
   }
 }

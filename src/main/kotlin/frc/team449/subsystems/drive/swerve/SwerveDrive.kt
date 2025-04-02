@@ -171,9 +171,10 @@ open class SwerveDrive(
 
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
-    fun createSwerveKraken(field: Field2d): SwerveDrive {
+    fun createSwerveKraken(field: Field2d, robot: Robot): SwerveDrive {
       val modules = listOf(
         createKrakenModule(
+          robot,
           "FLModule",
           SwerveConstants.DRIVE_MOTOR_FL,
           SwerveConstants.DRIVE_INVERTED,
@@ -188,6 +189,7 @@ open class SwerveDrive(
           )
         ),
         createKrakenModule(
+          robot,
           "FRModule",
           SwerveConstants.DRIVE_MOTOR_FR,
           SwerveConstants.DRIVE_INVERTED,
@@ -202,6 +204,7 @@ open class SwerveDrive(
           )
         ),
         createKrakenModule(
+          robot,
           "BLModule",
           SwerveConstants.DRIVE_MOTOR_BL,
           SwerveConstants.DRIVE_INVERTED,
@@ -216,6 +219,7 @@ open class SwerveDrive(
           )
         ),
         createKrakenModule(
+          robot,
           "BLModule",
           SwerveConstants.DRIVE_MOTOR_BR,
           SwerveConstants.DRIVE_INVERTED,
@@ -251,9 +255,10 @@ open class SwerveDrive(
       }
     }
 
-    fun createSwerveNEO(field: Field2d): SwerveDrive {
+    fun createSwerveNEO(field: Field2d, robot: Robot): SwerveDrive {
       val modules = listOf(
         createNEOModule(
+          robot,
           "FLModule",
           SwerveConstants.DRIVE_MOTOR_FL,
           SwerveConstants.DRIVE_INVERTED,
@@ -268,6 +273,7 @@ open class SwerveDrive(
           )
         ),
         createNEOModule(
+          robot,
           "FRModule",
           SwerveConstants.DRIVE_MOTOR_FR,
           SwerveConstants.DRIVE_INVERTED,
@@ -282,6 +288,7 @@ open class SwerveDrive(
           )
         ),
         createNEOModule(
+          robot,
           "BLModule",
           SwerveConstants.DRIVE_MOTOR_BL,
           SwerveConstants.DRIVE_INVERTED,
@@ -296,6 +303,7 @@ open class SwerveDrive(
           )
         ),
         createNEOModule(
+          robot,
           "BLModule",
           SwerveConstants.DRIVE_MOTOR_BR,
           SwerveConstants.DRIVE_INVERTED,

@@ -1,6 +1,8 @@
 package frc.team449.subsystems.drive.swerve
 
+import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkMax
+import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
@@ -9,6 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
+import frc.team449.Robot
 import frc.team449.system.encoder.AbsoluteEncoder.Companion.createAbsoluteEncoder
 import frc.team449.system.encoder.Encoder
 import frc.team449.system.encoder.NEOEncoder
@@ -29,6 +32,7 @@ import kotlin.math.sign
  * NOTE: In relation to the robot [+X is forward, +Y is left, and +THETA is Counter Clock-Wise].
  */
 open class SwerveModuleNEO(
+  private val robot: Robot,
   private val name: String,
   private val drivingMotor: SparkMax,
   private val turningMotor: SparkMax,
@@ -106,6 +110,13 @@ open class SwerveModuleNEO(
 
     drivingMotor.setVoltage(drivePid + driveFF)
 
+    /* voltage stuff */
+    val tempConfig = SparkMaxConfig()
+    tempConfig.smartCurrentLimit(robot.voltageDistribution.driveSupply.toInt())
+    turningMotor.configure(tempConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+    drivingMotor.configure(tempConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+    // last two params are placeholders ig?
+
     /** CONTROL direction of module */
     val turnPid = turnController.calculate(
       turningMotor.encoder.position
@@ -121,6 +132,7 @@ open class SwerveModuleNEO(
   companion object {
     /** Create a real or simulated [SwerveModule] based on the simulation status of the robot. */
     fun createNEOModule(
+      robot: Robot,
       name: String,
       driveID: Int,
       driveInverted: Boolean,
@@ -171,6 +183,7 @@ open class SwerveModuleNEO(
       )
       if (RobotBase.isReal()) {
         return SwerveModuleNEO(
+          robot,
           name,
           driveMotor,
           turnMotor,
@@ -182,6 +195,7 @@ open class SwerveModuleNEO(
         )
       } else {
         return SwerveModuleSimNEO(
+          robot,
           name,
           driveMotor,
           turnMotor,
@@ -198,6 +212,7 @@ open class SwerveModuleNEO(
 
 /** A "simulated" swerve module. Immediately reaches to its desired state. */
 class SwerveModuleSimNEO(
+  robot: Robot,
   name: String,
   drivingMotor: SparkMax,
   turningMotor: SparkMax,
@@ -207,6 +222,7 @@ class SwerveModuleSimNEO(
   driveFeedforward: SimpleMotorFeedforward,
   location: Translation2d
 ) : SwerveModuleNEO(
+  robot,
   name,
   drivingMotor,
   turningMotor,

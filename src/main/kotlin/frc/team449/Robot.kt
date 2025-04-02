@@ -1,6 +1,7 @@
 package frc.team449
 
 import choreo.auto.AutoChooser
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
@@ -8,7 +9,6 @@ import frc.team449.subsystems.WebConnection
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
 import frc.team449.subsystems.light.Light.Companion.createLight
-import frc.team449.subsystems.superstructure.CurrentManager
 import frc.team449.subsystems.superstructure.SuperstructureManager
 import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
 import frc.team449.subsystems.superstructure.elevator.Elevator
@@ -21,6 +21,7 @@ import frc.team449.subsystems.superstructure.wrist.Wrist
 import frc.team449.subsystems.superstructure.wrist.Wrist.Companion.createWrist
 import frc.team449.subsystems.vision.PoseSubsystem
 import frc.team449.subsystems.vision.PoseSubsystem.Companion.createPoseSubsystem
+import frc.team449.subsystems.voltage.VoltageDistribution
 import frc.team449.system.AHRS
 
 class Robot : RobotBase() {
@@ -39,9 +40,13 @@ class Robot : RobotBase() {
     PowerDistribution.ModuleType.kRev,
   )
 
-  val currentManager: CurrentManager = CurrentManager(powerDistribution)
+  fun setSupplyLim(config: TalonFXConfiguration, limit: Double) {
+    config.CurrentLimits.StatorCurrentLimit = limit
+  }
 
-  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
+  val voltageDistribution: VoltageDistribution = VoltageDistribution(powerDistribution)
+
+  override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field, this)
 
   val autoChooser = AutoChooser()
 
