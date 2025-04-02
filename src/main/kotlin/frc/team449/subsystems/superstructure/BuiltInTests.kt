@@ -74,7 +74,7 @@ class BuiltInTests (private val robot: Robot) {
   fun getDriveTests(): Command {
     return Commands.sequence(
       InstantCommand({ userInput = false }),
-      PrintCommand("Running drive tests. Press d-pad at any time to cancel."),
+      PrintCommand("Running drive tests. Make sure the wheels are in the air. Press d-pad at any time to cancel."),
       waitUntilDriveAtTolerance(ChassisSpeeds(2.0, 0.0, 0.0)),
       WaitCommand(BITConstants.DRIVE_WAIT),
       waitUntilDriveAtTolerance(ChassisSpeeds(0.0, 2.0, 0.0)),
@@ -95,8 +95,10 @@ class BuiltInTests (private val robot: Robot) {
   fun getIntakeTests(): Command {
     return Commands.sequence(
       InstantCommand({ userInput = false }),
-      PrintCommand("Running intake tests. Press d-pad at any time to cancel."),
+      PrintCommand("Running intake tests. Grab a coral. Press d-pad at any time to cancel."),
+      WaitCommand(0.5),
       intake.intakeCoral(),
+      PrintCommand("Please feed the robot a coral."),
       WaitUntilCommand {intake.coralDetected()},
       WaitCommand(1.0),
       intake.stop()

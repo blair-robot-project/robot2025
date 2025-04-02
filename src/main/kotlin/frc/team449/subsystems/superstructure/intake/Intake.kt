@@ -36,7 +36,7 @@ class Intake(
   }
 
   fun coralNotDetected(): Boolean {
-    return coralInfrared.get()
+    return infrared.get()
   }
 
   fun stop(): Command {
