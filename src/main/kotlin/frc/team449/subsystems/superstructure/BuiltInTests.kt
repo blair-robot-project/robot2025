@@ -1,6 +1,7 @@
 package frc.team449.subsystems.superstructure
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.util.Units
+import edu.wpi.first.util.function.BooleanConsumer
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.Command
@@ -29,8 +30,12 @@ class BuiltInTests (private val robot: Robot) {
   var userInput = false
   var runningTest = false
 
-  private fun getScoringTests(): Command {
+  fun getScoringTests(): Command {
     return Commands.sequence(
+      InstantCommand({
+        userInput = false
+      }),
+      PrintCommand("Running scoring position tests. Press d-pad at any time to cancel."),
       manager.requestGoal(SuperstructureGoal.L2),
       WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.L4),
@@ -40,7 +45,13 @@ class BuiltInTests (private val robot: Robot) {
       manager.requestGoal(SuperstructureGoal.L3),
       WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.STOW)
-    )
+    ).onlyWhile { !userInput }.finallyDo(Runnable {
+      if (userInput) {
+        println("Scoring Position Tests canceled.")
+      } else {
+        println("Scoring Position Tests done.")
+      }
+    })
   }
 
   private fun waitUntilDriveAtTolerance(speeds: ChassisSpeeds): Command {
@@ -49,25 +60,21 @@ class BuiltInTests (private val robot: Robot) {
       modulesAtSetpoint = false
     }).andThen(InstantCommand({
       var atSetpoint = true
-      robot.drive.modules.forEach() {
+      robot.drive.modules.forEach {
         val krakenModule = it as? SwerveModuleKraken //we use krakens
         val angleDistance = abs(krakenModule?.turnController?.setpoint!! - krakenModule.state.angle.radians)
         if(angleDistance >= BITConstants.DRIVE_ANGLE_TOLERANCE) {
           atSetpoint = false
         }
-        println(angleDistance)
       }
       modulesAtSetpoint = atSetpoint
     }).until { modulesAtSetpoint })
   }
 
-  private fun testDrive(): Command {
+  fun getDriveTests(): Command {
     return Commands.sequence(
-      InstantCommand({
-        val emptyCommand = InstantCommand()
-        emptyCommand.addRequirements(drive)
-        drive.defaultCommand = emptyCommand
-      }),
+      InstantCommand({ userInput = false }),
+      PrintCommand("Running drive tests. Press d-pad at any time to cancel."),
       waitUntilDriveAtTolerance(ChassisSpeeds(2.0, 0.0, 0.0)),
       WaitCommand(BITConstants.DRIVE_WAIT),
       waitUntilDriveAtTolerance(ChassisSpeeds(0.0, 2.0, 0.0)),
@@ -76,17 +83,30 @@ class BuiltInTests (private val robot: Robot) {
       WaitCommand(BITConstants.DRIVE_WAIT),
       waitUntilDriveAtTolerance(ChassisSpeeds(-1.0, -1.0, 0.0)),
       WaitCommand(BITConstants.DRIVE_WAIT),
-      InstantCommand({drive.defaultCommand = robot.driveCommand})
-    )
+    ).onlyWhile { !userInput }.finallyDo(Runnable {
+      if (userInput) {
+        println("Drive Tests canceled.")
+      } else {
+        println("Drive Tests done.")
+      }
+    })
   }
 
-  private fun testIntake(): Command {
+  fun getIntakeTests(): Command {
     return Commands.sequence(
+      InstantCommand({ userInput = false }),
+      PrintCommand("Running intake tests. Press d-pad at any time to cancel."),
       intake.intakeCoral(),
       WaitUntilCommand {intake.coralDetected()},
       WaitCommand(1.0),
       intake.stop()
-    )
+    ).onlyWhile { !userInput }.finallyDo(Runnable {
+      if (userInput) {
+        println("Intake Tests canceled.")
+      } else {
+        println("Intake Tests done.")
+      }
+    })
   }
 
   private fun checkVoltageWait(boolSupplier: BooleanSupplier, dblSupplier: DoubleSupplier, highVoltageVal: Double): Command {
@@ -99,7 +119,7 @@ class BuiltInTests (private val robot: Robot) {
     )
   }
 
-  private fun runTest(name: String, setpoint: Double, slowDeadline: Double, realDeadline: Double, setpointName: String): Command {
+  private fun runPositionTest(name: String, setpoint: Double, slowDeadline: Double, realDeadline: Double, setpointName: String): Command {
     return Commands.sequence(
       InstantCommand({
         timer.restart()
@@ -139,8 +159,11 @@ class BuiltInTests (private val robot: Robot) {
     )
   }
 
-  private fun getPositionTests(): Command {
-    val pivotTests = SequentialCommandGroup()
+  fun getPositionTests(): Command {
+    val pivotTests = SequentialCommandGroup(
+      InstantCommand({ userInput = false }),
+      PrintCommand("Running individual position tests. Press d-pad at any time to cancel.")
+    )
     listOf(
       BITConstants.PIVOT_SETPOINT_ONE,
       BITConstants.PIVOT_SETPOINT_TWO,
@@ -148,7 +171,7 @@ class BuiltInTests (private val robot: Robot) {
       BITConstants.PIVOT_SETPOINT_FOUR,
       BITConstants.PIVOT_SETPOINT_FIVE,
       BITConstants.PIVOT_SETPOINT_SIX
-    ).forEach { pivotTests.addCommands(runTest("pivot", it, BITConstants.PIVOT_EXPECTED_TIME,
+    ).forEach { pivotTests.addCommands(runPositionTest("pivot", it, BITConstants.PIVOT_EXPECTED_TIME,
       BITConstants.PIVOT_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
 
     val elevatorTests = SequentialCommandGroup()
@@ -157,7 +180,7 @@ class BuiltInTests (private val robot: Robot) {
       BITConstants.ELEVATOR_SETPOINT_TWO,
       BITConstants.ELEVATOR_SETPOINT_THREE,
       BITConstants.ELEVATOR_SETPOINT_FOUR
-    ).forEach { pivotTests.addCommands(runTest("elevator", it, BITConstants.ELEVATOR_EXPECTED_TIME,
+    ).forEach { pivotTests.addCommands(runPositionTest("elevator", it, BITConstants.ELEVATOR_EXPECTED_TIME,
       BITConstants.ELEVATOR_TIMEOUT, "the height $it in meters")) }
 
     val wristTests = SequentialCommandGroup()
@@ -167,11 +190,10 @@ class BuiltInTests (private val robot: Robot) {
       BITConstants.WRIST_SETPOINT_THREE,
       BITConstants.WRIST_SETPOINT_FOUR,
       BITConstants.WRIST_SETPOINT_FIVE
-    ).forEach { pivotTests.addCommands(runTest("wrist", it, BITConstants.WRIST_EXPECTED_TIME,
+    ).forEach { pivotTests.addCommands(runPositionTest("wrist", it, BITConstants.WRIST_EXPECTED_TIME,
       BITConstants.WRIST_TIMEOUT, "the angle ${Units.radiansToDegrees(it)} in degrees")) }
 
-    return Commands.sequence(
-      pivotTests,
+    pivotTests.addCommands(
       WaitCommand(BITConstants.EXTERNAL_WAIT),
       elevatorTests,
       WaitCommand(BITConstants.EXTERNAL_WAIT),
@@ -179,6 +201,13 @@ class BuiltInTests (private val robot: Robot) {
       WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.STOW)
     )
+    return pivotTests.onlyWhile { !userInput }.finallyDo(Runnable {
+      if (userInput) {
+        println("Individual Position Tests canceled.")
+      } else {
+        println("Individual Position Tests done.")
+      }
+    })
   }
 
   private fun getROMTest(
@@ -200,8 +229,11 @@ class BuiltInTests (private val robot: Robot) {
   }
 
 
-  private fun getROMTests(): Command {
-    val cmd = SequentialCommandGroup()
+  fun getROMTests(): Command {
+    val cmd = SequentialCommandGroup(
+      InstantCommand({ userInput = false }),
+      PrintCommand("Running Range of Motion Tests. Press d-pad at any time to cancel.")
+    )
     listOf(
       BITConstants.PIVOT_SLOW_VOLTAGE,
       BITConstants.PIVOT_MEDIUM_VOLTAGE,
@@ -217,6 +249,7 @@ class BuiltInTests (private val robot: Robot) {
         )
       )
     }
+    cmd.addCommands(pivot.setPosition(BITConstants.PIVOT_SETPOINT_SIX), WaitUntilCommand{pivot.atSetpoint()})
 
     listOf(
       BITConstants.ELEVATOR_SLOW_VOLTAGE,
@@ -249,54 +282,13 @@ class BuiltInTests (private val robot: Robot) {
         )
       )
     }
-    return cmd
+    return cmd.onlyWhile { !userInput }.finallyDo(Runnable {
+      if (userInput) {
+        println("ROM Tests canceled.")
+      } else {
+        println("ROM Tests done.")
+      }
+    })
   }
 
-  private fun inputCommand(message: String, nextCommand: Command): Command {
-    return Commands.sequence(
-      PrintCommand(message),
-      InstantCommand({ userInput = false }),
-      WaitUntilCommand { userInput }.withTimeout(BITConstants.INPUT_TIMEOUT),
-      nextCommand.onlyIf { userInput },
-      PrintCommand("BITs canceled from lack of input.").onlyIf { !userInput }
-    )
-  }
-
-  private fun testCommand(message: String, cmd: Command, nextCommand: Command): Command {
-    return Commands.sequence(
-      PrintCommand("$message Press d-pad down at any time to cancel."),
-      InstantCommand({ userInput = false }),
-      cmd.raceWith(WaitUntilCommand{ userInput }).handleInterrupt {
-        println("BITs canceled.")
-        runningTest = false
-        userInput = false
-      },
-      nextCommand
-    )
-  }
-
-  fun runBITs(): Command {
-    return Commands.sequence(
-      InstantCommand({
-        runningTest = true
-        userInput = false
-        timer.restart()
-      }),
-//      testCommand("Starting ROM tests.", getROMTests(),
-//        inputCommand("ROM tests finished. Press d-pad to start selective location testing.",
-          testCommand("Starting selective location testing.", getPositionTests(),
-            inputCommand("Selective location testing finished. Press d-pad to start testing scoring positions.",
-              testCommand("Testing scoring positions.", getScoringTests(),
-                inputCommand("Scoring position testing finished. Press d-pad to start testing drive.",
-                  testCommand("Starting drive tests.", testDrive(),
-//                    inputCommand("Drive tests finished. Press d-pad to start intake tests.",
-//                      testCommand("Starting intake testing.", testIntake(),
-                        PrintCommand("Intake tests finished. Thanks for using Built in Tests!"))))))//))//))
-      ,
-      InstantCommand({
-        runningTest = false
-        userInput = false
-      })
-    )
-  }
 }

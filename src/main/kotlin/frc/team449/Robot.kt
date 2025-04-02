@@ -32,6 +32,7 @@ class Robot : RobotBase() {
   val driveController: CommandXboxController = CommandXboxController(0)
   val mechController: CommandXboxController = CommandXboxController(1)
   val characController: CommandXboxController = CommandXboxController(2)
+  val testController: CommandXboxController = CommandXboxController(3)
 
   // NavX
   val ahrs: AHRS = AHRS()

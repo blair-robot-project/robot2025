@@ -29,6 +29,7 @@ class ControllerBindings(
   private val driveController: CommandXboxController,
   private val mechanismController: CommandXboxController,
   private val characterizationController: CommandXboxController,
+  private val testController: CommandXboxController,
   private val robot: Robot
 ) {
 
@@ -340,36 +341,52 @@ class ControllerBindings(
 
   private fun scoreDescore_l3() {
     driveController.b().onTrue(
-      ConditionalCommand(
-        ConditionalCommand(
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PIVOT),
-          robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
-        ) { robot.poseSubsystem.isPivotSide() },
-        robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_DESCORE)
-          .alongWith(robot.intake.descoreAlgae())
-      ) { robot.intake.coralDetected() }
+      InstantCommand({ robot.tester.userInput = true }),
     )
   }
 
   private fun score_l4() {
-    driveController.y().toggleOnTrue(
-      InstantCommand({
-        val cmd = if (robot.tester.runningTest)
-          InstantCommand({ robot.tester.userInput = true })
-        else robot.tester.runBITs()
-        cmd.schedule()
-      })
+    driveController.y().onTrue(
+      robot.superstructureManager.requestL4()
     )
   }
 
   private fun autoTest() {
-    driveController.povCenter().onTrue(
-      InstantCommand({
-        val cmd = if (robot.tester.runningTest)
-          InstantCommand({ robot.tester.userInput = true })
-        else robot.tester.runBITs()
-        cmd.schedule()
-      })
+    testController.povCenter().onTrue(
+      ConditionalCommand(
+        InstantCommand({ robot.tester.userInput = true }),
+        PrintCommand("Instructions in recommended order:\n" +
+          "Press a to run range of motion tests for the pivot, elevator, and wrist." +
+          "Press b to run individual position tests for the pivot, elevator, and wrist." +
+          "Press y to run scoring position tests for L1, L2, L3, and L4." +
+          "Press x to run intake tests for the motors and IR sensors." +
+          "Press down the left trigger L2 to run drive tests for the swerve modules.")
+      ) { robot.tester.runningTest }
+    )
+    testController.a().onTrue(
+      InstantCommand({ robot.tester.runningTest = true }).andThen(
+        robot.tester.getROMTests()
+      ).andThen(InstantCommand({ robot.tester.runningTest = false }))
+    )
+    testController.b().onTrue(
+      InstantCommand({ robot.tester.runningTest = true }).andThen(
+        robot.tester.getPositionTests()
+      ).andThen(InstantCommand({ robot.tester.runningTest = false }))
+    )
+    testController.y().onTrue(
+      InstantCommand({ robot.tester.runningTest = true }).andThen(
+        robot.tester.getScoringTests()
+      ).andThen(InstantCommand({ robot.tester.runningTest = false }))
+    )
+    testController.x().onTrue(
+      InstantCommand({ robot.tester.runningTest = true }).andThen(
+        robot.tester.getIntakeTests()
+      ).andThen(InstantCommand({ robot.tester.runningTest = false }))
+    )
+    testController.leftTrigger().onTrue(
+      InstantCommand({ robot.tester.runningTest = true }).andThen(
+        robot.tester.getDriveTests()
+      ).andThen(InstantCommand({ robot.tester.runningTest = false }))
     )
   }
 
