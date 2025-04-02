@@ -1,0 +1,78 @@
+{
+ "name":"algae",
+ "version":1,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"140 lbs",
+   "val":63.502931800000006
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"6.75",
+   "val":6.75
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"5350 RPM",
+   "val":560.2506898901797
+  },
+  "tmax":{
+   "exp":"0.7 N * m",
+   "val":0.7
+  },
+  "cof":{
+   "exp":"0.8",
+   "val":0.8
+  },
+  "bumper":{
+   "front":{
+    "exp":"16.75 in",
+    "val":0.42545
+   },
+   "side":{
+    "exp":"16.75 in",
+    "val":0.42545
+   },
+   "back":{
+    "exp":"16.75 in",
+    "val":0.42545
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[]
+}

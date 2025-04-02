@@ -2,17 +2,16 @@ package frc.team449.subsystems.superstructure.climb
 
 import com.revrobotics.spark.SparkMax
 import dev.doglog.DogLog
-import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.system.motor.createFollowerSpark
+import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.system.motor.createSparkMax
 
 // TODO(the entire class bru)
 class Climb(
-  private val motor: SparkMax,
-  private val infrared: DigitalInput,
-  private val infrared2: DigitalInput
+  private val motor: SparkMax
+//  private val sensor: DigitalInput
 ) : SubsystemBase() {
 
   fun runClimbWheels(): Command {
@@ -21,14 +20,25 @@ class Climb(
     }
   }
 
+  fun holdClimbWheels(): Command {
+    return runOnce {
+      motor.setVoltage(ClimbConstants.HOLD_VOLTAGE)
+    }
+  }
+
+//  fun cageDetected(): Boolean {
+//    return !sensor.get()
+//  }
+
+  fun waitUntilCurrrentSpike(): Command {
+    return WaitCommand(0.1750)
+      .andThen(WaitUntilCommand { motor.outputCurrent > 22.5 })
+  }
+
   fun stop(): Command {
     return runOnce {
       motor.stopMotor()
     }
-  }
-
-  fun isClimbEngaged(): Boolean {
-    return !infrared.get() && !infrared2.get()
   }
 
   override fun periodic() {
@@ -37,29 +47,21 @@ class Climb(
 
   private fun logData() {
     DogLog.log("Climb/Motor Voltage", motor.appliedOutput * 12.0)
-    DogLog.log("Climb/IR sensor 1", !infrared.get())
-    DogLog.log("Climb/IR sensor 2", !infrared2.get())
+    DogLog.log("Climb/Motor Current", motor.outputCurrent)
   }
 
   companion object {
     fun createClimb(): Climb {
       val motor = createSparkMax(
-        id = ClimbConstants.RIGHT_MOTOR_ID,
-        inverted = ClimbConstants.RIGHT_INVERTED,
+        id = ClimbConstants.MOTOR_ID,
+        inverted = ClimbConstants.INVERTED,
         brakeMode = ClimbConstants.BRAKE_MODE,
         currentLimit = ClimbConstants.CURRENT_LIMIT
       )
 
-      createFollowerSpark(
-        id = ClimbConstants.LEFT_MOTOR_ID,
-        leader = motor,
-        invertedFromLeader = ClimbConstants.LEFT_INVERTED_FROM_RIGHT
-      )
+//      val sensor = DigitalInput(ClimbConstants.SENSOR_DIO_PORT)
 
-      val sensor = DigitalInput(ClimbConstants.SENSOR_DIO_PORT)
-      val sensor2 = DigitalInput(ClimbConstants.SENSOR2_DIO_PORT)
-
-      return Climb(motor, sensor, sensor2)
+      return Climb(motor) // , sensor)
     }
   }
 }
