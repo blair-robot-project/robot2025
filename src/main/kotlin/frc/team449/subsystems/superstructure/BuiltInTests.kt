@@ -29,13 +29,6 @@ class BuiltInTests (private val robot: Robot) {
   var userInput = false
   var runningTest = false
 
-  private fun getInputCommand(): Command {
-    return Commands.sequence(
-      InstantCommand({ timer.reset() }),
-      WaitUntilCommand { userInput || timer.get() > BITConstants.INPUT_TIMEOUT }
-    )
-  }
-
   private fun getScoringTests(): Command {
     return Commands.sequence(
       manager.requestGoal(SuperstructureGoal.L2),
@@ -101,7 +94,7 @@ class BuiltInTests (private val robot: Robot) {
   private fun runTest(name: String, setpoint: Double, slowDeadline: Double, realDeadline: Double, setpointName: String): Command {
     return Commands.sequence(
       InstantCommand({
-        timer.reset()
+        timer.restart()
         autotestStart = when (name) {
           "pivot" -> "${Units.radiansToDegrees(pivot.positionSupplier.get())} degrees"
           "elevator" -> "${Units.radiansToDegrees(elevator.positionSupplier.get())} meters"
@@ -200,7 +193,6 @@ class BuiltInTests (private val robot: Robot) {
 
 
   private fun getROMTests(): Command {
-    println("getting rom tests")
     val cmd = SequentialCommandGroup()
     listOf(
       BITConstants.PIVOT_SLOW_VOLTAGE,
@@ -249,24 +241,18 @@ class BuiltInTests (private val robot: Robot) {
         )
       )
     }
-    println("u good")
     return cmd
-  }
-
-  private fun commandWithCancel(cmd: Command): Command {
-    return Commands.sequence(
-      InstantCommand({ userInput = false }),
-      cmd.onlyWhile { !userInput },
-    )
   }
 
   private fun inputCommand(message: String, nextCommand: Command): Command {
     return Commands.sequence(
       PrintCommand(message),
-      getInputCommand(),
+      InstantCommand({ userInput = false }),
+      WaitUntilCommand { userInput }.withTimeout(BITConstants.INPUT_TIMEOUT),
+    ).andThen(
       ConditionalCommand(
-        nextCommand,
-        PrintCommand("BITs canceled from lack of input.")
+        PrintCommand("next command run").andThen(nextCommand),
+        PrintCommand("BITs canceled from lack of input."),
       ) { userInput }
     )
   }
@@ -274,10 +260,12 @@ class BuiltInTests (private val robot: Robot) {
   private fun testCommand(message: String, cmd: Command, nextCommand: Command): Command {
     return Commands.sequence(
       PrintCommand("$message Press d-pad down at any time to cancel."),
-      commandWithCancel(cmd),
+      InstantCommand({ userInput = false }),
+      cmd.raceWith(WaitUntilCommand{ userInput }),
+    ).andThen(
       ConditionalCommand(
-        nextCommand,
-        PrintCommand("BITs canceled")
+        PrintCommand("next command run").andThen(nextCommand),
+        PrintCommand("BITs canceled.")
       ) { !userInput }
     )
   }
@@ -287,19 +275,19 @@ class BuiltInTests (private val robot: Robot) {
       InstantCommand({
         runningTest = true
         userInput = false
-        println("starting")
+        timer.restart()
       }),
-      inputCommand("Welcome to BITs. Press d-pad down to start",
-        testCommand("Starting ROM tests.", getROMTests(),
-          inputCommand("ROM tests finished. Press d-pad to start selective location testing.",
-            testCommand("Starting selective location testing.", getPositionTests(),
-              inputCommand("Selective location testing finished. Press d-pad to start testing scoring positions.",
-                testCommand("Testing scoring positions.", getScoringTests(),
-                  inputCommand("Scoring position testing finished. Press d-pad to start testing drive.",
-                    testCommand("Starting drive tests.", testDrive(),
-                      inputCommand("Drive tests finished. Press d-pad to start intake tests.",
-                        testCommand("Starting intake testing.", testIntake(),
-                          PrintCommand("Intake tests finished. Thanks for using Built in Tests!"))))))))))),
+//      testCommand("Starting ROM tests.", getROMTests(),
+//        inputCommand("ROM tests finished. Press d-pad to start selective location testing.",
+          testCommand("Starting selective location testing.", getPositionTests(),
+            inputCommand("Selective location testing finished. Press d-pad to start testing scoring positions.",
+              testCommand("Testing scoring positions.", getScoringTests(),
+                inputCommand("Scoring position testing finished. Press d-pad to start testing drive.",
+                  testCommand("Starting drive tests.", testDrive(),
+//                    inputCommand("Drive tests finished. Press d-pad to start intake tests.",
+//                      testCommand("Starting intake testing.", testIntake(),
+                        PrintCommand("Intake tests finished. Thanks for using Built in Tests!"))))))//))//))
+      ,
       InstantCommand({
         runningTest = false
         userInput = false

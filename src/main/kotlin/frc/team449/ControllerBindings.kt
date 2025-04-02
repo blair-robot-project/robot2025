@@ -354,13 +354,10 @@ class ControllerBindings(
   private fun score_l4() {
     driveController.y().onTrue(
       InstantCommand({
-        val runningTestSupplier = { robot.tester.runningTest }
-        val runTest = robot.tester.runBITs()
-        println(runningTestSupplier.invoke())
         val cmd = ConditionalCommand(
-          InstantCommand({ robot.tester.userInput = true }).andThen(PrintCommand("ui tru")),
-          runTest,
-        ) { runningTestSupplier.invoke() }
+          InstantCommand({ robot.tester.userInput = true }).andThen(InstantCommand({println("set to true ui: ${robot.tester.userInput}")})),
+          robot.tester.runBITs(),
+        ) { robot.tester.runningTest }
         cmd.schedule()
       })
     )
