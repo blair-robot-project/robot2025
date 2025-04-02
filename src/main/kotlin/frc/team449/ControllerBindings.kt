@@ -352,12 +352,11 @@ class ControllerBindings(
   }
 
   private fun score_l4() {
-    driveController.y().onTrue(
+    driveController.y().toggleOnTrue(
       InstantCommand({
-        val cmd = ConditionalCommand(
-          InstantCommand({ robot.tester.userInput = true }).andThen(InstantCommand({println("set to true ui: ${robot.tester.userInput}")})),
-          robot.tester.runBITs(),
-        ) { robot.tester.runningTest }
+        val cmd = if (robot.tester.runningTest)
+          InstantCommand({ robot.tester.userInput = true })
+        else robot.tester.runBITs()
         cmd.schedule()
       })
     )
@@ -365,7 +364,12 @@ class ControllerBindings(
 
   private fun autoTest() {
     driveController.povCenter().onTrue(
-      PrintCommand(":(")
+      InstantCommand({
+        val cmd = if (robot.tester.runningTest)
+          InstantCommand({ robot.tester.userInput = true })
+        else robot.tester.runBITs()
+        cmd.schedule()
+      })
     )
   }
 

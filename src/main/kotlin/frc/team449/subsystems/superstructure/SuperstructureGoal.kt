@@ -13,7 +13,7 @@ object SuperstructureGoal {
 
   private const val GROUND_INTAKE_SPEED = 3.5804
 
-  const val MIN_ELEVATOR_HEIGHT_IN = -0.35
+  private const val MIN_ELEVATOR_HEIGHT_IN = -0.35
 
   val L1 = SuperstructureState(
     Radians.of(0.527538),

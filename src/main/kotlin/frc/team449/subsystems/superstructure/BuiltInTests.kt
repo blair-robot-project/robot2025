@@ -32,9 +32,13 @@ class BuiltInTests (private val robot: Robot) {
   private fun getScoringTests(): Command {
     return Commands.sequence(
       manager.requestGoal(SuperstructureGoal.L2),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.L4),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.L1),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.L3),
+      WaitCommand(BITConstants.EXTERNAL_WAIT),
       manager.requestGoal(SuperstructureGoal.STOW)
     )
   }
@@ -65,9 +69,13 @@ class BuiltInTests (private val robot: Robot) {
         drive.defaultCommand = emptyCommand
       }),
       waitUntilDriveAtTolerance(ChassisSpeeds(2.0, 0.0, 0.0)),
+      WaitCommand(BITConstants.DRIVE_WAIT),
       waitUntilDriveAtTolerance(ChassisSpeeds(0.0, 2.0, 0.0)),
+      WaitCommand(BITConstants.DRIVE_WAIT),
       waitUntilDriveAtTolerance(ChassisSpeeds(1.0, 1.0, 0.0)),
+      WaitCommand(BITConstants.DRIVE_WAIT),
       waitUntilDriveAtTolerance(ChassisSpeeds(-1.0, -1.0, 0.0)),
+      WaitCommand(BITConstants.DRIVE_WAIT),
       InstantCommand({drive.defaultCommand = robot.driveCommand})
     )
   }
@@ -249,11 +257,8 @@ class BuiltInTests (private val robot: Robot) {
       PrintCommand(message),
       InstantCommand({ userInput = false }),
       WaitUntilCommand { userInput }.withTimeout(BITConstants.INPUT_TIMEOUT),
-    ).andThen(
-      ConditionalCommand(
-        PrintCommand("next command run").andThen(nextCommand),
-        PrintCommand("BITs canceled from lack of input."),
-      ) { userInput }
+      nextCommand.onlyIf { userInput },
+      PrintCommand("BITs canceled from lack of input.").onlyIf { !userInput }
     )
   }
 
@@ -261,12 +266,12 @@ class BuiltInTests (private val robot: Robot) {
     return Commands.sequence(
       PrintCommand("$message Press d-pad down at any time to cancel."),
       InstantCommand({ userInput = false }),
-      cmd.raceWith(WaitUntilCommand{ userInput }),
-    ).andThen(
-      ConditionalCommand(
-        PrintCommand("next command run").andThen(nextCommand),
-        PrintCommand("BITs canceled.")
-      ) { !userInput }
+      cmd.raceWith(WaitUntilCommand{ userInput }).handleInterrupt {
+        println("BITs canceled.")
+        runningTest = false
+        userInput = false
+      },
+      nextCommand
     )
   }
 
