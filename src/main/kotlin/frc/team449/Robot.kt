@@ -2,6 +2,7 @@ package frc.team449
 
 import choreo.auto.AutoChooser
 import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
@@ -18,6 +19,7 @@ import frc.team449.subsystems.superstructure.intake.Intake
 import frc.team449.subsystems.superstructure.intake.Intake.Companion.createIntake
 import frc.team449.subsystems.superstructure.pivot.Pivot
 import frc.team449.subsystems.superstructure.pivot.Pivot.Companion.createPivot
+import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.subsystems.superstructure.wrist.Wrist
 import frc.team449.subsystems.superstructure.wrist.Wrist.Companion.createWrist
 import frc.team449.subsystems.vision.PoseSubsystem
@@ -45,7 +47,7 @@ class Robot : RobotBase() {
     config.CurrentLimits.StatorCurrentLimit = limit
   }
 
-  val voltageDistribution: VoltageDistribution = VoltageDistribution(powerDistribution)
+  val voltageDistribution: VoltageDistribution = VoltageDistribution(powerDistribution, this)
 
   override val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field, this)
 
@@ -58,7 +60,6 @@ class Robot : RobotBase() {
   val elevator: Elevator = createElevator(this)
 
   val pivot: Pivot = createPivot(this)
-
   val wrist: Wrist = createWrist(this)
 
   val intake: Intake = createIntake()

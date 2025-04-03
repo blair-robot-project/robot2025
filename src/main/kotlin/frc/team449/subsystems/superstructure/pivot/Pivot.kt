@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
+import frc.team449.subsystems.voltage.VoltageDistributionConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
 import frc.team449.system.motor.KrakenDogLog
@@ -23,7 +24,7 @@ import kotlin.math.abs
 
 class Pivot(
   val robot: Robot,
-  private val motor: TalonFX,
+  val motor: TalonFX,
   val absoluteEncoder: AbsoluteEncoder,
   val quadEncoder: QuadEncoder
 ) : SubsystemBase() {
@@ -200,6 +201,9 @@ class Pivot(
     ): Pivot {
       val leadMotor = TalonFX(PivotConstants.LEAD_MOTOR_ID)
       val followerMotor = TalonFX(PivotConstants.FOLLOWER_MOTOR_ID)
+
+      VoltageDistributionConstants.pivotMotor1 = leadMotor
+      VoltageDistributionConstants.pivotMotor2 = followerMotor
 
       val config = TalonFXConfiguration()
 

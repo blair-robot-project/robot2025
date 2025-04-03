@@ -1,5 +1,7 @@
 package frc.team449.subsystems.drive.swerve
 
+import com.ctre.phoenix6.hardware.TalonFX
+import com.revrobotics.spark.SparkMax
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
@@ -22,4 +24,9 @@ interface SwerveModule {
   fun stop() {}
 
   fun update() {}
+
+  val sprkDriv: SparkMax
+  val krknDriv: TalonFX
+
+  val turn: SparkMax
 }

@@ -1,21 +1,25 @@
 package frc.team449.subsystems.voltage
 
 import edu.wpi.first.units.Units.Amps
+import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveConstants
 import frc.team449.subsystems.superstructure.elevator.ElevatorConstants
 import frc.team449.subsystems.superstructure.pivot.PivotConstants
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 
 class VoltageDistribution(
-  val pdh: PowerDistribution
+  val pdh: PowerDistribution,
+  val robot: Robot
 ): SubsystemBase() {
 
-  var pivotCurrent: Double
-  var eleCurrent: Double
-  var wristCurrent: Double
-  var driveCurrent: Double
+  var pivotCurrent = 0.0
+  var eleCurrent = 0.0
+  var wristCurrent = 0.0
+  var driveCurrent = 0.0
+  var driveeCurrent = 0.0
 
   var pivotSupply = 0.0
   var eleSupply = 0.0
@@ -25,17 +29,60 @@ class VoltageDistribution(
   var totalSupply = PivotConstants.SUPPLY_LIM + ElevatorConstants.SUPPLY_LIM + WristConstants.SUPPLY_LIM + SwerveConstants.DRIVE_SUPPLY_LIMIT.`in`(Amps)
 
   init {
-    pivotCurrent = pdh.getCurrent(VoltageDistributionConstants.pivotChannel) + pdh.getCurrent(VoltageDistributionConstants.pivotChannel2)
-    eleCurrent = pdh.getCurrent(VoltageDistributionConstants.elevatorChannel) + pdh.getCurrent(VoltageDistributionConstants.elevatorChannel2)
-    wristCurrent = pdh.getCurrent(VoltageDistributionConstants.wristChannel)
-    driveCurrent = pdh.getCurrent(VoltageDistributionConstants.driveChannel)
+    //pivotCurrent = pdh.getCurrent(VoltageDistributionConstants.pivotChannel) + pdh.getCurrent(VoltageDistributionConstants.pivotChannel2)
+    if (robot.pivot != null && robot.elevator != null && robot.wrist != null && robot.drive != null) {
+      //pivotCurrent = robot.pivot.motor.getSupplyCurrent(true).valueAsDouble
+      pivotCurrent =
+        VoltageDistributionConstants.pivotMotor1.getSupplyCurrent(true).valueAsDouble +
+                VoltageDistributionConstants.pivotMotor2.getSupplyCurrent(true).valueAsDouble
+      //pivotCurrent = robot.pivot.returnMotor().getSupplyCurrent(true).valueAsDouble
+      //eleCurrent = pdh.getCurrent(VoltageDistributionConstants.elevatorChannel) + pdh.getCurrent(VoltageDistributionConstants.elevatorChannel2)
+//      eleCurrent = robot.elevator.motor.getSupplyCurrent(true).valueAsDouble
+      eleCurrent =
+              VoltageDistributionConstants.eleMotor1.getSupplyCurrent(true).valueAsDouble +
+                      VoltageDistributionConstants.eleMotor2.getSupplyCurrent(true).valueAsDouble
+      //wristCurrent = pdh.getCurrent(VoltageDistributionConstants.wristChannel)
+      //wristCurrent = robot.wrist.motor.getSupplyCurrent(true).valueAsDouble
+      wristCurrent = VoltageDistributionConstants.wristMotor.getSupplyCurrent(true).valueAsDouble
+//      driveCurrent =
+//        pdh.getCurrent(VoltageDistributionConstants.driveChannel1) + pdh.getCurrent(VoltageDistributionConstants.driveChannel2) + pdh.getCurrent(VoltageDistributionConstants.driveChannel3) + pdh.getCurrent(
+//          VoltageDistributionConstants.driveChannel4
+//        )
+      robot.drive.modules.forEach {
+        driveeCurrent += it.krknDriv.supplyCurrent.valueAsDouble
+        driveeCurrent += it.turn.busVoltage
+      }
+      driveCurrent = driveeCurrent
+      driveeCurrent = 0.0
+    }
   }
 
   fun updateSupplies() {
-    pivotCurrent = pdh.getCurrent(VoltageDistributionConstants.pivotChannel) + pdh.getCurrent(VoltageDistributionConstants.pivotChannel2)
-    eleCurrent = pdh.getCurrent(VoltageDistributionConstants.elevatorChannel) + pdh.getCurrent(VoltageDistributionConstants.elevatorChannel2)
-    wristCurrent = pdh.getCurrent(VoltageDistributionConstants.wristChannel)
-    driveCurrent = pdh.getCurrent(VoltageDistributionConstants.driveChannel)
+    if (robot.pivot != null && robot.elevator != null && robot.wrist != null && robot.drive != null) {
+      //pivotCurrent = robot.pivot.motor.getSupplyCurrent(true).valueAsDouble
+      pivotCurrent =
+        VoltageDistributionConstants.pivotMotor1.getSupplyCurrent(true).valueAsDouble +
+                VoltageDistributionConstants.pivotMotor2.getSupplyCurrent(true).valueAsDouble
+      //pivotCurrent = robot.pivot.returnMotor().getSupplyCurrent(true).valueAsDouble
+      //eleCurrent = pdh.getCurrent(VoltageDistributionConstants.elevatorChannel) + pdh.getCurrent(VoltageDistributionConstants.elevatorChannel2)
+//      eleCurrent = robot.elevator.motor.getSupplyCurrent(true).valueAsDouble
+      eleCurrent =
+        VoltageDistributionConstants.eleMotor1.getSupplyCurrent(true).valueAsDouble +
+                VoltageDistributionConstants.eleMotor2.getSupplyCurrent(true).valueAsDouble
+      //wristCurrent = pdh.getCurrent(VoltageDistributionConstants.wristChannel)
+      //wristCurrent = robot.wrist.motor.getSupplyCurrent(true).valueAsDouble
+      wristCurrent = VoltageDistributionConstants.wristMotor.getSupplyCurrent(true).valueAsDouble
+//      driveCurrent =
+//        pdh.getCurrent(VoltageDistributionConstants.driveChannel1) + pdh.getCurrent(VoltageDistributionConstants.driveChannel2) + pdh.getCurrent(VoltageDistributionConstants.driveChannel3) + pdh.getCurrent(
+//          VoltageDistributionConstants.driveChannel4
+//        )
+      robot.drive.modules.forEach {
+        driveeCurrent += it.krknDriv.supplyCurrent.valueAsDouble
+        driveeCurrent += it.turn.busVoltage
+      }
+      driveCurrent = driveeCurrent
+      driveeCurrent = 0.0
+    }
   }
 
   fun calculateSupplies(): Array<Double> {
@@ -46,18 +93,25 @@ class VoltageDistribution(
     wrist: 40, 80
     drive: 52.5, 105
      */
-    pivotSupply = pivotCurrent/pdh.totalCurrent * totalSupply
-    eleSupply = eleCurrent/pdh.totalCurrent * totalSupply
-    wristSupply = wristCurrent/pdh.totalCurrent * totalSupply
-    driveSupply = driveCurrent/pdh.totalCurrent * totalSupply
+//    pivotSupply = pivotCurrent/pdh.totalCurrent * totalSupply
+//    eleSupply = eleCurrent/pdh.totalCurrent * totalSupply
+//    wristSupply = wristCurrent/pdh.totalCurrent * totalSupply
+//    driveSupply = driveCurrent/pdh.totalCurrent * totalSupply
 
-    return arrayOf(pivotSupply, eleSupply, wristSupply)
+    pivotSupply = pivotCurrent/(pivotSupply + eleSupply + wristSupply + driveSupply) * totalSupply
+    eleSupply = eleCurrent/(pivotSupply + eleSupply + wristSupply + driveSupply) * totalSupply
+    wristSupply = wristCurrent/(pivotSupply + eleSupply + wristSupply + driveSupply) * totalSupply
+    driveSupply = driveCurrent/(pivotSupply + eleSupply + wristSupply + driveSupply) * totalSupply
+
+    return arrayOf(pivotSupply, eleSupply, wristSupply, driveSupply)
   }
 
   override fun periodic() {
+    println("elevator id: ${VoltageDistributionConstants.eleMotor1.deviceID}")
+    println("elevator acceleration??: ${VoltageDistributionConstants.eleMotor1.acceleration}")
     updateSupplies()
-    println("calculated supplies from my thing: ${calculateSupplies().contentToString()}")
-
+    calculateSupplies()
+    println("currents -- pivot: $pivotCurrent, elevator: $eleCurrent, wrist: $wristCurrent, drive: $driveCurrent")
   }
 
 }

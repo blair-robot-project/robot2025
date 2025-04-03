@@ -9,7 +9,7 @@ import frc.team449.subsystems.RobotConstants
 import kotlin.math.PI
 
 class ElevatorSim(
-  private val motor: TalonFX,
+  override val motor: TalonFX,
   private val robot: Robot
 ) : Elevator(motor, robot) {
 

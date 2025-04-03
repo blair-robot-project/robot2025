@@ -32,6 +32,14 @@ fun createSparkMax(
     println("Motor could not be constructed on port $id due to error ${motor.lastError}")
   }
 
+//  fun returnsprk (motor: SparkMax): SparkMax {
+//    return motor
+//  }
+//
+//  fun returnkrkn (motor: TalonFX): TalonFX {
+//    return motor
+//  }
+
   val config = SparkMaxConfig()
 
   config

@@ -16,7 +16,6 @@ import edu.wpi.first.units.Units.Amps
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
 import frc.team449.Robot
-import frc.team449.subsystems.voltage.VoltageDistribution
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.Encoder
 import frc.team449.system.motor.createSparkMax
@@ -36,12 +35,18 @@ import kotlin.math.sign
 open class SwerveModuleKraken(
   val robot: Robot,
   private val name: String,
-  private val drivingMotor: TalonFX,
-  private val turningMotor: SparkMax,
+  val drivingMotor: TalonFX,
+  val turningMotor: SparkMax,
   private val turnEncoder: Encoder,
   val turnController: PIDController,
   override val location: Translation2d
 ) : SwerveModule {
+
+  override val krknDriv: TalonFX = drivingMotor
+  override val turn: SparkMax = turningMotor
+
+  override lateinit var sprkDriv: SparkMax
+
   init {
     turnController.enableContinuousInput(.0, 2 * PI)
     turnController.reset()
@@ -197,6 +202,7 @@ open class SwerveModuleKraken(
         upr = SwerveConstants.DRIVE_UPR,
         currentLimit = SwerveConstants.STEERING_CURRENT_LIM
       )
+
       val turnEncoder = AbsoluteEncoder.createAbsoluteEncoder(
         "$name Turn Encoder",
         turnEncoderChannel,

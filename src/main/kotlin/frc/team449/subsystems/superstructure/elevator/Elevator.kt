@@ -19,12 +19,13 @@ import frc.team449.Robot
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import frc.team449.subsystems.superstructure.wrist.WristConstants
+import frc.team449.subsystems.voltage.VoltageDistributionConstants
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
 open class Elevator(
-  private val motor: TalonFX,
+  open val motor: TalonFX,
   private val robot: Robot
 ) : SubsystemBase() {
 
@@ -202,6 +203,9 @@ open class Elevator(
     KrakenDogLog.log("Elevator/Motor", motor)
   }
 
+  val leadMotor = TalonFX(ElevatorConstants.LEAD_MOTOR_ID)
+  val followerMotor = TalonFX(ElevatorConstants.FOLLOWER_MOTOR_ID)
+
   companion object {
     fun createElevator(
        robot: Robot
@@ -210,6 +214,9 @@ open class Elevator(
       val leadMotor = TalonFX(ElevatorConstants.LEAD_MOTOR_ID)
       val followerMotor = TalonFX(ElevatorConstants.FOLLOWER_MOTOR_ID)
       val config = TalonFXConfiguration()
+
+      VoltageDistributionConstants.eleMotor1 = leadMotor
+      VoltageDistributionConstants.eleMotor2 = followerMotor
 
       config.MotorOutput.Inverted = ElevatorConstants.INVERTED
       config.MotorOutput.NeutralMode = ElevatorConstants.BRAKE_MODE

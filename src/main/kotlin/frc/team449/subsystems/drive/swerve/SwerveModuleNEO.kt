@@ -1,5 +1,6 @@
 package frc.team449.subsystems.drive.swerve
 
+import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkMaxConfig
@@ -34,14 +35,20 @@ import kotlin.math.sign
 open class SwerveModuleNEO(
   private val robot: Robot,
   private val name: String,
-  private val drivingMotor: SparkMax,
-  private val turningMotor: SparkMax,
+  val drivingMotor: SparkMax,
+  val turningMotor: SparkMax,
   private val turnEncoder: Encoder,
   private val driveController: PIDController,
   private val turnController: PIDController,
   private val driveFeedforward: SimpleMotorFeedforward,
   override val location: Translation2d
 ) : SwerveModule {
+
+  override var sprkDriv: SparkMax = drivingMotor
+  override var turn: SparkMax = turningMotor
+
+  override lateinit var krknDriv: TalonFX
+
   init {
     turnController.enableContinuousInput(.0, 2 * PI)
     driveController.reset()
@@ -151,6 +158,7 @@ open class SwerveModuleNEO(
         upr = SwerveConstants.DRIVE_UPR,
         currentLimit = SwerveConstants.DRIVE_SUPPLY_LIMIT
       )
+
       val turnMotor = createSparkMax(
         turnID,
         turnInverted,
@@ -159,6 +167,7 @@ open class SwerveModuleNEO(
         upr = SwerveConstants.DRIVE_UPR,
         currentLimit = SwerveConstants.STEERING_CURRENT_LIM
       )
+
       val turnEncoder = createAbsoluteEncoder(
         "$name Turn Encoder",
         turnEncoderChannel,

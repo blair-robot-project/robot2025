@@ -13,13 +13,14 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.subsystems.voltage.VoltageDistributionConstants
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
 import kotlin.math.abs
 
 class Wrist(
   val robot: Robot,
-  private val motor: TalonFX
+  val motor: TalonFX
 ) : SubsystemBase() {
 
   val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -136,6 +137,8 @@ class Wrist(
     ): Wrist {
       val leadMotor = TalonFX(WristConstants.MOTOR_ID)
       val config = TalonFXConfiguration()
+
+      VoltageDistributionConstants.wristMotor = leadMotor
 
       config.MotorOutput.Inverted = WristConstants.INVERTED
       config.MotorOutput.NeutralMode = WristConstants.BRAKE_MODE
