@@ -24,12 +24,4 @@ object VoltageDistributionConstants {
   val STEERING_CURRENT_LIM = Amps.of(40.0)
 
   val MAX_CURRENT = 120
-
-  lateinit var pivotMotor1: TalonFX
-  lateinit var pivotMotor2: TalonFX
-
-  lateinit var eleMotor1: TalonFX
-  lateinit var eleMotor2: TalonFX
-
-  lateinit var wristMotor: TalonFX
 }

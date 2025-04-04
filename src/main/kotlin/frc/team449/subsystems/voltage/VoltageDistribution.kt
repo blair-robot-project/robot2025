@@ -1,5 +1,7 @@
 package frc.team449.subsystems.voltage
 
+import com.ctre.phoenix6.hardware.TalonFX
+import dev.doglog.DogLog
 import edu.wpi.first.units.Units.Amps
 import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.wpilibj.PowerDistribution
@@ -14,6 +16,12 @@ class VoltageDistribution(
   val pdh: PowerDistribution,
   val robot: Robot
 ): SubsystemBase() {
+
+  lateinit var pivotMotor1: TalonFX
+  lateinit var pivotMotor2: TalonFX
+  lateinit var eleMotor1: TalonFX
+  lateinit var eleMotor2: TalonFX
+  lateinit var wristMotor: TalonFX
 
   var pivotCurrent = 0.0
   var eleCurrent = 0.0
@@ -33,17 +41,17 @@ class VoltageDistribution(
     if (robot.pivot != null && robot.elevator != null && robot.wrist != null && robot.drive != null) {
       //pivotCurrent = robot.pivot.motor.getSupplyCurrent(true).valueAsDouble
       pivotCurrent =
-        VoltageDistributionConstants.pivotMotor1.getSupplyCurrent(true).valueAsDouble +
-                VoltageDistributionConstants.pivotMotor2.getSupplyCurrent(true).valueAsDouble
+        pivotMotor1.getSupplyCurrent(true).valueAsDouble +
+                pivotMotor2.getSupplyCurrent(true).valueAsDouble
       //pivotCurrent = robot.pivot.returnMotor().getSupplyCurrent(true).valueAsDouble
       //eleCurrent = pdh.getCurrent(VoltageDistributionConstants.elevatorChannel) + pdh.getCurrent(VoltageDistributionConstants.elevatorChannel2)
 //      eleCurrent = robot.elevator.motor.getSupplyCurrent(true).valueAsDouble
       eleCurrent =
-              VoltageDistributionConstants.eleMotor1.getSupplyCurrent(true).valueAsDouble +
-                      VoltageDistributionConstants.eleMotor2.getSupplyCurrent(true).valueAsDouble
+              eleMotor1.getSupplyCurrent(true).valueAsDouble +
+                      eleMotor2.getSupplyCurrent(true).valueAsDouble
       //wristCurrent = pdh.getCurrent(VoltageDistributionConstants.wristChannel)
       //wristCurrent = robot.wrist.motor.getSupplyCurrent(true).valueAsDouble
-      wristCurrent = VoltageDistributionConstants.wristMotor.getSupplyCurrent(true).valueAsDouble
+      wristCurrent = wristMotor.getSupplyCurrent(true).valueAsDouble
 //      driveCurrent =
 //        pdh.getCurrent(VoltageDistributionConstants.driveChannel1) + pdh.getCurrent(VoltageDistributionConstants.driveChannel2) + pdh.getCurrent(VoltageDistributionConstants.driveChannel3) + pdh.getCurrent(
 //          VoltageDistributionConstants.driveChannel4
@@ -58,20 +66,21 @@ class VoltageDistribution(
   }
 
   fun updateSupplies() {
+    //pivotCurrent = pdh.getCurrent(VoltageDistributionConstants.pivotChannel) + pdh.getCurrent(VoltageDistributionConstants.pivotChannel2)
     if (robot.pivot != null && robot.elevator != null && robot.wrist != null && robot.drive != null) {
       //pivotCurrent = robot.pivot.motor.getSupplyCurrent(true).valueAsDouble
       pivotCurrent =
-        VoltageDistributionConstants.pivotMotor1.getSupplyCurrent(true).valueAsDouble +
-                VoltageDistributionConstants.pivotMotor2.getSupplyCurrent(true).valueAsDouble
+        pivotMotor1.getSupplyCurrent(true).valueAsDouble +
+                pivotMotor2.getSupplyCurrent(true).valueAsDouble
       //pivotCurrent = robot.pivot.returnMotor().getSupplyCurrent(true).valueAsDouble
       //eleCurrent = pdh.getCurrent(VoltageDistributionConstants.elevatorChannel) + pdh.getCurrent(VoltageDistributionConstants.elevatorChannel2)
 //      eleCurrent = robot.elevator.motor.getSupplyCurrent(true).valueAsDouble
       eleCurrent =
-        VoltageDistributionConstants.eleMotor1.getSupplyCurrent(true).valueAsDouble +
-                VoltageDistributionConstants.eleMotor2.getSupplyCurrent(true).valueAsDouble
+        eleMotor1.getSupplyCurrent(true).valueAsDouble +
+                eleMotor2.getSupplyCurrent(true).valueAsDouble
       //wristCurrent = pdh.getCurrent(VoltageDistributionConstants.wristChannel)
       //wristCurrent = robot.wrist.motor.getSupplyCurrent(true).valueAsDouble
-      wristCurrent = VoltageDistributionConstants.wristMotor.getSupplyCurrent(true).valueAsDouble
+      wristCurrent = wristMotor.getSupplyCurrent(true).valueAsDouble
 //      driveCurrent =
 //        pdh.getCurrent(VoltageDistributionConstants.driveChannel1) + pdh.getCurrent(VoltageDistributionConstants.driveChannel2) + pdh.getCurrent(VoltageDistributionConstants.driveChannel3) + pdh.getCurrent(
 //          VoltageDistributionConstants.driveChannel4
@@ -107,11 +116,13 @@ class VoltageDistribution(
   }
 
   override fun periodic() {
-    println("elevator id: ${VoltageDistributionConstants.eleMotor1.deviceID}")
-    println("elevator acceleration??: ${VoltageDistributionConstants.eleMotor1.acceleration}")
+    println("elevator id: ${robot.elevator.motor.deviceID}")
+    println("elevator acceleration??: ${eleMotor1.acceleration}")
+    DogLog.log("/VoltageDistribution/ele acceleration", eleMotor1.acceleration.valueAsDouble)
     updateSupplies()
     calculateSupplies()
     println("currents -- pivot: $pivotCurrent, elevator: $eleCurrent, wrist: $wristCurrent, drive: $driveCurrent")
+    DogLog.log("/VoltageDistribution/ele current", eleCurrent)
   }
 
 }

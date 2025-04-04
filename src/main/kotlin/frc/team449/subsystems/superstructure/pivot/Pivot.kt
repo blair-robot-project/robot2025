@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
+import frc.team449.subsystems.voltage.VoltageDistribution
 import frc.team449.subsystems.voltage.VoltageDistributionConstants
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.QuadEncoder
@@ -197,13 +199,13 @@ class Pivot(
 
   companion object {
     fun createPivot(
-      robot: Robot
+      robot: Robot,
+      voltage: VoltageDistribution
     ): Pivot {
       val leadMotor = TalonFX(PivotConstants.LEAD_MOTOR_ID)
       val followerMotor = TalonFX(PivotConstants.FOLLOWER_MOTOR_ID)
-
-      VoltageDistributionConstants.pivotMotor1 = leadMotor
-      VoltageDistributionConstants.pivotMotor2 = followerMotor
+      voltage.pivotMotor1 = leadMotor
+      voltage.pivotMotor2 = followerMotor
 
       val config = TalonFXConfiguration()
 

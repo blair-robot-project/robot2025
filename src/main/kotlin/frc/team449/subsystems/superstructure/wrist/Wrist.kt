@@ -9,10 +9,12 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.sim.ChassisReference
 import dev.doglog.DogLog
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.Robot
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.subsystems.voltage.VoltageDistribution
 import frc.team449.subsystems.voltage.VoltageDistributionConstants
 import frc.team449.system.motor.KrakenDogLog
 import java.util.function.Supplier
@@ -133,12 +135,13 @@ class Wrist(
 
   companion object {
     fun createWrist(
-      robot: Robot
+      robot: Robot,
+      voltage: VoltageDistribution
     ): Wrist {
       val leadMotor = TalonFX(WristConstants.MOTOR_ID)
       val config = TalonFXConfiguration()
 
-      VoltageDistributionConstants.wristMotor = leadMotor
+      voltage.wristMotor = leadMotor
 
       config.MotorOutput.Inverted = WristConstants.INVERTED
       config.MotorOutput.NeutralMode = WristConstants.BRAKE_MODE
