@@ -2,11 +2,14 @@ package frc.team449.subsystems.drive.swerve
 
 import dev.doglog.DogLog
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.wpilibj.Timer.getFPGATimestamp
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
+import kotlin.math.sin
 
 class SwerveSim(
   modules: List<SwerveModule>,

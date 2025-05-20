@@ -7,6 +7,8 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import dev.doglog.DogLog
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -163,6 +165,9 @@ class Pivot(
     DogLog.log("Pivot/Quad/Pos", quadEncoder.position)
     DogLog.log("Pivot/Quad/Vel", quadEncoder.velocity)
     KrakenDogLog.log("Pivot/Motor", motor)
+    if (!isReal) {
+      DogLog.log("MapleSim Position/Pivot", Pose3d(0.0, 0.0, 0.0, Rotation3d(0.0, absoluteEncoder.position, 0.0)))
+    }
   }
 
   companion object {
