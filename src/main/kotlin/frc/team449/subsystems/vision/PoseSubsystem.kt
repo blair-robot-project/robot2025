@@ -109,18 +109,24 @@ class PoseSubsystem(
     poseEstimator.resetPose(pose)
   }
 
+private var midfield = 8.78 // x measurement of the robot on the midfield line
   fun isFacingNet(): Boolean {
     val alliance = DriverStation.getAlliance().getOrNull()
     val tolerance = 40
     return (
       (
-        alliance == DriverStation.Alliance.Red &&
-          abs(heading.degrees - 180) < tolerance
-        ) ||
+        (alliance == DriverStation.Alliance.Red &&
+          (abs(heading.degrees - 180) < tolerance ||
+            (abs(heading.degrees - 0) < tolerance && pose.x < midfield))
+          )
+        )
 
+        ||
         (
-          alliance == DriverStation.Alliance.Blue &&
-            abs(heading.degrees - 0) < tolerance
+          (alliance == DriverStation.Alliance.Blue &&
+           ( abs(heading.degrees - 0) < tolerance  ||
+            (abs(heading.degrees - 180) < tolerance && pose.x > midfield))
+          )
           )
       )
   }

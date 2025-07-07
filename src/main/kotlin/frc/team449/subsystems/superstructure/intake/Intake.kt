@@ -10,7 +10,6 @@ import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import edu.wpi.first.wpilibj2.command.*
-import edu.wpi.first.wpilibj2.command.Commands
 import frc.team449.subsystems.superstructure.intake.IntakeConstants.config
 import frc.team449.system.motor.KrakenDogLog
 import kotlin.math.abs
@@ -59,7 +58,6 @@ class Intake(
 
   private var allSensorsConfigured = true
   private var lasercanConfigured = listOf<Boolean>()
-
   init {
     for (sensor in sensors) {
       try {
@@ -77,13 +75,10 @@ class Intake(
   private fun setVoltageTop(voltage: Double): Command {
     return runOnce { topMotor.setVoltage(voltage) }
   }
-
-
   private fun setMotorsRight(rightVoltage: Double = IntakeConstants.SIDES_RUN_TO_SIDE_LEFT_VOLTAGE, leftVoltage: Double = rightVoltage) {
     rightMotor.setVoltage(rightVoltage)
     leftMotor.setVoltage(-leftVoltage)
   }
-
   private fun setMotorsLeft(rightVoltage: Double = IntakeConstants.SIDES_RUN_TO_SIDE_LEFT_VOLTAGE, leftVoltage: Double = rightVoltage) {
     rightMotor.setVoltage(-rightVoltage)
     leftMotor.setVoltage(leftVoltage)
@@ -131,7 +126,7 @@ class Intake(
     leftMotor.setPosition(0.0)
   }
 
-  private fun holdCoral(): Command {
+   fun holdCoral(): Command {
     return stopMotors().andThen(
       runOnce {
         resetPos()
@@ -215,7 +210,7 @@ class Intake(
   private var unverticaling = false
   private var coralIn = true
 
-  private var sensorsOut =
+   var sensorsOut:Boolean =
     (
       rightSensor.measurement == null ||
         middleSensor.measurement == null ||
@@ -223,7 +218,7 @@ class Intake(
         backSensor.measurement == null
       )
 
-  private var sensorsOutExceptBack =
+   var sensorsOutExceptBack =
     (
       (
         rightSensor.measurement == null ||
@@ -233,34 +228,14 @@ class Intake(
         backSensor.measurement != null
       )
 
-  // TODO: check coral motor stall current
-  private fun horizontalCoralStall(): Boolean {
-    return topMotor.motorStallCurrent.valueAsDouble < 40.0
-  }
-
-  private fun verticalCoralStall(): Boolean {
-    return if (
-      leftMotor.motorStallCurrent.valueAsDouble < 40.0 ||
-      rightMotor.motorStallCurrent.valueAsDouble < 40.0
-    ) {
-      true
-    } else {
-      false
-    }
-  }
 
   fun intakeToHorizontal(): Command {
     return FunctionalCommand(
       {
         unverticaling = false
         coralIn = true // source: trust me bro
-        sensorsOut
       },
       {
-//        if (sensorsOut) {
-//          topMotor.setVoltage(IntakeConstants.TOP_CORAL_INWARDS_VOLTAGE)
-//        }
-
         if (coralNotDetected()) {
           // pull in coral until a sensor detects
           coralIn = false
@@ -329,7 +304,6 @@ class Intake(
       },
       { },
       {
-//        if (sensorsOut) { horizontalCoralStall() } else { coralIsHorizontal() }
         coralIsHorizontal()
       }
     ).andThen(changePieceToCoral(true)).andThen(runOnce { topMotor.setVoltage(IntakeConstants.TOP_L1_HOLD) })
@@ -339,15 +313,6 @@ class Intake(
     return FunctionalCommand(
       { },
       {
-//        if (sensorsOut) {
-//          setMotorsInwards()
-//        } else if (sensorsOutExceptBack) {
-//          Commands.sequence(
-//            inwards().andThen(
-//              WaitUntilCommand { backSensorDetected() }
-//            )
-//          )
-//        }
 
         if (leftSensorDetected() && rightSensorDetected()) {
           // if it's horizontal, just run it right
@@ -361,11 +326,7 @@ class Intake(
       },
       { },
       {
-//        if (sensorsOut) {
-//          verticalCoralStall()
-//        }else if (sensorsOutExceptBack){
-//          backSensorDetected()
-//        } else {
+
         backSensorDetected()
       },
     ).andThen(changePieceToCoral(false)).andThen(holdCoral())
@@ -386,14 +347,12 @@ class Intake(
     )
   }
 
-
   fun holdAlgaeProc(): Command {
     return Commands.sequence(
       runOnce { topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_HOLDING_CONFIG_PROC) },
       setVoltageTop(IntakeConstants.ALGAE_HOLD_VOLTAGE),
     )
   }
-
 
   fun outtakeL1(): Command {
     return Commands.sequence(
@@ -434,8 +393,14 @@ class Intake(
     return laserCan.measurement != null
   }
 
+  fun allSensorsAreOn():Boolean{
+    return laserCanIsPlugged(rightSensor)&& laserCanIsPlugged(middleSensor)&&
+      laserCanIsPlugged(leftSensor)&& laserCanIsPlugged(backSensor)
+  }
+
   fun coralDetected(): Boolean {
-    return laserCanDetected(backSensor) || laserCanDetected(leftSensor) || laserCanDetected(rightSensor) || laserCanDetected(middleSensor)
+    return laserCanDetected(backSensor) || laserCanDetected(leftSensor) ||
+      laserCanDetected(rightSensor) || laserCanDetected(middleSensor)
   }
 
   fun coralNotDetected(): Boolean {
@@ -462,7 +427,7 @@ class Intake(
     return laserCanDetected(middleSensor)
   }
 
-  private fun backSensorDetected(): Boolean {
+   fun backSensorDetected(): Boolean {
     return laserCanDetected(backSensor)
   }
 
@@ -550,7 +515,7 @@ class Intake(
   }
 
   fun hasPiece(): Boolean {
-    return algaeDetected() || coralDetected()
+    return algaeDetected() || coralDetected() || isHoldingCoralNoSensor
   }
 
   fun resetPiece(): Command {
@@ -607,6 +572,50 @@ class Intake(
     f.addRequirements(this)
     return f
   }
+
+
+
+
+  /** INTAKE WITHOUT SENSORS/ ONLY BACK**/
+  fun onlyBackSensorIntakeVertical(): Command{
+    return Commands.sequence(
+      runIntakeBackwards(),
+      WaitUntilCommand{ (backSensorDetected()) },
+      moveCoralByAmount(1.0) // supposedly by 1 inch if not comment this out
+        .andThen(holdCoral())
+    )
+  }
+
+  var isHoldingCoralNoSensor:Boolean =
+    (leftMotor.statorCurrent.valueAsDouble > 20 && rightMotor.statorCurrent.valueAsDouble > 20) ||
+    topMotor.statorCurrent.valueAsDouble > 25
+
+  private var coralVerticalDebouncer = Debouncer(0.2,Debouncer.DebounceType.kRising)
+  fun noSensorIntakeVertical(): Command{
+    return Commands.sequence(
+      runIntakeBackwards(),
+      WaitUntilCommand{ coralVerticalDebouncer.calculate(leftMotor.statorCurrent.valueAsDouble > 55) }
+        .andThen(holdCoral())
+    )
+  }
+
+  private var coralL1Debouncer = Debouncer(0.2,Debouncer.DebounceType.kRising)
+  fun noSensorHorizontal(): Command{
+    return Commands.sequence(
+      setVoltageTop(IntakeConstants.TOP_CORAL_INWARDS_VOLTAGE),
+      WaitUntilCommand{ coralL1Debouncer.calculate(topMotor.statorCurrent.valueAsDouble > 40) }
+        .andThen(runOnce { topMotor.setVoltage(IntakeConstants.TOP_L1_HOLD) })
+    )
+  }
+
+
+
+
+
+
+
+
+
 
   private fun logData() {
     KrakenDogLog.log("Intake/topMotor", topMotor)
@@ -667,10 +676,14 @@ class Intake(
       config.MotorOutput.Inverted = IntakeConstants.TOP_INVERTED
       topMotor.configurator.apply(config)
       topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_INTAKING_CONFIG)
+      topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_SENSOR_TO_MECH_RATIO)
       config.MotorOutput.Inverted = IntakeConstants.LEFT_INVERTED
       leftMotor.configurator.apply(config)
+      leftMotor.configurator.apply(IntakeConstants.SIDE_MOTOR_SENSOR_TO_MECH_RATIO)
       config.MotorOutput.Inverted = IntakeConstants.RIGHT_INVERTED
       rightMotor.configurator.apply(config)
+      rightMotor.configurator.apply(IntakeConstants.SIDE_MOTOR_SENSOR_TO_MECH_RATIO)
+
 
       // Use MockLaserCan in Simulation
       if (isSimulation()) {
