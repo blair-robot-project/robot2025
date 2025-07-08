@@ -331,15 +331,16 @@ open class Routines(
     return groundBack2L4L2("l", intArrayOf(2, 4, 4, 2))
   }
 
-  private fun severnAuto(): AutoRoutine {
+  private fun severnAuto(direction: String): AutoRoutine {
     val routine = autoFactory.newRoutine("severn auto")
-    val waitTimes = listOf(1.0, 1.5, 1.4)
+    val waitTimes = listOf(1.0, 1.3, 1.4)
 
-    val scoreFirstPiece = routine.trajectory("subby3L4/1")
-    val pickupSecondPiece = routine.trajectory("subby3L4/2")
-    val scoreSecondPiece = routine.trajectory("subby3L4/3")
-    val pickupThirdPiece = routine.trajectory("subby3L4/4")
-    val scoreThirdPiece = routine.trajectory("subby3L4/5")
+    val scoreFirstPiece = routine.trajectory("subby3L4/1$direction")
+    val pickupSecondPiece = routine.trajectory("subby3L4/2$direction")
+    val scoreSecondPiece = routine.trajectory("subby3L4/3$direction")
+    val pickupThirdPiece = routine.trajectory("subby3L4/4$direction")
+    val scoreThirdPiece = routine.trajectory("subby3L4/5$direction")
+    val pickupFourthPiece = routine.trajectory("subby3L4/6$direction")
 
     routine.active().onTrue(
       Commands.sequence(
@@ -388,6 +389,19 @@ open class Routines(
         robot.drive.driveStop(),
         WaitUntilCommand { robot.intake.hasPiece() },
         scoreThirdPiece.cmd().alongWith(getPremoveCommand(4, waitTimes[2]))
+      )
+    )
+
+    scoreThirdPiece.done().onTrue(
+      Commands.sequence(
+        robot.drive.driveStop(),
+        scoreCoral(),
+        pickupFourthPiece.cmd()
+          .alongWith(WaitCommand(1.5)
+            .andThen(robot.intake.intakeToVertical()))
+          .alongWith(
+            robot.superstructureManager.requestGoal(SuperstructureGoal.STATION_INTAKE)
+          )
       )
     )
 
@@ -486,6 +500,9 @@ open class Routines(
 
   private fun hateKotlin(): AutoRoutine { return algaeAuto(true) }
 
+  private fun severnLeft(): AutoRoutine { return severnAuto("l") }
+  private fun severnRight(): AutoRoutine { return severnAuto("r") }
+
   // autoChooser that will be displayed on dashboard
   fun addOptions(autoChooser: AutoChooser) {
     autoChooser.addRoutine("lollipop right", this::rightGroundBack2L4L2)
@@ -494,7 +511,8 @@ open class Routines(
     autoChooser.addRoutine("Center L4 & 3 Algae", this::algaeAuto)
     autoChooser.addRoutine("Center L4 & 2.5 Algae", this::hateKotlin)
 
-    autoChooser.addRoutine("Severn Left", this::severnAuto)
+    autoChooser.addRoutine("3L4 Left", this::severnLeft)
+    autoChooser.addRoutine("3L4 Right", this::severnRight)
 
     autoChooser.addRoutine("Center 1 L4", this::middleRoutine)
 
