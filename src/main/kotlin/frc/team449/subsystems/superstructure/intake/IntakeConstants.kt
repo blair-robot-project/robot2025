@@ -1,7 +1,6 @@
 package frc.team449.subsystems.superstructure.intake
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs
-import com.ctre.phoenix6.configs.FeedbackConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -25,15 +24,6 @@ object IntakeConstants {
 
   const val WHEEL_TOLERANCE = 0.01
 
-// the top rollers are 620:81 ~ 7.654, the side rollers are 529:48 ~ 11.021
-  const val topRollerRatio = 620/81
-  const val topRollerCircumference = 4/PI
-  const val sideRollersRatio = 529/48
-  const val sideRollerCircumference = 2/PI
-
-  const val topInchesPerRotation = sideRollersRatio * topRollerCircumference
-  const val sideInchesPerRotation = topRollerRatio * sideRollerCircumference
-
   val TOP_INVERTED = InvertedValue.Clockwise_Positive
   val RIGHT_INVERTED = InvertedValue.CounterClockwise_Positive
   val LEFT_INVERTED = InvertedValue.Clockwise_Positive
@@ -54,11 +44,6 @@ object IntakeConstants {
   val TOP_MOTOR_HOLDING_CONFIG_PROC: CurrentLimitsConfigs = CurrentLimitsConfigs()
     .withSupplyCurrentLimit(25.0)
     .withStatorCurrentLimit(75.0)
-
-  val TOP_MOTOR_SENSOR_TO_MECH_RATIO: FeedbackConfigs = FeedbackConfigs()
-    .withSensorToMechanismRatio(1/ topInchesPerRotation)
-  val SIDE_MOTOR_SENSOR_TO_MECH_RATIO: FeedbackConfigs = FeedbackConfigs()
-    .withSensorToMechanismRatio(1/ sideInchesPerRotation)
 
   // voltage for different scenarios and motors
   const val TOP_CORAL_INWARDS_VOLTAGE = 10.0

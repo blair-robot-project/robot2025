@@ -54,7 +54,7 @@ object PivotConstants {
   const val KG_MAX_EXTENSION = 1.36934
 
   val CRUISE_VEL = RotationsPerSecond.of(0.365) // max theoretical 0.3968  // 0.365 norm
-  val MAX_ACCEL = RotationsPerSecondPerSecond.of(2.0)//2.125 slow down so it's more controlled  // 5.0, heavily limited by robot tipping // 2.125
+  val MAX_ACCEL = RotationsPerSecondPerSecond.of(2.125) // 5.0, heavily limited by robot tipping // 2.125
 
   val RESET_ENC_LIMIT = Degrees.of(0.25)
 
