@@ -159,7 +159,7 @@ class SuperstructureManager(
       elevator.setPosition(goal.elevator.`in`(Meters)), // about 0.15 meter
       WaitCommand(0.2),
 
-      pivot.setPosition(pivot.positionSupplier.get() - 0.045).onlyIf {
+      pivot.setPosition(pivot.quadEncoder.position - 0.045).onlyIf {
         lastCompletedGoal == SuperstructureGoal.L4_PIVOT
       },
 

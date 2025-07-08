@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -19,7 +20,6 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.drive.swerve.WheelRadiusCharacterization
 import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.superstructure.intake.IntakeConstants
 import frc.team449.subsystems.superstructure.wrist.WristConstants
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
@@ -49,7 +49,9 @@ class ControllerBindings(
     autoScoreRight()
 
     groundIntakeVertical()
-    groundIntakeL1andOuttake()
+//    groundIntakeL1andOuttake()
+    outtakeNoSensor()
+    intakeL1()
     algaeGroundIntake()
 
     stow()
@@ -106,12 +108,20 @@ class ControllerBindings(
   private fun groundIntakeVertical() {
     driveController.leftBumper().onTrue(
       Commands.sequence(
+        runOnce ({ robot.intake.resetPos() }),
         Commands.parallel(
           robot.superstructureManager.requestGoal(SuperstructureGoal.GROUND_INTAKE_CORAL),
-          robot.intake.intakeToVertical()
+          ConditionalCommand(
+            robot.intake.onlyBackSensorIntakeVertical(),
+            ConditionalCommand(
+              robot.intake.noSensorIntakeVertical(),
+              robot.intake.intakeToVertical().onlyIf { robot.intake.allSensorsAreOn() }
+            ){robot.intake.sensorsOut}
+          ){robot.intake.sensorsOutExceptBack}
+
         ),
         robot.superstructureManager.requestGoal(SuperstructureGoal.STOW),
-        robot.intake.holdCoral()
+        robot.intake.recenterCoral()
       )
     )
   }
@@ -161,6 +171,7 @@ class ControllerBindings(
 
         // intake l1
         Commands.sequence(
+          runOnce ({ robot.intake.resetPos() }),
           Commands.parallel(
             robot.superstructureManager.requestGoal(SuperstructureGoal.GROUND_INTAKE_CORAL),
             robot.intake.intakeToHorizontal()
@@ -171,6 +182,75 @@ class ControllerBindings(
       ) { robot.intake.hasPiece() }
     )
   }
+
+  private fun outtakeNoSensor() {
+    Trigger{
+      driveController.rightBumper().asBoolean &&
+        (robot.intake.algaeDetected() ||
+         ( //check coral
+           if (robot.intake.sensorsOutExceptBack){ //if back sensor is on  check we have coral
+            robot.intake.backSensorDetected()
+          } else{
+            if (!robot.intake.allSensorsAreOn()){ //if all are out check voltage
+              robot.intake.isHoldingCoralNoSensor
+            } else{ // if all sensors are good
+              robot.intake.coralDetected()
+            }
+          }
+         )
+          )
+    }.onTrue(
+      // outtake
+      Commands.sequence(
+
+        ConditionalCommand( // currently have coral
+
+          ConditionalCommand( // outtaking to l1
+            robot.intake.outtakeL1(),
+
+            ConditionalCommand( // scoring on pivot side
+              robot.intake.outtakeCoralPivot(),
+              robot.intake.outtakeCoral()
+            ) { robot.superstructureManager.requestedPivotSide() }
+
+          ) { robot.superstructureManager.lastRequestedGoal() == SuperstructureGoal.L1 },
+
+          // dont have coral
+          robot.intake.outtakeAlgae()
+
+        ) {( robot.intake.coralDetected() || robot.intake.isHoldingCoralNoSensor) && !robot.intake.algaeDetected()}.onlyIf { RobotBase.isReal() },
+        WaitCommand(0.15),
+        robot.superstructureManager.requestRetraction(SuperstructureGoal.STOW)
+          .onlyIf {
+            robot.superstructureManager.lastRequestedGoal() != SuperstructureGoal.L1 &&
+              robot.superstructureManager.lastRequestedGoal() != SuperstructureGoal.PROC
+          }
+
+      )
+    )
+  }
+  private fun intakeL1() {
+    Trigger{
+      driveController.rightBumper().asBoolean &&
+    !robot.intake.algaeDetected() && // don't have algae
+       ( !robot.intake.coralDetected() ||
+         if (robot.intake.sensorsOutExceptBack){  // if we still have the back sensor then check that we don't have coral
+          !robot.intake.backSensorDetected()
+        } else robot.superstructureManager.lastRequestedGoal() != SuperstructureGoal.GROUND_INTAKE_CORAL)
+    }.onTrue(
+      Commands.sequence(
+        runOnce({ robot.intake.resetPos() }),
+        Commands.parallel(
+          robot.superstructureManager.requestGoal(SuperstructureGoal.GROUND_INTAKE_CORAL),
+          ConditionalCommand(//sensors check
+            robot.intake.noSensorHorizontal(),
+            robot.intake.intakeToHorizontal().onlyIf { robot.intake.allSensorsAreOn() }
+          ){robot.intake.sensorsOut}
+         ),
+        robot.superstructureManager.requestGoal(SuperstructureGoal.L1)
+      )
+    )
+}
 
 /** driver controller A,B,X,Y **/
   private fun processor() {
@@ -187,7 +267,7 @@ class ControllerBindings(
   private fun climbTriggers() {
     Trigger {
       driveController.hid.aButton &&
-        !robot.intake.hasPiece()
+        (!robot.intake.hasPiece())
     }.onTrue(
       Commands.sequence(
         robot.elevator.manualDown()
@@ -214,15 +294,25 @@ class ControllerBindings(
 
         ConditionalCommand(
           robot.superstructureManager.requestGoal(SuperstructureGoal.L2_PIVOT)
-            .alongWith(robot.intake.moveCoralPivotSide()),
+            .alongWith(
+              ConditionalCommand(
+                robot.intake.moveCoralPivotSide(),
+                robot.intake.holdCoral() // go manual adjust atp
+              ){robot.intake.allSensorsAreOn()}
+            ),
           robot.superstructureManager.requestGoal(SuperstructureGoal.L2)
-            .alongWith(robot.intake.moveCoralOppSide())
+            .alongWith(
+              ConditionalCommand(
+                robot.intake.moveCoralOppSide(),
+                robot.intake.holdCoral()
+              ){robot.intake.allSensorsAreOn()}
+            )
         ) { robot.poseSubsystem.isPivotSide() },
 
         robot.superstructureManager.requestGoal(SuperstructureGoal.L2_ALGAE_INTAKE)
           .alongWith(robot.intake.intakeAlgae())
           .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
-      ) { robot.intake.coralDetected() }
+      ) { (robot.intake.coralDetected() || robot.intake.isHoldingCoralNoSensor) && !robot.intake.algaeDetected() }
     )
   }
 
@@ -232,15 +322,25 @@ class ControllerBindings(
 
         ConditionalCommand(
           robot.superstructureManager.requestGoal(SuperstructureGoal.L3_PIVOT)
-            .alongWith(robot.intake.moveCoralPivotSide()),
+            .alongWith(
+              ConditionalCommand(
+                robot.intake.moveCoralPivotSide(),
+                robot.intake.holdCoral()
+              ){robot.intake.allSensorsAreOn()}
+            ),
           robot.superstructureManager.requestGoal(SuperstructureGoal.L3)
-            .alongWith(robot.intake.moveCoralOppSide())
+            .alongWith(
+              ConditionalCommand(
+                robot.intake.moveCoralOppSide(),
+                robot.intake.holdCoral()
+              ){robot.intake.allSensorsAreOn()}
+            )
         ) { robot.poseSubsystem.isPivotSide() },
 
         robot.superstructureManager.requestGoal(SuperstructureGoal.L3_ALGAE_INTAKE)
           .alongWith(robot.intake.intakeAlgae())
           .andThen(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW))
-      ) { robot.intake.coralDetected() }
+      ) { (robot.intake.coralDetected() || robot.intake.isHoldingCoralNoSensor) && !robot.intake.algaeDetected() }
     )
   }
 
@@ -250,11 +350,19 @@ class ControllerBindings(
 
         ConditionalCommand(
           robot.superstructureManager.requestGoal(SuperstructureGoal.L4_PIVOT)
-            .alongWith(robot.intake.moveCoralPivotSide()),
-
+            .alongWith(
+              ConditionalCommand(
+                robot.intake.moveCoralPivotSide(),
+                robot.intake.holdCoral()
+              ){robot.intake.allSensorsAreOn()}
+            ),
           robot.superstructureManager.requestGoal(SuperstructureGoal.L4)
-            .alongWith(robot.intake.moveCoralOppSide())
-
+            .alongWith(
+              ConditionalCommand(
+                robot.intake.moveCoralOppSide(),
+                robot.intake.holdCoral()
+              ){robot.intake.allSensorsAreOn()}
+            )
         ) { robot.poseSubsystem.isPivotSide() },
 
         ConditionalCommand(
@@ -262,7 +370,7 @@ class ControllerBindings(
           robot.superstructureManager.requestGoal(SuperstructureGoal.NET_PIVOT)
         ) { robot.poseSubsystem.isFacingNet() }
 
-      ) { robot.intake.coralDetected() }
+      ) { (robot.intake.coralDetected() || robot.intake.isHoldingCoralNoSensor) && !robot.intake.algaeDetected() }
     )
   }
 
@@ -596,8 +704,12 @@ class ControllerBindings(
 
   /** Try not to touch, just add things to the robot or nonrobot bindings */
   fun bindButtons() {
+    println("Binding Buttons")
     nonRobotBindings()
+    println("\tBound non robot bindings")
     robotBindings()
+    println("\tBound robot bindings")
     characterizationBindings()
+    println("\tBound characterization bindings")
   }
 }
