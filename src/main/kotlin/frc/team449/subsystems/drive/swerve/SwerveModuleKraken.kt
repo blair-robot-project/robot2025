@@ -157,11 +157,11 @@ open class SwerveModuleKraken(
         println("Could not apply configs, error code: $status")
       }
 
-      drivingMotor.statorCurrent.setUpdateFrequency(SwerveConstants.VALUE_UPDATE_RATE)
-      drivingMotor.supplyCurrent.setUpdateFrequency(SwerveConstants.VALUE_UPDATE_RATE)
+      drivingMotor.statorCurrent.setUpdateFrequency(5.0)
+      drivingMotor.supplyCurrent.setUpdateFrequency(5.0)
       drivingMotor.position.setUpdateFrequency(SwerveConstants.VALUE_UPDATE_RATE)
       drivingMotor.velocity.setUpdateFrequency(SwerveConstants.VALUE_UPDATE_RATE)
-      drivingMotor.motorVoltage.setUpdateFrequency(SwerveConstants.VALUE_UPDATE_RATE)
+      drivingMotor.motorVoltage.setUpdateFrequency(5.0)
       drivingMotor.closedLoopError.setUpdateFrequency(SwerveConstants.VALUE_UPDATE_RATE)
       drivingMotor.optimizeBusUtilization()
 
@@ -173,6 +173,13 @@ open class SwerveModuleKraken(
         upr = SwerveConstants.DRIVE_UPR,
         currentLimit = SwerveConstants.STEERING_CURRENT_LIM
       )
+
+//      turnMotor.setPeriodicFrameRate(PeriodicFrame.kStatus0, 200)
+//      turnMotor.setPeriodicFrameRate(PeriodicFrame.kStatus1, 200)
+//      turnMotor.setPeriodicFrameRate(PeriodicFrame.kStatus2, 200)
+//      turnMotor.setPeriodicFrameRate(PeriodicFrame.kStatus3, 200)
+//      turnMotor.setPeriodicFrameRate(PeriodicFrame.kStatus4, 200)
+
       val turnEncoder = AbsoluteEncoder.createAbsoluteEncoder(
         "$name Turn Encoder",
         turnEncoderChannel,
@@ -180,6 +187,7 @@ open class SwerveModuleKraken(
         SwerveConstants.TURN_UPR,
         turnEncoderInverted
       )
+
       val turnController = PIDController(
         SwerveConstants.TURN_KP,
         SwerveConstants.TURN_KI,

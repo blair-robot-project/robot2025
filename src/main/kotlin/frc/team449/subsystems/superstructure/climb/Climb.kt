@@ -59,16 +59,19 @@ class Climb(
       config.CurrentLimits.StatorCurrentLimit = ClimbConstants.STATOR_LIM
       motor.configurator.apply(config)
 
-//      BaseStatusSignal.setUpdateFrequencyForAll(
-//        10,
-//        motor.position,
-//        motor.velocity,
-//        motor.motorVoltage,
-//        motor.closedLoopReference,
-//        motor.closedLoopReferenceSlope,
-//        motor.closedLoopFeedForward,
-//        motor.deviceTemp
-//      )
+      motor.statorCurrent.setUpdateFrequency(50.0)
+      motor.optimizeBusUtilization()
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        5.0,
+        motor.position,
+        motor.velocity,
+        motor.motorVoltage,
+        motor.closedLoopReference,
+        motor.closedLoopReferenceSlope,
+        motor.closedLoopFeedForward,
+        motor.deviceTemp
+      )
 
       return Climb(motor)
     }

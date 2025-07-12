@@ -46,11 +46,19 @@ fun createSparkMax(
     .positionConversionFactor(upr * gearing)
     .velocityConversionFactor(upr * gearing)
 
+
+  config.signals
+    .absoluteEncoderPositionPeriodMs(200)
+    .appliedOutputPeriodMs(200)
+
+
   motor.configure(
     config,
     SparkBase.ResetMode.kResetSafeParameters,
     SparkBase.PersistMode.kPersistParameters
   )
+
+
 
   motor.setControlFramePeriodMs(controlPeriod.`in`(Milliseconds).toInt())
   motor.setPeriodicFrameTimeout(0) // sets to minimum (2.1 * period)

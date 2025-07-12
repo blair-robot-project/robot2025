@@ -70,7 +70,7 @@ class Intake(
         backSensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_20MS)
         for (sensor in sensors) {
           if (sensor != backSensor) {
-            sensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_33MS)
+            sensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_50MS)
           }
           sensor.setRegionOfInterest(LaserCanInterface.RegionOfInterest(8, 8, 4, 4))
           sensor.setRangingMode(LaserCanInterface.RangingMode.SHORT)
@@ -224,21 +224,6 @@ class Intake(
   private var coralIn = true
 
 
-  // TODO: check coral motor stall current
-  private fun horizontalCoralStall(): Boolean {
-    return topMotor.motorStallCurrent.valueAsDouble < 40.0
-  }
-
-  private fun verticalCoralStall(): Boolean {
-    return if (
-      leftMotor.motorStallCurrent.valueAsDouble < 40.0 ||
-      rightMotor.motorStallCurrent.valueAsDouble < 40.0
-    ) {
-      true
-    } else {
-      false
-    }
-  }
 
   fun intakeToHorizontal(): Command {
     return FunctionalCommand(
@@ -249,9 +234,7 @@ class Intake(
         coralPosGoal = CoralPlace.HORIZONTAL
       },
       {
-//        if (sensorsOut) {
-//          topMotor.setVoltage(IntakeConstants.TOP_CORAL_INWARDS_VOLTAGE)
-//        }
+
 
         if (coralNotDetected()) {
           // pull in coral until a sensor detects
@@ -764,6 +747,34 @@ class Intake(
           MockLaserCan()
         )
       }
+
+      topMotor.statorCurrent.setUpdateFrequency(50.0)
+      topMotor.position.setUpdateFrequency(50.0)
+      topMotor.motorVoltage.setUpdateFrequency(5.0)
+      topMotor.closedLoopError.setUpdateFrequency(5.0)
+      topMotor.deviceTemp.setUpdateFrequency(5.0)
+      topMotor.optimizeBusUtilization()
+
+
+      leftMotor.statorCurrent.setUpdateFrequency(50.0)
+      leftMotor.position.setUpdateFrequency(50.0)
+      leftMotor.motorVoltage.setUpdateFrequency(5.0)
+      leftMotor.closedLoopError.setUpdateFrequency(5.0)
+      leftMotor.deviceTemp.setUpdateFrequency(5.0)
+      leftMotor.optimizeBusUtilization()
+
+
+      rightMotor.statorCurrent.setUpdateFrequency(50.0)
+      rightMotor.position.setUpdateFrequency(50.0)
+      rightMotor.motorVoltage.setUpdateFrequency(5.0)
+      rightMotor.closedLoopError.setUpdateFrequency(5.0)
+      rightMotor.deviceTemp.setUpdateFrequency(5.0)
+      rightMotor.optimizeBusUtilization()
+
+
+
+
+
 
       return Intake(
         topMotor,

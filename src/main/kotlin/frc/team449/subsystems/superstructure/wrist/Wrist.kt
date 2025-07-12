@@ -180,15 +180,21 @@ class Wrist(
       BaseStatusSignal.setUpdateFrequencyForAll(
         WristConstants.VALUE_UPDATE_RATE,
         leadMotor.position,
+        leadMotor.closedLoopReferenceSlope,
+      )
+
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        5.0,
         leadMotor.velocity,
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
         leadMotor.closedLoopReference,
-        leadMotor.closedLoopReferenceSlope,
         leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
+      leadMotor.optimizeBusUtilization()
 
       return Wrist(leadMotor)
     }

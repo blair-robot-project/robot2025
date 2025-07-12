@@ -227,20 +227,26 @@ open class Elevator(
       BaseStatusSignal.setUpdateFrequencyForAll(
         ElevatorConstants.VALUE_UPDATE_RATE,
         leadMotor.position,
+        leadMotor.closedLoopReference
+
+      )
+
+      BaseStatusSignal.setUpdateFrequencyForAll(
+        5.0,
         leadMotor.velocity,
         leadMotor.motorVoltage,
         leadMotor.supplyCurrent,
         leadMotor.statorCurrent,
-        leadMotor.closedLoopReference,
         leadMotor.closedLoopReferenceSlope,
         leadMotor.closedLoopFeedForward,
         leadMotor.deviceTemp
       )
 
+
       leadMotor.optimizeBusUtilization()
 
       BaseStatusSignal.setUpdateFrequencyForAll(
-        ElevatorConstants.VALUE_UPDATE_RATE,
+        5.0,
         followerMotor.position,
         followerMotor.velocity,
         followerMotor.motorVoltage,
