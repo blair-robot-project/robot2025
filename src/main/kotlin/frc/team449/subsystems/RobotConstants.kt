@@ -19,8 +19,8 @@ object RobotConstants {
   val SNAP_TO_ANGLE_TOLERANCE_RAD = Units.degreesToRadians(3.5)
 
   /** Drive Configuration */
-  val MAX_LINEAR_SPEED = SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED // m/s
-  const val MAX_ROT_SPEED = 4.9496 * PI / 4 // r ad/s
+  val MAX_LINEAR_SPEED = 1.0 // SwerveConstants.MAX_ATTAINABLE_MK4I_SPEED // m/s
+  const val MAX_ROT_SPEED = PI / 4 //4.9496 * PI / 4 // r ad/s
 
   const val USE_ACCEL_LIMIT = true
 
