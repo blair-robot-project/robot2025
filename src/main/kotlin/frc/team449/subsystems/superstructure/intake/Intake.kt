@@ -278,6 +278,27 @@ class Intake(
       },
     ).andThen(changePieceToVertCoral())
 
+  fun collectAlgae(): Command =
+    FunctionalCommand(
+      {
+        command = "collecting algae"
+      },
+      {
+        topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_INTAKING_CONFIG)
+        topMotor.setVoltage(IntakeConstants.ALGAE_INTAKE_VOLTAGE)
+      },
+      {
+        topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_HOLDING_CONFIG)
+        topMotor.setVoltage(IntakeConstants.ALGAE_HOLD_VOLTAGE)
+        command = "holding algae"
+      },
+      {
+        algaeDebouncer.calculate(topMotor.statorCurrent.valueAsDouble > IntakeConstants.ALGAE_STALL_VOLTAGE_THRESHOLD)
+      },
+    ).andThen(pieceIsAlgae())
+
+  private fun pieceIsAlgae(): Command = runOnce { gamePiece = Piece.ALGAE }
+
   fun holdAlgae(): Command =
     Commands.sequence(
       runOnce {

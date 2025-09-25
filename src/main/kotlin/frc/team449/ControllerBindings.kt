@@ -30,7 +30,7 @@ class ControllerBindings(
   private val mechanismController: CommandXboxController,
   private val characterizationController: CommandXboxController,
   private val testController: CommandXboxController,
-  private val robot: Robot
+  private val robot: Robot,
 ) {
   val percentageElevatorPosition = { robot.elevator.positionSupplier.get() / SuperstructureGoal.L4.elevator.`in`(Meters) }
 
@@ -39,7 +39,7 @@ class ControllerBindings(
     /** Driver: https://docs.google.com/drawings/d/13W3qlIxzIh5MTraZGWON7IqwJvovVr8eNBvjq8_vYZI/edit
      * Operator: https://docs.google.com/drawings/d/1lF4Roftk6932jMCQthgKfoJVPuTVSgnGZSHs5j68uo4/edit
      */
-    // processor()
+    processor()
     scoreIntakeL2()
     scoreIntakeL3()
     scoreL4Net()
@@ -137,12 +137,12 @@ class ControllerBindings(
           robot.superstructureManager
             .requestGoal(SuperstructureGoal.ALGAE_GROUND)
             .withTimeout(1.5),
-          robot.intake.intakeAlgae(),
+          robot.intake.collectAlgae(),
         ),
         robot.wrist.slowWristSpeed(),
         robot.superstructureManager.requestGoal(SuperstructureGoal.STOW),
         robot.wrist.resetWristSpeed(),
-        robot.intake.holdAlgae(),
+//        robot.intake.holdAlgae(),
       ),
     )
   }
@@ -232,12 +232,12 @@ class ControllerBindings(
         Commands.sequence(
           robot.superstructureManager
             .requestGoal(SuperstructureGoal.L2_ALGAE_INTAKE)
-            .alongWith(robot.intake.intakeAlgae()),
+            .alongWith(robot.intake.collectAlgae()),
           WaitCommand(0.422),
           robot.wrist.slowWristSpeed(),
           robot.superstructureManager.requestGoal(SuperstructureGoal.STOW),
           robot.wrist.resetWristSpeed(),
-          robot.intake.holdAlgae(),
+          // robot.intake.holdAlgae(),
         ),
       ) { robot.intake.hasCoral() },
     )
@@ -258,12 +258,12 @@ class ControllerBindings(
         Commands.sequence(
           robot.superstructureManager
             .requestGoal(SuperstructureGoal.L3_ALGAE_INTAKE)
-            .alongWith(robot.intake.intakeAlgae()),
+            .alongWith(robot.intake.collectAlgae()),
           WaitCommand(0.422),
           robot.wrist.slowWristSpeed(),
           robot.superstructureManager.requestGoal(SuperstructureGoal.STOW),
           robot.wrist.resetWristSpeed(),
-          robot.intake.holdAlgae(),
+          //  robot.intake.holdAlgae(),
         ),
       ) { robot.intake.hasCoral() },
     )
@@ -358,7 +358,7 @@ class ControllerBindings(
   private fun manualAlgae() {
     // intake algae
     mechanismController.a().onTrue(
-      robot.intake.intakeAlgae(),
+      robot.intake.collectAlgae(),
     )
 
     // outtake algae
