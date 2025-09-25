@@ -26,7 +26,7 @@ object SuperstructureGoal {
   val L1 = SuperstructureState(
     Radians.of(0.866943359375),
     MIN_ELEVATOR_HEIGHT,
-    Radians.of(-1.116455078125),
+    Radians.of(-1.106455078125),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED),
     "L1"
   )
@@ -88,7 +88,7 @@ object SuperstructureGoal {
   )
 
   val GROUND_INTAKE_CORAL = SuperstructureState(
-    Radian.of(-0.02239 - 0.01),
+    Radian.of(-0.02239),
     MIN_ELEVATOR_HEIGHT,
     Radians.of(-0.2900390625 - 0.01),
     DriveDynamics(GROUND_INTAKE_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED),

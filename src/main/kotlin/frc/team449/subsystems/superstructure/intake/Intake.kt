@@ -211,6 +211,8 @@ class Intake(
           // pull in coral until a sensor detects
           coralIn = false
           topMotor.setVoltage(IntakeConstants.TOP_CORAL_INWARDS_VOLTAGE)
+          leftMotor.stopMotor()
+          rightMotor.stopMotor()
         } else {
           // stop top motor once a coral is detected so we don't have it running when it shouldn't be
           if (!coralIn) {
@@ -219,7 +221,7 @@ class Intake(
           }
         }
 
-        if (rightSensorDetected()) {
+        if (rightSensorDetected() && !(leftSensorDetected() && middleSensorDetected())) {
           topMotor.setVoltage(IntakeConstants.TOP_CORAL_INWARDS_VOLTAGE / IntakeConstants.TOP_MOTOR_HORIZONTAL_SLOWDOWN)
           if (middleSensorDetected()) {
             // move left and slow down to prevent overshoot
@@ -230,7 +232,7 @@ class Intake(
           }
         }
 
-        if (leftSensorDetected()) {
+        if (leftSensorDetected() && !(rightSensorDetected() && middleSensorDetected())) {
           topMotor.setVoltage(IntakeConstants.TOP_CORAL_INWARDS_VOLTAGE / IntakeConstants.TOP_MOTOR_HORIZONTAL_SLOWDOWN)
           if (middleSensorDetected()) {
             // move right and slow down to prevent overshoot
@@ -282,14 +284,16 @@ class Intake(
     FunctionalCommand(
       {
         command = "collecting algae"
-      },
-      {
         topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_INTAKING_CONFIG)
         topMotor.setVoltage(IntakeConstants.ALGAE_INTAKE_VOLTAGE)
       },
       {
+
+      },
+      {
         topMotor.configurator.apply(IntakeConstants.TOP_MOTOR_HOLDING_CONFIG)
         topMotor.setVoltage(IntakeConstants.ALGAE_HOLD_VOLTAGE)
+        gamePiece = Piece.ALGAE
         command = "holding algae"
       },
       {
@@ -345,11 +349,14 @@ class Intake(
       changePieceToNone(false),
     )
 
-  private fun laserCanDetected(laserCan: LaserCanInterface): Boolean =
-    laserCan.measurement != null && (
-      laserCan.measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT &&
-        laserCan.measurement.distance_mm <= IntakeConstants.CORAL_DETECTION_THRESHOLD
-    )
+  private fun laserCanDetected(laserCan: LaserCanInterface): Boolean {
+    val measurement = laserCan.measurement
+    return measurement != null && (
+      measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT &&
+        measurement.distance_mm <= IntakeConstants.CORAL_DETECTION_THRESHOLD
+
+      )
+  }
 
   private fun laserCanIsPlugged(laserCan: LaserCanInterface): Boolean = laserCan.measurement != null
 

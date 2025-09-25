@@ -40,7 +40,7 @@ object IntakeConstants {
   val TOP_MOTOR_HOLDING_CONFIG: CurrentLimitsConfigs =
     CurrentLimitsConfigs()
       .withSupplyCurrentLimit(25.0)
-      .withStatorCurrentLimit(75.0)
+      .withStatorCurrentLimit(50.0)
   val TOP_MOTOR_HOLDING_CONFIG_PROC: CurrentLimitsConfigs =
     CurrentLimitsConfigs()
       .withSupplyCurrentLimit(25.0)
@@ -72,7 +72,7 @@ object IntakeConstants {
   const val SIDES_SLOWDOWN_CONSTANT = 1.2
 
   const val ALGAE_INTAKE_VOLTAGE = -11.0
-  const val ALGAE_HOLD_VOLTAGE = -10.0
+  const val ALGAE_HOLD_VOLTAGE = -7.0
   const val ALGAE_OUTTAKE_VOLTAGE = 11.0
   const val ALGAE_STALL_VOLTAGE_THRESHOLD = 60.0
 
