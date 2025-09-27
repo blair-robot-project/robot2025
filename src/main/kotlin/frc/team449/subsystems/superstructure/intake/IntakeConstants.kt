@@ -39,8 +39,8 @@ object IntakeConstants {
       .withStatorCurrentLimit(80.0)
   val TOP_MOTOR_HOLDING_CONFIG: CurrentLimitsConfigs =
     CurrentLimitsConfigs()
-      .withSupplyCurrentLimit(25.0)
-      .withStatorCurrentLimit(50.0)
+      .withSupplyCurrentLimit(30.0)
+      .withStatorCurrentLimit(100.0)
   val TOP_MOTOR_HOLDING_CONFIG_PROC: CurrentLimitsConfigs =
     CurrentLimitsConfigs()
       .withSupplyCurrentLimit(25.0)
