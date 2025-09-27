@@ -331,10 +331,10 @@ open class Routines(
     val pickupMiddle = routine.trajectory("AlignTwoL4L2/2$direction")
     val scoreMiddle = routine.trajectory("AlignTwoL4L2/3$direction")
     val pickupSide = routine.trajectory("AlignTwoL4L2/4$direction")
-    val scoreSide = routine.trajectory("AlignTwoL4L2/5$direction")
+    /*val scoreSide = routine.trajectory("AlignTwoL4L2/5$direction")
 
     val missMidPickup = routine.trajectory("AlignTwoL4L2/failpickup$direction")
-    val missMidScore = routine.trajectory("AlignTwoL4L2/failscore$direction")
+    val missMidScore = routine.trajectory("AlignTwoL4L2/failscore$direction")*/
     val forward = routine.trajectory("AlignTwoL4L2/forward")
 
     val firstPickupTime = 3.0
@@ -352,7 +352,7 @@ open class Routines(
     // first piece score and middle piece pickup
     scorePreload.done().onTrue(
       Commands.sequence(
-        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide[0])),
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide[1])),
         robot.drive.driveStop(),
         scoreCoral(),
         pickupMiddle
@@ -362,12 +362,12 @@ open class Routines(
           ).alongWith(
             robot.superstructureManager.requestGoal(SuperstructureGoal.GROUND_INTAKE_CORAL),
           ).withTimeout(firstPickupTime + AutoConstants.INTAKE_TIMEOUT),
-        ConditionalCommand(
+        //ConditionalCommand(
           // if we got the coral
           scoreMiddle
             .cmd()
-            .alongWith(getPremoveCommand(reefLevels[1], 1.0)),
-          // if we didn't
+            .alongWith(getPremoveCommand(reefLevels[1], 1.2)),
+         /* // if we didn't
           Commands.sequence(
             // failsafe move
             missMidPickup
@@ -392,12 +392,12 @@ open class Routines(
               robot.superstructureManager.requestGoal(SuperstructureGoal.STOW),
             ) { robot.intake.coralDetected() || !RobotBase.isReal() },
           ),
-        ) { robot.intake.coralDetected() || !RobotBase.isReal() },
+        ) { robot.intake.coralDetected() || !RobotBase.isReal() },*/
       ),
     )
 
     // first miss backup second score logic
-    missMidScore.done().onTrue(
+ /*   missMidScore.done().onTrue(
       Commands.sequence(
         SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide[1])),
         robot.drive.driveStop(),
@@ -405,14 +405,17 @@ open class Routines(
         forward.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)),
         robot.drive.driveStop(),
       ),
-    )
+    )*/
 
     // middle piece score side piece pickup
     scoreMiddle.done().onTrue(
       Commands.sequence(
-        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide[1])),
+        SimpleReefAlign(robot.drive, robot.poseSubsystem, leftOrRight = Optional.of(reefSide[0])),
         robot.drive.driveStop(),
         scoreCoral(),
+
+
+        /*
         pickupSide
           .cmd()
           .alongWith(
@@ -429,7 +432,7 @@ open class Routines(
     scoreSide.done().onTrue(
       Commands.sequence(
         robot.drive.driveStop(),
-        scoreCoral(),
+        scoreCoral(),*/
         forward.cmd().alongWith(robot.superstructureManager.requestGoal(SuperstructureGoal.STOW)),
         robot.drive.driveStop(),
       ),

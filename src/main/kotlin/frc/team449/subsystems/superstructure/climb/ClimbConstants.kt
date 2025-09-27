@@ -18,5 +18,5 @@ object ClimbConstants {
   const val SUPPLY_LIM = 40.0
   const val STATOR_LIM = 80.0
 
-  const val CLIMB_DEBOUNCER_WAIT = 0.4
+  const val CLIMB_DEBOUNCER_WAIT = 0.2
 }

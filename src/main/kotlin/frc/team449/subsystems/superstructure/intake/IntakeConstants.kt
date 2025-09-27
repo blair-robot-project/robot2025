@@ -54,7 +54,7 @@ object IntakeConstants {
   const val PIECE_DETECT_DEBOUNCER_WAIT = 1.1
 
   // moving constants
-  const val PIVOT_MOVEMENT = 3.5
+  const val PIVOT_MOVEMENT = 3.0
   const val OPP_MOVEMENT = 3.5
   const val INTAKEN_TO_CENTERED = 1.0
 
